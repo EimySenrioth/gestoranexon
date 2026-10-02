@@ -6,3 +6,7 @@ dist/
 *.log
 *.tsbuildinfo
 .turbo/
+
+# Codebase Memory
+.codebase-memory/
+.kilo/
