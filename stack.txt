@@ -1,0 +1,191 @@
+Frontend:    microfrontends: Angular + SSR (Angular Universal) + TypeScript + react
+Backend:      NestJS + TypeScript
+Database:     PostgreSQL + Prisma
+APIs:         REST + OpenAPI/Swagger
+DevOps:       Docker + GitHub Actions (CI/CD Pipeline)*dejar en pendiente
+Cloud:        AWS*dejar en pendiente
+Versionado:   Git + GitHub
+Extras:       Testing + Monitoring
+
+Go para gestionar la votacion de los documentos.
+HTML5, CSS3 y tailwind
+
+Angular va ser el microfronten para el proceso de evaluacion de los colaboradores.
+React va ser el frontend principal de la apliacion.
+
+WebSockets para la evualiacion en tiempo real de un documento.
+
+ Desarrollo End-to-End
+ End-to-end ownership
+
+Arquitectura modular orientada a dominios
+
+                         FRONTEND
+                            │
+                     ┌──────▼──────┐
+                     │ React Shell │
+                     │  + SSR      │
+                     └──────┬──────┘
+                            │
+          ┌─────────────────┼──────────────────┐
+          │                 │                  │
+          ▼                 ▼                  ▼
+    Solicitantes       Administrador       Evaluadores
+       React              Angular             Angular
+          │                 │                  │
+          └─────────────────┼──────────────────┘
+                            │
+                            ▼
+                       API Gateway
+                            │
+                 ┌──────────┼───────────┐
+                 │          │           │
+                 ▼          ▼           ▼
+             Solicitudes Expedientes Evaluación
+                 │          │           │
+                 └──────────┼───────────┘
+                            │
+                       Base de datos
+
+
+1. React como Shell; encargarse de la aplicación general:
+│
+├── Login
+├── Inicio
+├── Menú
+├── Navegación
+├── evaluacion
+
+
+
+2. Angular para los módulos complejos
+
+Aquí es donde Angular.
+
+Microfrontend de gestión de expedientes
+Angular MFE
+│
+├── RF-002 Gestor de carga
+├── RF-003 Datos generales
+├── RF-009 Estados del expediente
+└── RF-013 Envío final
+
+Esto tiene muchos formularios, validaciones y estados.
+
+Microfrontend de evaluación
+
+Otro Angular:
+
+Angular MFE
+│
+├── RF-006 Evaluación
+├── RF-007 Recomendaciones
+└── RF-008 Firmas
+
+Este módulo tiene una lógica bastante estructurada:
+
+Evaluación
+     │
+     ├── Principios éticos
+     │
+     ├── Normativa legal
+     │
+     ▼
+Recomendación
+     │
+     ├── Aprobado
+     ├── Aprobado con observaciones
+     └── No aprobado
+     │
+     ▼
+Firmas
+
+Backend modular
+Expediente como una máquina de estados, modulo de backend en donde ada transición genera un evento
+modulo de Notificaciones
+
+
+┌─────────────────────────────────────────────────────┐
+│                    FRONTEND                         │
+│                                                     │
+│                 React Shell + SSR                  │
+│                                                     │
+│  ┌─────────────┐ ┌─────────────┐ ┌──────────────┐ │
+│  │ Solicitante │ │Administrador│ │ Evaluadores  │ │
+│  │    React    │ │   Angular   │ │   Angular    │ │
+│  └─────────────┘ └─────────────┘ └──────────────┘ │
+└──────────────────────────┬──────────────────────────┘
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │ API Gateway │
+                    └──────┬──────┘
+                           │
+        ┌──────────────────┼─────────────────┐
+        │                  │                 │
+        ▼                  ▼                 ▼
+   Solicitudes        Expedientes       Evaluación
+        │                  │                 │
+        └──────────────────┼─────────────────┘
+                           │
+                    ┌──────▼──────┐
+                    │ Event Bus   │
+                    └──────┬──────┘
+                           │
+             ┌─────────────┼──────────────┐
+             ▼             ▼              ▼
+       Notificaciones  Historial      Documentos
+             │
+             ▼
+       Email / Sistema
+
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │ PostgreSQL  │
+                    └─────────────┘
+
+
+Modulos:
+| Requisito | Módulo                                    |
+| --------- | ----------------------------------------- |
+| RF-001    | React Shell / Solicitantes                |
+| RF-002    | Angular – Expedientes                     |
+| RF-003    | Angular – Expedientes                     |
+| RF-004    | Angular – Administración                  |
+| RF-005    | Angular – Administración + Notificaciones |
+| RF-006    | Angular – Evaluación                      |
+| RF-007    | Angular – Evaluación                      |
+| RF-008    | Angular – Evaluación/Firmas               |
+| RF-009    | Expedientes + Historial                   |
+| RF-010    | Administración                            |
+| RF-011    | Notificaciones                            |
+| RF-012    | Solicitudes                               |
+| RF-013    | Expedientes + Orquestación                |
+
+
+Tus límites naturales:
+
+                 DOMINIOS
+
+        ┌──────────────────────┐
+        │      Solicitudes     │
+        └──────────────────────┘
+
+        ┌──────────────────────┐
+        │      Expedientes     │
+        └──────────────────────┘
+
+        ┌──────────────────────┐
+        │      Evaluación      │
+        └──────────────────────┘
+
+        ┌──────────────────────┐
+        │   Administración     │
+        └──────────────────────┘
+
+        ┌──────────────────────┐
+        │ Notificaciones/      │
+        │ Historial            │
+        └──────────────────────┘
+

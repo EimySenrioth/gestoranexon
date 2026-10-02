@@ -1,0 +1,194 @@
+﻿generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  SOLICITANTE
+  EVALUADOR
+  ADMINISTRADOR
+  SUPERADMIN
+}
+
+model Usuario {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  nombre        String
+  apellido      String
+  rol           Rol      @default(SOLICITANTE)
+  activo        Boolean  @default(true)
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  solicitudes   Solicitud[]
+  expedientes   Expediente[]
+  evaluaciones  Evaluacion[]
+  firmas        Firma[]
+  historial     Historial[]
+
+  @@map("usuarios")
+}
+
+enum EstadoSolicitud {
+  BORRADOR
+  ENVIADA
+  EN_REVISION
+  APROBADA
+  RECHAZADA
+}
+
+model Solicitud {
+  id            String          @id @default(cuid())
+  titulo        String
+  descripcion   String
+  estado        EstadoSolicitud @default(BORRADOR)
+  solicitanteId String
+  creadoEn      DateTime        @default(now())
+  actualizadoEn DateTime        @updatedAt
+
+  solicitante Usuario     @relation(fields: [solicitanteId], references: [id])
+  expediente  Expediente?
+  historial   Historial[]
+
+  @@map("solicitudes")
+}
+
+enum EstadoExpediente {
+  INICIADO
+  DOCUMENTACION_PENDIENTE
+  EN_EVALUACION
+  OBSERVADO
+  APROBADO
+  RECHAZADO
+  CERRADO
+}
+
+model Expediente {
+  id            String           @id @default(cuid())
+  codigo        String           @unique
+  estado        EstadoExpediente @default(INICIADO)
+  solicitudId   String           @unique
+  gestorId      String
+  creadoEn      DateTime         @default(now())
+  actualizadoEn DateTime         @updatedAt
+
+  solicitud    Solicitud    @relation(fields: [solicitudId], references: [id])
+  gestor       Usuario      @relation(fields: [gestorId], references: [id])
+  documentos   Documento[]
+  evaluaciones Evaluacion[]
+  historial    Historial[]
+
+  @@map("expedientes")
+}
+
+model Documento {
+  id           String   @id @default(cuid())
+  nombre       String
+  url          String
+  tipo         String
+  expedienteId String
+  creadoEn     DateTime @default(now())
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id])
+  votos      Voto[]
+
+  @@map("documentos")
+}
+
+enum TipoVoto {
+  APROBADO
+  OBSERVADO
+  RECHAZADO
+}
+
+model Voto {
+  id          String   @id @default(cuid())
+  documentoId String
+  evaluadorId String
+  tipo        TipoVoto
+  comentario  String?
+  creadoEn    DateTime @default(now())
+
+  documento Documento @relation(fields: [documentoId], references: [id])
+
+  @@unique([documentoId, evaluadorId])
+  @@map("votos")
+}
+
+enum ResultadoEvaluacion {
+  APROBADO
+  APROBADO_CON_OBSERVACIONES
+  NO_APROBADO
+}
+
+model Evaluacion {
+  id               String               @id @default(cuid())
+  expedienteId     String
+  evaluadorId      String
+  principiosEticos String?
+  normativaLegal   String?
+  resultado        ResultadoEvaluacion?
+  recomendacion    String?
+  creadoEn         DateTime             @default(now())
+  actualizadoEn    DateTime             @updatedAt
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id])
+  evaluador  Usuario    @relation(fields: [evaluadorId], references: [id])
+  firmas     Firma[]
+
+  @@map("evaluaciones")
+}
+
+model Firma {
+  id           String   @id @default(cuid())
+  evaluacionId String
+  firmadoPor   String
+  firma        String
+  creadoEn     DateTime @default(now())
+
+  evaluacion Evaluacion @relation(fields: [evaluacionId], references: [id])
+  usuario    Usuario    @relation(fields: [firmadoPor], references: [id])
+
+  @@map("firmas")
+}
+
+model Historial {
+  id           String   @id @default(cuid())
+  entidad      String
+  entidadId    String
+  evento       String
+  descripcion  String?
+  usuarioId    String?
+  solicitudId  String?
+  expedienteId String?
+  metadata     Json?
+  creadoEn     DateTime @default(now())
+
+  usuario    Usuario?    @relation(fields: [usuarioId], references: [id])
+  solicitud  Solicitud?  @relation(fields: [solicitudId], references: [id])
+  expediente Expediente? @relation(fields: [expedienteId], references: [id])
+
+  @@map("historial")
+}
+
+enum CanalNotificacion {
+  EMAIL
+  SISTEMA
+  WEBSOCKET
+}
+
+model Notificacion {
+  id        String            @id @default(cuid())
+  usuarioId String
+  titulo    String
+  mensaje   String
+  canal     CanalNotificacion @default(SISTEMA)
+  leida     Boolean           @default(false)
+  creadoEn  DateTime          @default(now())
+
+  @@map("notificaciones")
+}

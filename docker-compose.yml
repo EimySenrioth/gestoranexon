@@ -1,0 +1,33 @@
+﻿version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: estanciaperu_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: estancia_user
+      POSTGRES_PASSWORD: estancia_pass
+      POSTGRES_DB: estanciaperu_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - estancia_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: estanciaperu_redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    networks:
+      - estancia_network
+
+volumes:
+  postgres_data:
+
+networks:
+  estancia_network:
+    driver: bridge
