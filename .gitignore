@@ -10,3 +10,7 @@ dist/
 # Codebase Memory
 .codebase-memory/
 .kilo/
+tools/codebase-memory/
+
+# Scripts locales de Windows
+*.bat
