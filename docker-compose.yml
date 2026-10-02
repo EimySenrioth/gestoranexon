@@ -1,33 +1,379 @@
-﻿version: '3.9'
+# =============================================================================
+# ESTANCIA PERU - Docker Compose
+# =============================================================================
+# Arquitectura de contenedores para el entorno de desarrollo y produccion.
+#
+# SERVICIOS INCLUIDOS:
+#   - postgres       : Base de datos principal (PostgreSQL 16)
+#   - redis          : Broker de eventos y caché (WebSockets / Event Bus)
+#   - backend        : API REST + WebSockets (NestJS)
+#   - shell          : Frontend principal con SSR (Next.js + React)
+#   - mfe-expedientes: Microfrontend de gestion de expedientes (Angular)
+#   - mfe-evaluacion : Microfrontend de evaluacion y firmas (Angular)
+#   - go-votacion    : Microservicio de votacion de documentos (Go)
+#   - pgadmin        : Interfaz visual para administrar PostgreSQL (opcional)
+#
+# USO:
+#   Iniciar todo:            docker-compose up -d
+#   Iniciar solo DB:         docker-compose up -d postgres redis
+#   Ver logs en vivo:        docker-compose logs -f backend
+#   Detener todo:            docker-compose down
+#   Detener y borrar datos:  docker-compose down -v
+#
+# VARIABLES DE ENTORNO:
+#   Copia el archivo .env.example a .env antes de iniciar.
+#   cp .env.example .env
+# =============================================================================
 
 services:
+
+  # ===========================================================================
+  # POSTGRESQL 16 - Base de datos principal
+  # ===========================================================================
+  # Motor relacional que almacena todos los dominios del sistema:
+  #   Solicitudes, Expedientes, Evaluaciones, Usuarios, Historial,
+  #   Notificaciones, Votos y Firmas.
+  # Prisma ORM se conecta a este servicio desde el backend.
+  #
+  # Puerto expuesto: 5432 (accesible desde tu maquina local)
+  # Datos persistidos en: volumen Docker "postgres_data"
+  # ===========================================================================
   postgres:
     image: postgres:16-alpine
+    # alpine = imagen minimalista (~70MB vs ~400MB de la imagen completa)
     container_name: estanciaperu_db
     restart: unless-stopped
+    # unless-stopped = reinicia automaticamente salvo que lo detengas manualmente
     environment:
-      POSTGRES_USER: estancia_user
-      POSTGRES_PASSWORD: estancia_pass
-      POSTGRES_DB: estanciaperu_db
+      POSTGRES_USER: ${DB_USER:-estancia_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-estancia_pass}
+      POSTGRES_DB: ${DB_NAME:-estanciaperu_db}
+      # Usar TZ correcto para que los timestamps sean coherentes
+      TZ: America/Lima
+      PGTZ: America/Lima
     ports:
-      - '5432:5432'
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Carpeta de scripts SQL que se ejecutan al crear la DB por primera vez
+      - ./infra/db/init:/docker-entrypoint-initdb.d:ro
     networks:
       - estancia_network
+    healthcheck:
+      # Verifica que PostgreSQL esta listo para recibir conexiones
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-estancia_user} -d ${DB_NAME:-estanciaperu_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
+  # ===========================================================================
+  # REDIS 7 - Broker de mensajes y caché
+  # ===========================================================================
+  # Cumple dos roles en el sistema:
+  #   1. EVENT BUS: Los microservicios publican y consumen eventos de dominio
+  #      (ej: "expediente.estado.cambiado", "evaluacion.firmada")
+  #   2. WEBSOCKETS: Socket.io usa Redis Adapter para sincronizar conexiones
+  #      entre multiples instancias del backend (escalabilidad horizontal)
+  #   3. CACHÉ: Resultados de queries frecuentes (listas de expedientes, etc.)
+  #
+  # Puerto expuesto: 6379
+  # ===========================================================================
   redis:
     image: redis:7-alpine
     container_name: estanciaperu_redis
     restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_pass}
+    # appendonly yes = persistencia AOF (Append Only File), mejor durabilidad
+    # requirepass    = autenticacion requerida
     ports:
-      - '6379:6379'
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
     networks:
       - estancia_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_pass}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # ===========================================================================
+  # NESTJS BACKEND - API Gateway + Microservicios
+  # ===========================================================================
+  # Nucleo del sistema. Expone:
+  #   - REST API   : /api/v1/** (Solicitudes, Expedientes, Evaluacion, Auth)
+  #   - WebSockets : /ws        (Evaluacion en tiempo real de documentos)
+  #   - Swagger UI : /api/docs  (Documentacion interactiva de la API)
+  #
+  # Modulos internos (Domain-Driven):
+  #   - auth          : JWT, login, roles (SOLICITANTE / EVALUADOR / ADMIN)
+  #   - solicitudes   : RF-001, RF-012
+  #   - expedientes   : RF-002, RF-003, RF-009, RF-013 (maquina de estados)
+  #   - evaluacion    : RF-006, RF-007, RF-008
+  #   - administracion: RF-004, RF-005, RF-010
+  #   - notificaciones: RF-011 (email + websocket)
+  #   - historial     : trazabilidad de eventos
+  #
+  # Depende de: postgres (DB lista) + redis (broker listo)
+  # Puerto: 3000
+  # ===========================================================================
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+      target: development
+      # target: production  # usar en produccion
+    container_name: estanciaperu_backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      # Conexion a PostgreSQL via Prisma
+      DATABASE_URL: postgresql://${DB_USER:-estancia_user}:${DB_PASSWORD:-estancia_pass}@postgres:5432/${DB_NAME:-estanciaperu_db}?schema=public
+      # Conexion a Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_pass}
+      # JWT para autenticacion
+      JWT_SECRET: ${JWT_SECRET:-cambia_esto_en_produccion}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      # URL del servicio Go de votacion (interno, sin exponer al exterior)
+      GO_VOTING_URL: http://go-votacion:8080
+    ports:
+      - "${API_PORT:-3000}:3000"
+    volumes:
+      # Montar codigo fuente para hot-reload en desarrollo
+      - ./apps/backend/src:/app/src
+      - ./apps/backend/prisma:/app/prisma
+    networks:
+      - estancia_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+        # Solo inicia cuando PostgreSQL confirme que esta listo
+      redis:
+        condition: service_healthy
+
+  # ===========================================================================
+  # NEXT.JS SHELL - Frontend principal (React + SSR)
+  # ===========================================================================
+  # Punto de entrada del usuario. Es el "orquestador" que:
+  #   - Renderiza Login, Inicio, Menu, Navegacion (SSR para mejor SEO/velocidad)
+  #   - Carga dinamicamente los microfrontends Angular segun la ruta
+  #   - Mantiene el estado global de sesion del usuario
+  #
+  # Rutas principales:
+  #   /              -> Inicio (vista de Solicitante)
+  #   /admin/**      -> Carga MFE Expedientes (Angular :4201)
+  #   /evaluacion/** -> Carga MFE Evaluacion (Angular :4202)
+  #   /login         -> Autenticacion
+  #
+  # Puerto: 3001
+  # ===========================================================================
+  shell:
+    build:
+      context: ./apps/shell
+      dockerfile: Dockerfile
+      target: development
+    container_name: estanciaperu_shell
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      # URL interna del backend (desde dentro de Docker)
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      # URL de WebSockets para evaluacion en tiempo real
+      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:3000}
+      # URLs de los microfrontends Angular
+      NEXT_PUBLIC_MFE_EXPEDIENTES_URL: http://localhost:4201
+      NEXT_PUBLIC_MFE_EVALUACION_URL: http://localhost:4202
+    ports:
+      - "${SHELL_PORT:-3001}:3001"
+    volumes:
+      - ./apps/shell/src:/app/src
+    networks:
+      - estancia_network
+    depends_on:
+      - backend
+
+  # ===========================================================================
+  # ANGULAR MFE - Gestion de Expedientes (Puerto 4201)
+  # ===========================================================================
+  # Microfrontend independiente para el modulo de expedientes.
+  # Destinado al rol: ADMINISTRADOR
+  #
+  # Requisitos que cubre:
+  #   RF-002: Carga y gestion de documentos del expediente
+  #   RF-003: Formulario de datos generales del colaborador
+  #   RF-009: Visualizacion y transicion de estados del expediente
+  #           (INICIADO -> EN_EVALUACION -> APROBADO / RECHAZADO)
+  #   RF-013: Envio final y orquestacion de cierre del expediente
+  #
+  # Se integra al Shell React mediante: iframe / Module Federation / Web Components
+  # Puerto: 4201
+  # ===========================================================================
+  mfe-expedientes:
+    build:
+      context: ./apps/mfe-expedientes
+      dockerfile: Dockerfile
+      target: development
+    container_name: estanciaperu_mfe_expedientes
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      API_URL: http://backend:3000/api/v1
+    ports:
+      - "4201:4201"
+    volumes:
+      - ./apps/mfe-expedientes/src:/app/src
+    networks:
+      - estancia_network
+    depends_on:
+      - backend
+
+  # ===========================================================================
+  # ANGULAR MFE - Evaluacion y Firmas (Puerto 4202)
+  # ===========================================================================
+  # Microfrontend independiente para el modulo de evaluacion.
+  # Destinado al rol: EVALUADOR
+  #
+  # Requisitos que cubre:
+  #   RF-006: Formulario de evaluacion (Principios Eticos + Normativa Legal)
+  #           con criterios ponderados y observaciones
+  #   RF-007: Recomendacion final del evaluador:
+  #           - APROBADO
+  #           - APROBADO CON OBSERVACIONES
+  #           - NO APROBADO
+  #   RF-008: Firmas digitales de los evaluadores que validan la evaluacion
+  #
+  # WebSocket activo: recibe actualizaciones en tiempo real cuando otro
+  # evaluador modifica el mismo documento (via Redis Adapter)
+  # Puerto: 4202
+  # ===========================================================================
+  mfe-evaluacion:
+    build:
+      context: ./apps/mfe-evaluacion
+      dockerfile: Dockerfile
+      target: development
+    container_name: estanciaperu_mfe_evaluacion
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      API_URL: http://backend:3000/api/v1
+      WS_URL: ws://backend:3000
+    ports:
+      - "4202:4202"
+    volumes:
+      - ./apps/mfe-evaluacion/src:/app/src
+    networks:
+      - estancia_network
+    depends_on:
+      - backend
+
+  # ===========================================================================
+  # GO - Microservicio de Votacion de Documentos (Puerto 8080)
+  # ===========================================================================
+  # Servicio independiente escrito en Go para gestionar el sistema de votacion
+  # de documentos dentro del proceso de evaluacion.
+  #
+  # Por que Go y no NestJS?
+  #   - Alta concurrencia: multiples evaluadores votan simultaneamente
+  #   - Go maneja goroutines de forma nativa (mucho mas eficiente que Node.js)
+  #   - Logica de consenso simple y de alto rendimiento
+  #
+  # Flujo de votacion:
+  #   1. Evaluador vota un documento (APROBADO / OBSERVADO / RECHAZADO)
+  #   2. Go recalcula el consenso del documento en tiempo real
+  #   3. Publica evento en Redis: "documento.votado" con el resultado
+  #   4. NestJS consume el evento y actualiza el estado del expediente
+  #
+  # Puerto interno: 8080 (no expuesto al exterior en produccion)
+  # ===========================================================================
+  go-votacion:
+    build:
+      context: ./apps/go-votacion
+      dockerfile: Dockerfile
+    container_name: estanciaperu_go_votacion
+    restart: unless-stopped
+    environment:
+      GO_ENV: ${NODE_ENV:-development}
+      PORT: 8080
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_pass}@redis:6379
+      DATABASE_URL: postgresql://${DB_USER:-estancia_user}:${DB_PASSWORD:-estancia_pass}@postgres:5432/${DB_NAME:-estanciaperu_db}
+    ports:
+      - "8080:8080"
+    networks:
+      - estancia_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ===========================================================================
+  # PGADMIN 4 - Administrador visual de PostgreSQL
+  # ===========================================================================
+  # Interfaz web para explorar y administrar la base de datos PostgreSQL.
+  # SOLO para desarrollo/staging. NO incluir en produccion.
+  #
+  # Acceso: http://localhost:5050
+  # Login:  admin@estanciaperu.com / admin123
+  #
+  # Para conectar a PostgreSQL desde pgAdmin:
+  #   Host: postgres   (nombre del servicio Docker, no localhost)
+  #   Port: 5432
+  #   User: estancia_user
+  #   Pass: estancia_pass
+  #   DB:   estanciaperu_db
+  # ===========================================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: estanciaperu_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@estanciaperu.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - estancia_network
+    depends_on:
+      - postgres
+    profiles:
+      - tools
+      # Este servicio solo inicia si ejecutas:
+      # docker-compose --profile tools up -d
+
+# =============================================================================
+# VOLUMENES PERSISTENTES
+# =============================================================================
+# Los volumenes Docker sobreviven cuando el contenedor se elimina.
+# Los datos de la DB no se pierden al hacer "docker-compose down".
+# Para borrar TODO (incluyendo datos): docker-compose down -v
+# =============================================================================
 volumes:
   postgres_data:
+    # Datos de PostgreSQL: tablas, schemas, registros
+    name: estanciaperu_postgres_data
 
+  redis_data:
+    # Datos de Redis: cache y mensajes persistidos via AOF
+    name: estanciaperu_redis_data
+
+  pgadmin_data:
+    # Configuracion guardada de pgAdmin (servidores, queries, etc.)
+    name: estanciaperu_pgadmin_data
+
+# =============================================================================
+# RED INTERNA
+# =============================================================================
+# Todos los servicios se comunican entre si por nombre de servicio.
+# Ejemplo: el backend llama a postgres en la URL "postgres:5432"
+# Los puertos solo son accesibles desde tu maquina local (no desde internet).
+# =============================================================================
 networks:
   estancia_network:
     driver: bridge
+    name: estanciaperu_network
