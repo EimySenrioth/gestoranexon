@@ -189,3 +189,61 @@ Tus límites naturales:
         │ Historial            │
         └──────────────────────┘
 
+
+
+cd apps/backend
+npx prisma migrate dev --name init
+
+
+# Terminal 1 - Backend
+cd apps/backend && npm run start:dev
+
+# Terminal 2 - React Shell
+cd apps/shell && npm run dev
+
+# Terminal 3 - MFE Expedientes
+cd apps/mfe-expedientes && ng serve --port 4201
+
+# Terminal 4 - MFE Evaluación
+cd apps/mfe-evaluacion && ng serve --port 4202
+
+
+Ventana	Servicio	URL
+1	Backend NestJS	http://localhost:3000
+2	React Shell Next.js	http://localhost:3001
+3	MFE Expedientes Angular	http://localhost:4201
+4	MFE Evaluación Angular	http://localhost:4202
+
+Por qué 4 servicios
+1️⃣ Backend NestJS → :3000
+Es el cerebro de la aplicación. Expone la API REST, maneja la lógica de negocio, WebSockets y se conecta a PostgreSQL con Prisma. Sin él, los otros 3 no tienen datos.
+
+2️⃣ React Shell (Next.js) → :3001
+Es la carcasa principal que el usuario ve al entrar a la app. Maneja:
+
+Login
+Navegación / Menú
+Inicio
+Es el orquestador que carga los microfrontends debajo de él. Es el único que el usuario visita directamente.
+
+3️⃣ MFE Expedientes (Angular) → :4201
+Es un microfrontend independiente que el Shell carga dentro de sí mismo cuando el usuario va a gestionar expedientes. Cubre:
+
+RF-002 Carga de documentos
+RF-003 Datos generales
+RF-009 Estados del expediente
+RF-013 Envío final
+Corre en su propio puerto porque es una app Angular separada, no parte del Shell React.
+
+4️⃣ MFE Evaluación (Angular) → :4202
+Otro microfrontend independiente para el proceso de evaluación. Cubre:
+
+RF-006 Evaluación (principios éticos + normativa legal)
+RF-007 Recomendaciones (Aprobado / Con observaciones / No aprobado)
+RF-008 Firmas digitales
+
+URL	Quién la usa	¿La abres tú?
+http://localhost:3001	El usuario final	✅ SÍ — esta es tu app
+http://localhost:3000	El Shell y los MFEs para llamar la API	❌ Solo la API (JSON)
+http://localhost:4201	El Shell la carga dentro de sí mismo	❌ No directamente
+http://localhost:4202	El Shell la carga dentro de sí mismo	❌ No directamente
