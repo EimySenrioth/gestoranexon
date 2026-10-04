@@ -1,0 +1,100 @@
+/* AUTO-GENERADO desde src/design-tokens/tokens/*.ts — NO EDITAR A MANO.
+   Regenerar: npm run tokens:sync  ·  Verificar: npm run tokens:check
+   Prohibido usar z-index numéricos sueltos: solo var(--ui-z-*). */
+
+:root {
+  /* Colores semánticos */
+  --ui-background-app: #0D0D0D;
+  --ui-background-panel: #1A1A1A;
+  --ui-background-card: #222222;
+  --ui-background-card-hover: #2D2D2D;
+  --ui-background-slot: #141620;
+  --ui-background-icon: #1A1A1F;
+  --ui-background-modal: #FFFFFF;
+  --ui-background-panel-light: #F5F5F5;
+  --ui-background-overlay: rgba(0, 0, 0, 0.7);
+  --ui-background-dropdown-top: #ECECEC;
+  --ui-background-dropdown-bottom: #CFCFCF;
+  --ui-background-group-start: #A0206A;
+  --ui-text-primary: #FFFFFF;
+  --ui-text-secondary: #A3A3A3;
+  --ui-text-muted: #555555;
+  --ui-text-inverse: #000000;
+  --ui-text-inverse-secondary: #333333;
+  --ui-text-inverse-muted: #757575;
+  --ui-accent-primary: #FF2A6D;
+  --ui-accent-primary-glow: rgba(255, 42, 109, 0.4);
+  --ui-accent-primary-text: #FF6699;
+  --ui-accent-cta: #FFEB3B;
+  --ui-accent-title: #FFD700;
+  --ui-accent-progress: #00E5FF;
+  --ui-accent-highlight: #DDF259;
+  --ui-status-notification: #FF1744;
+  --ui-status-strike: #FF6B6B;
+  --ui-status-progress-track: #333333;
+  --ui-button-primary-bg: #FFEB3B;
+  --ui-button-primary-text: #1A1A1A;
+  --ui-button-default-bg: #262626;
+  --ui-button-default-text: #FFFFFF;
+  --ui-button-disabled-bg: #D4D4D4;
+  --ui-button-disabled-text: #555555;
+  --ui-border-active: #FF2A6D;
+  --ui-border-divider-dark: #2A2A2A;
+  --ui-border-divider-light: #E0E0E0;
+  --ui-border-focus: #FFFFFF;
+  --ui-border-node: #AAAAAA;
+  /* Vidrio (solo :root, sin utilidades Tailwind) */
+  --ui-glass-bg: rgba(8, 8, 12, 0.55);
+  --ui-glass-blur: 10px;
+  --ui-glass-edge: rgba(255, 255, 255, 0.28);
+  --ui-glass-edge-highlight: rgba(255, 255, 255, 0.55);
+  --ui-glass-edge-low: rgba(255, 255, 255, 0.12);
+  --ui-glass-sheen: rgba(255, 255, 255, 0.08);
+  --ui-glass-selected-bg: rgba(10, 10, 14, 0.7);
+  --ui-glass-pill-border: rgba(255, 255, 255, 0.25);
+  --ui-glass-glow: rgba(255, 255, 255, 0.6);
+  --ui-glass-light-bg: rgba(255, 255, 255, 0.7);
+  --ui-glass-light-blur: 16px;
+  --ui-glass-light-border: rgba(255, 255, 255, 0.4);
+  --ui-glass-light-shadow: rgba(0, 0, 0, 0.1);
+  /* Z-index */
+  --ui-z-base: 0;
+  --ui-z-dropdown: 100;
+  --ui-z-overlay: 500;
+  --ui-z-modal: 1000;
+  /* Spacing */
+  --ui-edge-thin: 1px;
+  --ui-edge-normal: 2px;
+  --ui-edge-thick: 4px;
+  --ui-radius-sm: 4px;
+  --ui-radius-md: 8px;
+  --ui-radius-lg: 16px;
+  --ui-radius-pill: 9999px;
+  --ui-cut-sm: 8px;
+  --ui-cut-md: 12px;
+  --ui-cut-lg: 22px;
+  /* Motion */
+  --ui-duration-fast: 120ms;
+  --ui-duration-normal: 240ms;
+  --ui-duration-glow: 400ms;
+  --ui-ease-snappy: cubic-bezier(0.16, 1, 0.3, 1);
+  --ui-ease-glow: ease-in-out;
+  /* Tipografía */
+  --ui-font-family-lagu: "Lagu Sans", system-ui, sans-serif;
+  --ui-font-weight-thin: 100;
+  --ui-font-weight-extralight: 200;
+  --ui-font-weight-light: 300;
+  --ui-font-weight-regular: 400;
+  --ui-font-weight-medium: 500;
+  --ui-font-weight-semibold: 600;
+  --ui-font-weight-bold: 700;
+  --ui-font-weight-extrabold: 800;
+  --ui-font-weight-black: 900;
+  --ui-font-size-xs: 0.75rem;
+  --ui-font-size-sm: 0.875rem;
+  --ui-font-size-md: 1rem;
+  --ui-font-size-lg: 1.25rem;
+  --ui-font-size-xl: 1.5rem;
+  --ui-font-size-2xl: 2rem;
+  --ui-font-size-3xl: 3rem;
+}

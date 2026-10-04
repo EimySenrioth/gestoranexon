@@ -1,0 +1,19 @@
+﻿/* typography.css â€” Lagu Sans (archivos compartidos en apps/lagu-sans) */
+@font-face { font-family: "Lagu Sans"; font-weight: 100; font-style: normal; font-display: swap; src: url("../../../lagu-sans/Lagu Sans Thin.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 100; font-style: italic; font-display: swap; src: url("../../../lagu-sans/Lagu Sans Thin Italic.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 200; font-style: normal; font-display: swap; src: url("../../../lagu-sans/Lagu Sans ExtraLight.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 200; font-style: italic; font-display: swap; src: url("../../../lagu-sans/Lagu Sans ExtraLight Italic.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 300; font-style: normal; font-display: swap; src: url("../../../lagu-sans/Lagu Sans Light.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 300; font-style: italic; font-display: swap; src: url("../../../lagu-sans/Lagu Sans Light Italic.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 400; font-style: normal; font-display: swap; src: url("../../../lagu-sans/Lagu Sans Regular.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 400; font-style: italic; font-display: swap; src: url("../../../lagu-sans/Lagu Sans Regular Italic.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 500; font-style: normal; font-display: swap; src: url("../../../lagu-sans/Lagu Sans Medium.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 500; font-style: italic; font-display: swap; src: url("../../../lagu-sans/Lagu Sans Medium Italic.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 600; font-style: normal; font-display: swap; src: url("../../../lagu-sans/Lagu Sans SemiBold.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 600; font-style: italic; font-display: swap; src: url("../../../lagu-sans/Lagu Sans SemiBold Italic.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 700; font-style: normal; font-display: swap; src: url("../../../lagu-sans/Lagu Sans Bold.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 700; font-style: italic; font-display: swap; src: url("../../../lagu-sans/Lagu Sans Bold Italic.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 800; font-style: normal; font-display: swap; src: url("../../../lagu-sans/Lagu Sans ExtraBold.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 800; font-style: italic; font-display: swap; src: url("../../../lagu-sans/Lagu Sans ExtraBold Italic.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 900; font-style: normal; font-display: swap; src: url("../../../lagu-sans/Lagu Sans Black.otf") format("opentype"); }
+@font-face { font-family: "Lagu Sans"; font-weight: 900; font-style: italic; font-display: swap; src: url("../../../lagu-sans/Lagu Sans Black Italic.otf") format("opentype"); }

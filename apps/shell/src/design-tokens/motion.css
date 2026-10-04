@@ -1,0 +1,31 @@
+/* motion.css — Clases utilitarias y reglas de accesibilidad para animaciones */
+
+/* Utilidad para elementos interactivos (botones recortados y tarjetas)
+   IMPORTANTE: Solo anima transform y filter; animar background sobre clip-path
+   produce tirones en renderizado GPU. */
+.ui-interactive {
+  transition:
+    transform var(--ui-duration-fast) var(--ui-ease-snappy),
+    filter var(--ui-duration-normal) var(--ui-ease-glow);
+  will-change: transform, filter;
+}
+
+.ui-interactive:hover {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 4px 12px var(--ui-accent-primary-glow));
+}
+
+.ui-interactive:active {
+  transform: translateY(1px);
+}
+
+/* Accesibilidad: Respetar la preferencia de reducción de movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .ui-interactive {
+    transition: none !important;
+  }
+  .ui-interactive:hover,
+  .ui-interactive:active {
+    transform: none !important;
+  }
+}

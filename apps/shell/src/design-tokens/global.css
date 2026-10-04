@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@import "./generated/theme.css";
+@import "./generated/tokens.css";
+@import "./fonts.css";
+@import "./polygons.css";
+@import "./glass.css";
+@import "./motion.css";
+
+body {
+  background: var(--ui-background-app);
+  color: var(--ui-text-primary);
+  font-family: var(--ui-font-family-lagu);
+}

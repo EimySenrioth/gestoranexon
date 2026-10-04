@@ -1,0 +1,164 @@
+/* polygons.css — Formas geométricas con clip-path.
+   Regla: Cada --poly se define en su propio selector para resolver var(--cut)
+   en el elemento y permitir override por instancia (style="--cut: 20px"). */
+
+/* 1. Técnica de borde: capa exterior = borde, .inner = relleno */
+.shape {
+  --cut: var(--ui-cut-md);
+  position: relative;
+  padding: var(--ui-edge-normal);
+  background: var(--ui-accent-primary);
+  clip-path: var(--poly, none);
+}
+.shape > .inner {
+  background: var(--ui-background-app);
+  clip-path: var(--poly, none);
+  padding: 14px 28px;
+}
+
+/* 2. Fila de ajuste: píldora con puntas en rombo (usando px fijos en extremos) */
+.row {
+  --cut: var(--ui-cut-md);
+  --poly: polygon(
+    0% 50%, var(--cut) 0, calc(100% - var(--cut)) 0,
+    100% 50%,
+    calc(100% - var(--cut)) 100%, var(--cut) 100%
+  );
+  clip-path: var(--poly);
+}
+
+/* 3. Dropdown: píldora gris con nodos laterales */
+.dropdown {
+  --cut: var(--ui-cut-sm);
+  --poly: polygon(
+    0 50%, var(--cut) 0, calc(100% - var(--cut)) 0,
+    100% 50%,
+    calc(100% - var(--cut)) 100%, var(--cut) 100%
+  );
+  position: relative;
+  background: var(--ui-background-modal);
+  padding: var(--ui-edge-normal);
+  clip-path: var(--poly);
+}
+.dropdown .inner {
+  background: linear-gradient(var(--ui-background-dropdown-top), var(--ui-background-dropdown-bottom));
+  color: var(--ui-text-inverse-secondary);
+  text-align: center;
+  clip-path: var(--poly);
+  padding: 10px 28px;
+}
+.dropdown-wrap {
+  position: relative;
+  display: inline-block;
+}
+.dropdown-wrap::before,
+.dropdown-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  background: var(--ui-border-node);
+  transform: translateY(-50%) rotate(45deg);
+  z-index: 1;
+}
+.dropdown-wrap::before { left: -4px; }
+.dropdown-wrap::after { right: -4px; }
+
+/* 4. Pestañas de la tienda: paralelogramo con chaflán en px */
+.tab {
+  --cut: var(--ui-cut-sm);
+  --poly: polygon(var(--cut) 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%);
+  font-style: italic;
+  padding: 12px 56px;
+  background: var(--ui-button-default-bg);
+  color: var(--ui-button-default-text);
+  clip-path: var(--poly);
+}
+.tab.active {
+  background: var(--ui-accent-primary);
+}
+.tab.first {
+  --poly: polygon(0 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%);
+}
+.tab.last {
+  --poly: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* 5. Botón Purchase: píldora con punta de flecha en px fijos */
+.purchase {
+  --cut: var(--ui-cut-lg);
+  --poly: polygon(
+    var(--cut) 0, 100% 0, 100% 100%, var(--cut) 100%, 0 50%
+  );
+  background: var(--ui-text-inverse);
+  padding: 4px;
+  clip-path: var(--poly);
+}
+.purchase .inner {
+  background: var(--ui-accent-cta);
+  color: var(--ui-text-inverse);
+  font: italic var(--ui-font-weight-extrabold) 1.4rem var(--ui-font-family-lagu);
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 24px 12px 40px;
+  clip-path: var(--poly);
+}
+.purchase .inner::after {
+  content: "»";
+}
+
+/* 6. Botón lateral del menú: rectángulo con chaflanes en 8 esquinas */
+.side-btn {
+  --cut: var(--ui-cut-md);
+  --poly: polygon(
+    var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut),
+    100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%,
+    var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut)
+  );
+  background: var(--ui-button-default-bg);
+  color: var(--ui-button-default-text);
+  padding: 14px 24px;
+  clip-path: var(--poly);
+}
+.side-btn.active {
+  background: var(--ui-accent-primary);
+}
+
+/* 7. Grupo desplegable de misiones: corte inclinado */
+.mission-group {
+  --cut: var(--ui-cut-md);
+  --poly: polygon(
+    0 50%, var(--cut) 0, 100% 0, 100% 100%, var(--cut) 100%
+  );
+  background: linear-gradient(90deg, var(--ui-background-group-start), var(--ui-background-app));
+  color: var(--ui-text-primary);
+  padding: 14px 32px;
+  clip-path: var(--poly);
+}
+
+/* 8. Botones circulares (sin polígono) */
+.icon-btn {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-background-icon);
+  color: var(--ui-text-primary);
+}
+.icon-btn.active {
+  box-shadow: 0 0 0 3px var(--ui-border-focus), 0 0 0 7px var(--ui-accent-primary);
+}
+.badge {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-status-notification);
+  color: var(--ui-text-primary);
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  font-size: var(--ui-font-size-xs);
+}

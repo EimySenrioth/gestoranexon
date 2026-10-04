@@ -1,0 +1,88 @@
+/* glass.css — Paneles de vidrio y efectos de cristal cortado.
+   Regla: Los colores y opacidades provienen de var(--ui-glass-*) y var(--ui-*). */
+
+/* Panel blanco con desenfoque */
+.fondo-vidrio-blanco {
+  background: var(--ui-glass-light-bg);
+  backdrop-filter: blur(var(--ui-glass-light-blur));
+  -webkit-backdrop-filter: blur(var(--ui-glass-light-blur));
+  border: 1px solid var(--ui-glass-light-border);
+  box-shadow: 0 4px 30px var(--ui-glass-light-shadow);
+  border-radius: var(--ui-radius-lg);
+  color: var(--ui-button-primary-text);
+}
+
+/* Fila de vidrio oscuro (hexagonal) */
+.glass-row {
+  --cut: var(--ui-cut-lg);
+  --poly: polygon(
+    var(--cut) 0,
+    calc(100% - var(--cut)) 0,
+    100% 50%,
+    calc(100% - var(--cut)) 100%,
+    var(--cut) 100%,
+    0 50%
+  );
+  position: relative;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  color: var(--ui-text-primary);
+  font: var(--ui-font-weight-semibold) 1.4rem/1 var(--ui-font-family-lagu);
+  background: linear-gradient(180deg, var(--ui-glass-edge-highlight), var(--ui-glass-edge) 40%, var(--ui-glass-edge-low));
+  clip-path: var(--poly);
+}
+
+.glass-row::before {
+  content: "";
+  position: absolute;
+  inset: var(--ui-edge-normal);
+  background:
+    linear-gradient(180deg, var(--ui-glass-sheen), rgba(255, 255, 255, 0) 45%),
+    var(--ui-glass-bg);
+  backdrop-filter: blur(var(--ui-glass-blur)) saturate(1.1);
+  -webkit-backdrop-filter: blur(var(--ui-glass-blur)) saturate(1.1);
+  clip-path: var(--poly);
+  z-index: 0;
+}
+
+.glass-row > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Contenedor padre opcional para drop-shadow sin recorte */
+.glass-glow-wrap {
+  display: inline-block;
+  filter: drop-shadow(0 0 10px var(--ui-glass-glow));
+}
+
+.glass-row.selected {
+  background: var(--ui-border-focus);
+  filter: drop-shadow(0 0 8px var(--ui-glass-glow));
+}
+
+.glass-row.selected::before {
+  background: var(--ui-glass-selected-bg);
+}
+
+/* Versión con extremos redondeados (píldora) */
+.glass-pill {
+  height: 64px;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  color: var(--ui-text-primary);
+  border-radius: var(--ui-radius-pill);
+  border: var(--ui-edge-normal) solid var(--ui-glass-pill-border);
+  background: linear-gradient(180deg, var(--ui-glass-sheen), rgba(255, 255, 255, 0) 50%), var(--ui-glass-bg);
+  backdrop-filter: blur(var(--ui-glass-blur));
+  -webkit-backdrop-filter: blur(var(--ui-glass-blur));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.glass-pill.selected {
+  border: var(--ui-edge-thick) solid var(--ui-border-focus);
+  box-shadow: 0 0 14px var(--ui-glass-glow), inset 0 0 10px rgba(255, 255, 255, 0.15);
+}
