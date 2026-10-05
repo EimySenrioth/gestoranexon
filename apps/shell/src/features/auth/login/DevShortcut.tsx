@@ -12,9 +12,9 @@ export function DevShortcut() {
 
   return (
     <div className="flex justify-center w-full">
-      <Link href="/tokens" className="ui-dev-btn" title="Ir al catálogo de tokens de diseño">
-        <span aria-hidden="true">🛠</span>
-        <span>Modo desarrollo → Ver tokens</span>
+      <Link href="/inicio" className="ui-dev-btn" title="Ir a la pantalla de inicio">
+        <span aria-hidden="true">🚀</span>
+        <span>Modo desarrollo → Ir a Inicio</span>
       </Link>
     </div>
   );

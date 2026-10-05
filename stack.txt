@@ -281,3 +281,9 @@ navigation/
 │  └─ useEvaluationSocket.ts ← WebSocket de evaluación en tiempo real (RF-006)
 ├─ README.md
 └─ index.ts
+
+
+flowchart TD
+    A["1. design-tokens/ (Variables CSS: --ui-*)"] --> B["2. designofuiparts/ (header.css, sidebar.css, footer.css)"]
+    B --> C["3. componentforlayout/ (Header.tsx, Sidebar.tsx, Footer.tsx)"]
+    C --> D["4. inicio/page.tsx (Pantalla final ensamblada)"]

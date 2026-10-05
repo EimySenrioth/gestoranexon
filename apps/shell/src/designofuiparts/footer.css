@@ -1,0 +1,31 @@
+/* apps/shell/src/designofuiparts/footer.css */
+
+.layout-footer {
+  width: 100%;
+  min-height: 48px;
+  background-color: var(--ui-button-secondary-bg);
+  border-top: 1px solid var(--ui-border-divider-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.5rem;
+  margin-top: auto;
+  box-sizing: border-box;
+}
+
+.layout-footer-text {
+  font-size: var(--ui-font-size-sm);
+  color: var(--ui-text-inverse-secondary);
+  font-weight: var(--ui-font-weight-regular);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.layout-footer-copy-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  line-height: 1;
+}

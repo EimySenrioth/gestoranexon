@@ -1,0 +1,99 @@
+/* apps/shell/src/design-tokens/backgrounds.css */
+
+.mall {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #050507;
+}
+
+/* ---------- FRANJAS NEGRAS (arriba y abajo) ---------- */
+.banda {
+  position: relative;
+  overflow: hidden;
+  background: #060608;
+  flex-shrink: 0;
+}
+
+/* Tipografía gigante oscura, cortada por los bordes */
+.banda::before {
+  content: "UNTELS  UNTELS  UNTELS  UNTELS";
+  position: absolute;
+  inset: -20% 0 auto -5%;
+  white-space: nowrap;
+  font: italic 900 14vw/1 "Impact", "Arial Black", sans-serif;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.80);
+  transform: rotate(-4deg) skewX(-8deg);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.banda-bottom::before {
+  inset: -10% 0 auto -12%;
+}
+
+.banda > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* ---------- ESCENARIO: DEGRADADO + TEXTURA ---------- */
+.escenario {
+  position: relative;
+  overflow: hidden;
+  background:
+    /* sombra bajo el header */
+    linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,0) 6%),
+    /* oscurecimiento hacia el footer */
+    linear-gradient(0deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,0) 5%),
+    /* textura: líneas diagonales finas */
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255,255,255,.05) 0 1px,
+      transparent 1px 4px
+    ),
+    /* degradado principal atenuado (75%) */
+    linear-gradient(
+      180deg,
+      rgba(106, 63, 200, 0.75) 0%,
+      rgba(92, 71, 204, 0.75) 30%,
+      rgba(76, 79, 196, 0.75) 55%,
+      rgba(69, 104, 204, 0.75) 78%,
+      rgba(63, 130, 210, 0.75) 100%
+    );
+}
+
+/* Letras gigantes translúcidas detrás del contenido */
+.escenario::before {
+  content: "UNTELS";
+  position: absolute;
+  left: -6%;
+  top: 48%;
+  white-space: nowrap;
+  font: italic 900 20vw/1 "Impact", "Arial Black", sans-serif;
+  color: rgba(255, 255, 255, 0.06);
+  transform: skewX(-8deg);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Brillo suave central (profundidad) */
+.escenario::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 45% 60% at 50% 45%,
+      rgba(200, 150, 255, .22), transparent 70%),
+    radial-gradient(ellipse 30% 40% at 85% 70%,
+      rgba(80, 160, 255, .18), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.escenario > * {
+  position: relative;
+  z-index: 2;
+}

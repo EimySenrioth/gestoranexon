@@ -7,6 +7,11 @@
 @import "./dialog.css";
 @import "./controls.css";
 @import "./motion.css";
+@import "./backgrounds.css";
+@import "../designofuiparts/layout-shell.css";
+@import "../designofuiparts/header.css";
+@import "../designofuiparts/footer.css";
+@import "../designofuiparts/sidebar.css";
 
 body {
   background: var(--ui-background-app);

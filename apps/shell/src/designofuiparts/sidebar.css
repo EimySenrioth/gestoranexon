@@ -1,0 +1,274 @@
+/* apps/shell/src/designofuiparts/sidebar.css */
+
+.layout-sidebar-container {
+  position: relative;
+  transition: width var(--ui-duration-normal) var(--ui-ease-snappy),
+              opacity var(--ui-duration-normal) var(--ui-ease-snappy);
+  user-select: none;
+  z-index: var(--ui-z-dropdown);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ----------------------------------------------------
+   1. MODO EXPANDIDO (FASE 1: Panel blanco con iconos y texto)
+---------------------------------------------------- */
+.layout-sidebar-expanded {
+  width: 240px;
+  background-color: var(--ui-background-modal);
+  border: 1.5px solid #1a1a1a;
+  border-radius: var(--ui-radius-lg);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  min-height: 520px;
+  overflow: hidden;
+}
+
+/* Cabecera superior: Centrada para alinear el eje vertical con el footer */
+.layout-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.85rem 1rem 0.25rem;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+/* Grupo interactivo: [Flechas] + [Puntos centrados] + [Espaciador simétrico] */
+.layout-sidebar-toggle-group {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--ui-radius-sm);
+  background: transparent;
+  border: none;
+  transition: all var(--ui-duration-fast) var(--ui-ease-snappy);
+}
+
+.layout-sidebar-toggle-group:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.layout-sidebar-toggle-arrows {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: #1a1a1a;
+  transition: transform var(--ui-duration-fast) var(--ui-ease-snappy);
+  flex-shrink: 0;
+}
+
+.layout-sidebar-toggle-group:hover .layout-sidebar-toggle-arrows {
+  transform: translateX(-2px);
+}
+
+/* Espaciador de contrapeso con ancho idéntico a las flechas */
+.layout-sidebar-toggle-spacer {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.layout-sidebar-menu {
+  list-style: none;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.layout-sidebar-item {
+  width: 100%;
+}
+
+.layout-sidebar-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  font-size: var(--ui-font-size-md);
+  font-weight: var(--ui-font-weight-regular);
+  color: #1a1a1a;
+  text-decoration: none;
+  border-radius: var(--ui-radius-md);
+  transition: background-color var(--ui-duration-fast) var(--ui-ease-snappy),
+              color var(--ui-duration-fast) var(--ui-ease-snappy);
+  cursor: pointer;
+  position: relative;
+}
+
+.layout-sidebar-link:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.layout-sidebar-link.active {
+  font-weight: var(--ui-font-weight-semibold);
+  color: #000000;
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Contenido del link con icono + texto */
+.layout-sidebar-link-content {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+/* Iconos de la primera fase: COLOR NEGRO */
+.layout-sidebar-link-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1a1a;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/* Badge rojo con signo de exclamación en modo expandido (en Mis Solicitudes) */
+.layout-sidebar-link-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--ui-status-notification);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Pie del sidebar expandido: Centrado idéntico al header */
+.layout-sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 1.25rem 0;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+
+/* ----------------------------------------------------
+   2. MODO COLAPSADO (FASE 2: Dock píldora oscura de referencia)
+---------------------------------------------------- */
+.layout-sidebar-collapsed {
+  width: 58px;
+  background: #121316;
+  border-radius: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 0;
+  gap: 20px;
+  cursor: pointer;
+}
+
+/* Grip de puntos reutilizable para ambas fases */
+.layout-sidebar-grip {
+  display: grid;
+  grid-template-columns: repeat(6, 3px);
+  grid-template-rows: repeat(2, 3px);
+  gap: 2.5px;
+  padding: 4px;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity var(--ui-duration-fast) var(--ui-ease-snappy);
+}
+
+.layout-sidebar-grip:hover {
+  opacity: 1;
+}
+
+.layout-sidebar-grip-dot {
+  width: 3px;
+  height: 3px;
+  background-color: #a0a0a0;
+  border-radius: 50%;
+}
+
+/* Variante de puntos NEGROS para la primera fase */
+.layout-sidebar-grip.black {
+  opacity: 0.7;
+}
+
+.layout-sidebar-grip.black:hover {
+  opacity: 1;
+}
+
+.layout-sidebar-grip.black .layout-sidebar-grip-dot {
+  background-color: #1a1a1a;
+}
+
+/* Lista de iconos en la píldora */
+.layout-sidebar-dock-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.layout-sidebar-dock-btn {
+  position: relative;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: #7a7e85;
+  transition: all var(--ui-duration-fast) var(--ui-ease-snappy);
+}
+
+.layout-sidebar-dock-btn:hover {
+  color: #ffffff;
+}
+
+/* Ítem activo en dock: Círculo blanco destacado con icono NEGRO */
+.layout-sidebar-dock-btn.active {
+  background-color: #ededed;
+  color: #121316;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* Badge rojo con signo de exclamación en dock */
+.layout-sidebar-dock-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--ui-status-notification);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1.5px solid #121316;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}

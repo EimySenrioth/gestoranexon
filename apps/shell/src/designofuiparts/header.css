@@ -1,0 +1,111 @@
+/* apps/shell/src/designofuiparts/header.css */
+
+.layout-header {
+  width: 100%;
+  min-height: 72px;
+  background: linear-gradient(180deg, var(--ui-button-secondary-bg) 0%, #FFFFFF 100%);
+  border-bottom: 1px solid #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  z-index: var(--ui-z-dropdown);
+  box-sizing: border-box;
+}
+
+.layout-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.layout-header-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  width: 64px;
+}
+
+.layout-header-logo {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+
+.layout-header-titles {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.layout-header-title {
+  font-size: var(--ui-font-size-xl);
+  font-weight: var(--ui-font-weight-bold);
+  color: var(--ui-text-inverse);
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.layout-header-subtitle {
+  font-size: var(--ui-font-size-sm);
+  font-weight: var(--ui-font-weight-regular);
+  color: var(--ui-text-inverse-secondary);
+  margin: 0;
+  margin-top: 2px;
+}
+
+.layout-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.layout-header-bell-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--ui-radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--ui-duration-fast) var(--ui-ease-snappy);
+  color: var(--ui-text-inverse);
+}
+
+.layout-header-bell-btn:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.layout-header-bell-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-status-notification);
+  border: 2px solid var(--ui-button-secondary-bg);
+}
+
+.layout-header-avatar-container {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--ui-radius-pill);
+  background-color: #BDBDBD;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--ui-duration-fast) var(--ui-ease-snappy);
+}
+
+.layout-header-avatar-container:hover {
+  transform: scale(1.05);
+}
