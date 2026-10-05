@@ -6,6 +6,7 @@ export { zIndex } from "./tokens/z-index.ts";
 export { spacing } from "./tokens/spacing.ts";
 export { motion } from "./tokens/motion.ts";
 export { typography } from "./tokens/typography.ts";
+export { effects } from "./tokens/effects.ts";
 
 import { colors } from "./tokens/colors.ts";
 import { zIndex } from "./tokens/z-index.ts";

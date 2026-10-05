@@ -9,6 +9,7 @@ import { zIndex } from "../tokens/z-index.ts";
 import { spacing } from "../tokens/spacing.ts";
 import { motion } from "../tokens/motion.ts";
 import { typography } from "../tokens/typography.ts";
+import { effects } from "../tokens/effects.ts";
 
 type Groups = Record<string, Record<string, string | number>>;
 
@@ -53,6 +54,7 @@ const outputs: Record<string, string> = {
   "tokens.css": rootBlock([
     ["Colores semánticos", colors as Groups],
     ["Vidrio (solo :root, sin utilidades Tailwind)", glass as Groups],
+    ["Efectos y sombras", effects as Groups],
     ["Z-index", { z: zIndex } as Groups],
     ["Spacing", spacing as Groups],
     ["Motion", motion as Groups],

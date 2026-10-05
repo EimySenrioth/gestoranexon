@@ -8,7 +8,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Estancia Perú",
+  title: {
+    default: "Estancia Perú",
+    template: "%s · Estancia Perú",
+  },
   description: "Shell de la aplicación Estancia Perú",
 };
 

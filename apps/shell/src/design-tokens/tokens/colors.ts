@@ -16,6 +16,11 @@ export const colors = {
     dropdownTop: p.gray150, // Inicio del degradado del dropdown
     dropdownBottom: p.gray300, // Fin del degradado del dropdown
     groupStart: p.plum700, // Inicio del degradado del grupo de misiones
+    page: p.white, // Fondo blanco de la página de login
+    dialogFrame: p.dark600, // Marco exterior oscuro del modal
+    dialogHeader: p.dark820, // Barra superior oscura con X
+    dialogBody: p.gray175, // Cuerpo del diálogo gris claro
+    cardLight: p.white, // Tarjeta de cuenta blanca
   },
   text: {
     primary: p.white, // Texto principal sobre oscuro
@@ -24,6 +29,8 @@ export const colors = {
     inverse: p.black, // Texto sobre fondos claros o vibrantes
     inverseSecondary: p.dark650, // Secundario en noticias
     inverseMuted: p.gray500, // Fechas en paneles claros
+    dialog: p.dark900, // Texto en el modal
+    dialogMuted: p.gray700, // Texto secundario en el modal
   },
   accent: {
     primary: p.pink500, // Pestañas activas, selección
@@ -46,6 +53,12 @@ export const colors = {
     defaultText: p.white,
     disabledBg: p.gray250,
     disabledText: p.gray600,
+    pillBg: p.gray125, // Fondo del botón píldora
+    pillText: p.dark900, // Texto del botón píldora
+    pillBorder: p.gray450, // Borde exterior del botón píldora
+    pillRing: p.white, // Anillo interior blanco del botón píldora
+    secondaryBg: p.gray275, // Botón secundario gris
+    secondaryText: p.dark800, // Texto botón secundario
   },
   border: {
     active: p.pink500, // Borde de selección
@@ -53,6 +66,14 @@ export const colors = {
     dividerLight: p.gray200, // Bordes del modal claro
     focus: p.white, // Anillo de foco
     node: p.gray350, // Nodos laterales del dropdown
+    tabActive: p.dark900, // Línea activa de pestaña
+    divider: p.gray450, // Línea divisoria en tarjeta/pestaña
+  },
+  brand: {
+    googleBlue: p.googleBlue,
+    googleRed: p.googleRed,
+    googleYellow: p.googleYellow,
+    googleGreen: p.googleGreen,
   },
 } as const;
 

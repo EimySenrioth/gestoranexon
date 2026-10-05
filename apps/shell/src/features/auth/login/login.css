@@ -1,0 +1,21 @@
+/* login.css — Layout de la página de inicio de sesión */
+
+.login-layout {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background-color: var(--ui-background-page, #ffffff);
+}
+
+.login-container {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}

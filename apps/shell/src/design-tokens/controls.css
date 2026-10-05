@@ -1,0 +1,272 @@
+/* controls.css — Pestañas, tarjetas de cuenta, botones píldora y controles de login.
+   Usa exclusivamente variables semánticas --ui-*. */
+
+/* 1. Pestañas */
+.ui-tabs {
+  display: flex;
+  width: 100%;
+  border-bottom: 2px solid var(--ui-border-divider);
+  margin-bottom: 28px;
+}
+
+.ui-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 10px 12px 14px 12px;
+  font-family: var(--ui-font-family-lagu);
+  font-size: 1.15rem;
+  font-weight: var(--ui-font-weight-bold);
+  color: var(--ui-text-dialog);
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: opacity var(--ui-motion-duration-fast) var(--ui-motion-easing-standard);
+}
+
+.ui-tab:hover {
+  opacity: 0.85;
+}
+
+.ui-tab--active {
+  color: var(--ui-text-dialog);
+}
+
+.ui-tab--active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--ui-border-tab-active);
+}
+
+/* 2. Tarjeta de cuenta / credencial */
+.ui-account-card {
+  width: 100%;
+  background: var(--ui-background-card-light);
+  border-radius: var(--ui-radius-xl);
+  box-shadow: var(--ui-shadow-card);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 32px;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: transform var(--ui-motion-duration-fast) var(--ui-motion-easing-standard),
+              box-shadow var(--ui-motion-duration-fast) var(--ui-motion-easing-standard);
+  text-align: left;
+}
+
+.ui-account-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.ui-account-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ui-account-card__divider {
+  width: 1px;
+  height: 42px;
+  background: var(--ui-border-divider);
+  flex-shrink: 0;
+}
+
+.ui-account-card__info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.ui-account-card__title {
+  font-family: var(--ui-font-family-lagu);
+  font-size: 1.05rem;
+  font-weight: var(--ui-font-weight-bold);
+  color: var(--ui-text-dialog);
+  line-height: 1.3;
+}
+
+.ui-account-card__subtitle {
+  font-family: var(--ui-font-family-lagu);
+  font-size: 0.95rem;
+  font-weight: var(--ui-font-weight-medium);
+  color: var(--ui-text-dialog-muted);
+  line-height: 1.3;
+}
+
+.ui-account-card__caret {
+  color: var(--ui-text-dialog-muted);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* 3. Botón píldora con doble anillo */
+.ui-pill-btn {
+  position: relative;
+  width: 100%;
+  height: 52px;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-button-pill-bg);
+  color: var(--ui-button-pill-text);
+  font-family: var(--ui-font-family-lagu);
+  font-size: 1.2rem;
+  font-weight: var(--ui-font-weight-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid var(--ui-button-pill-border);
+  box-shadow: inset 0 0 0 2px var(--ui-button-pill-ring), var(--ui-shadow-pill);
+  transition: all var(--ui-motion-duration-fast) var(--ui-motion-easing-standard);
+  text-decoration: none;
+}
+
+.ui-pill-btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+
+.ui-pill-btn:active {
+  transform: translateY(0);
+}
+
+.ui-pill-btn--secondary {
+  background: var(--ui-button-secondary-bg);
+  color: var(--ui-button-secondary-text);
+  border: 2px solid transparent;
+  box-shadow: none;
+  margin-top: 12px;
+}
+
+.ui-pill-btn--secondary:hover {
+  filter: brightness(0.95);
+}
+
+/* 4. Botón de acceso de desarrollo */
+.ui-dev-btn {
+  margin-top: 24px;
+  padding: 8px 16px;
+  background: var(--ui-background-card-hover);
+  color: var(--ui-accent-title);
+  border: 1px dashed var(--ui-accent-cta);
+  border-radius: var(--ui-radius-pill);
+  font-family: var(--ui-font-family-lagu);
+  font-size: 0.85rem;
+  font-weight: var(--ui-font-weight-semibold);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: all var(--ui-motion-duration-fast) var(--ui-motion-easing-standard);
+}
+
+.ui-dev-btn:hover {
+  background: var(--ui-background-panel);
+  transform: translateY(-1px);
+}
+
+/* 5. Campos de formulario (Inputs de credenciales) */
+.ui-text-field {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.ui-text-field__label {
+  font-family: var(--ui-font-family-lagu);
+  font-size: 1.05rem;
+  font-weight: var(--ui-font-weight-semibold);
+  color: var(--ui-text-dialog);
+  line-height: 1.2;
+}
+
+.ui-text-field__input {
+  width: 100%;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--ui-background-card-light);
+  border: 2px solid #242424;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  padding: 0 16px;
+  font-family: var(--ui-font-family-lagu);
+  font-size: 1.05rem;
+  color: var(--ui-text-dialog);
+  outline: none;
+  transition: border-color var(--ui-motion-duration-fast) var(--ui-motion-easing-standard),
+              box-shadow var(--ui-motion-duration-fast) var(--ui-motion-easing-standard);
+}
+
+.ui-text-field__input:focus {
+  border-color: #000000;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+.ui-text-field__input::placeholder {
+  color: var(--ui-text-dialog-muted);
+  opacity: 0.6;
+}
+
+/* 6. Divisor inferior y enlace de recuperación */
+.ui-credentials-divider {
+  width: 100%;
+  height: 1.5px;
+  background: var(--ui-border-divider);
+  border: none;
+  margin-top: 28px;
+  margin-bottom: 18px;
+}
+
+.ui-forgot-password-link {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-family: var(--ui-font-family-lagu);
+  font-size: 1.05rem;
+  font-weight: var(--ui-font-weight-medium);
+  color: var(--ui-text-dialog);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 4px 0;
+  transition: opacity var(--ui-motion-duration-fast) var(--ui-motion-easing-standard);
+}
+
+.ui-forgot-password-link:hover {
+  opacity: 0.75;
+  text-decoration: underline;
+}
+
+/* 7. Botón Volver */
+.ui-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: var(--ui-text-dialog-muted);
+  font-family: var(--ui-font-family-lagu);
+  font-size: 0.95rem;
+  font-weight: var(--ui-font-weight-semibold);
+  cursor: pointer;
+  margin-bottom: 16px;
+  padding: 0;
+  align-self: flex-start;
+  transition: color var(--ui-motion-duration-fast) var(--ui-motion-easing-standard);
+}
+
+.ui-back-btn:hover {
+  color: var(--ui-text-dialog);
+}
+

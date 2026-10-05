@@ -4,6 +4,8 @@
 @import "./fonts.css";
 @import "./polygons.css";
 @import "./glass.css";
+@import "./dialog.css";
+@import "./controls.css";
 @import "./motion.css";
 
 body {

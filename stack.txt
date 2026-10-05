@@ -247,3 +247,37 @@ http://localhost:3001	El usuario final	✅ SÍ — esta es tu app
 http://localhost:3000	El Shell y los MFEs para llamar la API	❌ Solo la API (JSON)
 http://localhost:4201	El Shell la carga dentro de sí mismo	❌ No directamente
 http://localhost:4202	El Shell la carga dentro de sí mismo	❌ No directamente
+
+
+navegacion tentavia
+navigation/
+├─ registry/
+│  ├─ modules.ts            ← FUENTE: módulos, rutas, rol permitido, tipo (react | mfe)
+│  ├─ mfe-manifest.ts       ← URL, puerto, tag del custom element de cada MFE
+│  └─ types.ts              ← ModuleId, Role, ModuleDefinition, MfeDefinition
+├─ access/
+│  ├─ roles.ts              ← solicitante | administrador | evaluador
+│  ├─ guards.ts             ← canAccess(role, moduleId)
+│  └─ useAccess.ts          ← hook: módulos visibles para el usuario actual
+├─ state/
+│  ├─ navigation.store.ts   ← módulo activo, historial, estado del menú
+│  └─ selectors.ts
+├─ hosts/                   ← CÓMO se monta cada tipo de vista
+│  ├─ ReactModuleHost.tsx   ← módulos propios del Shell (login, inicio)
+│  ├─ MfeHost.tsx           ← monta un MFE Angular (loader + error + reintento)
+│  ├─ MfeBoundary.tsx       ← error boundary si el MFE no carga
+│  └─ MfeLoader.ts          ← carga el script/iframe una sola vez
+├─ bridge/                  ← COMUNICACIÓN Shell ↔ MFE
+│  ├─ events.ts             ← contratos tipados (auth:token, nav:change, expediente:updated)
+│  ├─ shell-bus.ts          ← emite y escucha CustomEvents
+│  └─ auth-context.ts       ← entrega token, rol y usuario al MFE
+├─ components/
+│  ├─ AppMenu.tsx           ← menú lateral/superior generado desde el registro
+│  ├─ Breadcrumbs.tsx
+│  ├─ ModuleShell.tsx       ← marco común (título, pestañas, botón X)
+│  ├─ TabBar.tsx / TabButton.tsx / CloseButton.tsx
+│  └─ ForbiddenView.tsx
+├─ realtime/
+│  └─ useEvaluationSocket.ts ← WebSocket de evaluación en tiempo real (RF-006)
+├─ README.md
+└─ index.ts

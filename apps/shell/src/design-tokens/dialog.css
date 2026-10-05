@@ -1,0 +1,61 @@
+/* dialog.css — Estilos del modal/diálogo inspirados en la referencia visual.
+   Usa exclusivamente variables semánticas --ui-*. */
+
+.ui-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: var(--ui-background-dialog-frame);
+  border: var(--ui-edge-frame) solid var(--ui-background-dialog-frame);
+  border-radius: var(--ui-radius-dialog);
+  box-shadow: var(--ui-shadow-dialog);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ui-dialog__header {
+  height: 54px;
+  background: var(--ui-background-dialog-header);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 16px;
+}
+
+.ui-dialog__close {
+  background: transparent;
+  border: none;
+  color: var(--ui-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--ui-radius-sm);
+  transition: opacity var(--ui-motion-duration-fast) var(--ui-motion-easing-standard),
+              transform var(--ui-motion-duration-fast) var(--ui-motion-easing-standard);
+}
+
+.ui-dialog__close:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+.ui-dialog__body {
+  background: var(--ui-background-dialog-body);
+  padding: 24px 28px 36px 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 480px) {
+  .ui-dialog {
+    max-width: 100%;
+    border-radius: var(--ui-radius-lg);
+  }
+
+  .ui-dialog__body {
+    padding: 20px 20px 28px 20px;
+  }
+}

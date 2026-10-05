@@ -16,12 +16,19 @@
   --ui-background-dropdown-top: #ECECEC;
   --ui-background-dropdown-bottom: #CFCFCF;
   --ui-background-group-start: #A0206A;
+  --ui-background-page: #FFFFFF;
+  --ui-background-dialog-frame: #3A3A3A;
+  --ui-background-dialog-header: #242424;
+  --ui-background-dialog-body: #E3E4E2;
+  --ui-background-card-light: #FFFFFF;
   --ui-text-primary: #FFFFFF;
   --ui-text-secondary: #A3A3A3;
   --ui-text-muted: #555555;
   --ui-text-inverse: #000000;
   --ui-text-inverse-secondary: #333333;
   --ui-text-inverse-muted: #757575;
+  --ui-text-dialog: #1A1A1A;
+  --ui-text-dialog-muted: #4A4A4A;
   --ui-accent-primary: #FF2A6D;
   --ui-accent-primary-glow: rgba(255, 42, 109, 0.4);
   --ui-accent-primary-text: #FF6699;
@@ -38,11 +45,23 @@
   --ui-button-default-text: #FFFFFF;
   --ui-button-disabled-bg: #D4D4D4;
   --ui-button-disabled-text: #555555;
+  --ui-button-pill-bg: #F2F2F2;
+  --ui-button-pill-text: #1A1A1A;
+  --ui-button-pill-border: #8C8C8C;
+  --ui-button-pill-ring: #FFFFFF;
+  --ui-button-secondary-bg: #D2D2D2;
+  --ui-button-secondary-text: #262626;
   --ui-border-active: #FF2A6D;
   --ui-border-divider-dark: #2A2A2A;
   --ui-border-divider-light: #E0E0E0;
   --ui-border-focus: #FFFFFF;
   --ui-border-node: #AAAAAA;
+  --ui-border-tab-active: #1A1A1A;
+  --ui-border-divider: #8C8C8C;
+  --ui-brand-google-blue: #4285F4;
+  --ui-brand-google-red: #EA4335;
+  --ui-brand-google-yellow: #FBBC05;
+  --ui-brand-google-green: #34A853;
   /* Vidrio (solo :root, sin utilidades Tailwind) */
   --ui-glass-bg: rgba(8, 8, 12, 0.55);
   --ui-glass-blur: 10px;
@@ -57,6 +76,10 @@
   --ui-glass-light-blur: 16px;
   --ui-glass-light-border: rgba(255, 255, 255, 0.4);
   --ui-glass-light-shadow: rgba(0, 0, 0, 0.1);
+  /* Efectos y sombras */
+  --ui-shadow-card: 0 4px 14px rgba(0, 0, 0, 0.08);
+  --ui-shadow-dialog: 0 16px 40px rgba(0, 0, 0, 0.35);
+  --ui-shadow-pill: 0 2px 4px rgba(0, 0, 0, 0.06);
   /* Z-index */
   --ui-z-base: 0;
   --ui-z-dropdown: 100;
@@ -66,9 +89,12 @@
   --ui-edge-thin: 1px;
   --ui-edge-normal: 2px;
   --ui-edge-thick: 4px;
+  --ui-edge-frame: 6px;
   --ui-radius-sm: 4px;
   --ui-radius-md: 8px;
   --ui-radius-lg: 16px;
+  --ui-radius-xl: 20px;
+  --ui-radius-dialog: 18px;
   --ui-radius-pill: 9999px;
   --ui-cut-sm: 8px;
   --ui-cut-md: 12px;
