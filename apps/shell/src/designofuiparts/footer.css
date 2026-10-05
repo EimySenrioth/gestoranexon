@@ -4,14 +4,17 @@
   width: 100%;
   min-height: 48px;
   background-color: var(--ui-button-secondary-bg);
-  border-top: 1px solid var(--ui-border-divider-light);
+  flex-shrink: 0;
+  margin: 0;
+  border-top: none;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 1.5rem;
-  margin-top: auto;
   box-sizing: border-box;
 }
+
+
 
 .layout-footer-text {
   font-size: var(--ui-font-size-sm);

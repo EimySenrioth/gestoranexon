@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { SidebarItem, SidebarItemData } from "./SidebarItem";
 
 export interface SidebarProps {
@@ -29,12 +30,22 @@ export function GripDots({ variant = "light" }: { variant?: "light" | "black" })
 
 export function Sidebar({
   items,
-  defaultCollapsed = false,
+  defaultCollapsed,
   activeId: controlledActiveId,
   onItemSelect,
 }: SidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  const pathname = usePathname();
+  // Colapsa por defecto si no estamos en /inicio y no se pasó una prop explícita
+  const isNotHome = pathname !== "/inicio";
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed ?? isNotHome);
   const [internalActiveId, setInternalActiveId] = useState<string>("nueva-solicitud");
+
+  // Efecto para contraer automáticamente cuando cambiamos de ruta y salimos de home
+  useEffect(() => {
+    if (pathname !== "/inicio") {
+      setIsCollapsed(true);
+    }
+  }, [pathname]);
 
   const currentActiveId = controlledActiveId ?? internalActiveId;
 
@@ -66,8 +77,9 @@ export function Sidebar({
     {
       id: "mis-solicitudes",
       label: "Mis Solicitudes",
-      href: "/solicitudes",
+      href: "/tablesolicitud",
       badge: "!", // Icono de '!' rojo ubicado en 'Mis Solicitudes'
+
       icon: (
         // Icono dedicado a 'Mis Solicitudes': Portapapeles con listado / gestión
         <svg

@@ -1,14 +1,14 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Header, Footer, Sidebar } from "@/componentforlayout";
-
-import { SolicitudWizard } from "@/components/ui/missolicitudes";
+import { TableSolicitud } from "@/components/ui/tablesolicitud";
 
 export const metadata: Metadata = {
-  title: "Solicitudes",
+  title: "Tabla de Solicitudes | ANEXO N°9",
+  description: "Monitoreo de estado y progreso de solicitudes de evaluación ética - UNTELS",
 };
 
-export default function SolicitudesPage() {
+export default function TableSolicitudPage() {
   return (
     <div className="layout-shell mall">
       {/* 1. Header con logo oficial UNTELS */}
@@ -21,12 +21,11 @@ export default function SolicitudesPage() {
 
       {/* 2. Cuerpo: Sidebar interactivo + Contenido central */}
       <div className="layout-body escenario">
-        <Sidebar defaultCollapsed={true} />
+        <Sidebar defaultCollapsed={true} activeId="mis-solicitudes" />
 
-        <main className="layout-content w-full items-center justify-start p-4 md:p-6">
-          <SolicitudWizard />
+        <main className="layout-content w-full items-center justify-start p-4 md:p-8">
+          <TableSolicitud />
         </main>
-
       </div>
 
       {/* 3. Footer institucional */}
@@ -34,4 +33,3 @@ export default function SolicitudesPage() {
     </div>
   );
 }
-

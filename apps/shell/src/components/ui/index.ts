@@ -5,3 +5,4 @@ export { PillButton } from "./login/PillButton";
 export { GoogleIcon } from "./login/GoogleIcon";
 export { TextField } from "./login/TextField";
 export { CreateRequestButton } from "./home/CreateRequestButton";
+export * from "./missolicitudes";

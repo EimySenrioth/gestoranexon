@@ -1,42 +1,71 @@
 /* apps/shell/src/designofuiparts/layout-shell.css */
 
 .layout-shell {
+  height: 100vh;
   min-height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--ui-background-page);
+  background-color: #060608;
   color: var(--ui-text-inverse);
   font-family: var(--ui-font-family-lagu);
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .layout-body {
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 0;
   display: flex;
   position: relative;
-  padding: 1.5rem;
+  padding: 1rem 1.5rem;
   gap: 2rem;
   align-items: flex-start;
-  min-height: calc(100vh - 128px);
+  overflow: hidden;
 }
+
 
 .layout-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 180px);
-  padding: 2rem 1rem;
+  justify-content: flex-start;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem 1rem 3rem 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
 }
+
+.layout-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.layout-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.layout-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 9999px;
+}
+
+.layout-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
 
 /* Estado Vacío Central (Sobre con '?' y botón 'Crear Solicitud') */
 .empty-state-card {
+  margin: auto 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
   text-align: center;
   gap: 1.5rem;
   animation: fadeIn 0.4s var(--ui-ease-snappy);
