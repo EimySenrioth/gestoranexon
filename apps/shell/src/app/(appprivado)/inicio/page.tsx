@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Header, Footer, Sidebar } from "@/componentforlayout";
-import { CreateRequestButton } from "./bottonshome";
+import { CreateRequestButton } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Inicio | Anexo N°9",

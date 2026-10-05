@@ -5,6 +5,3 @@ export * from "./access/roles";
 export * from "./access/guards";
 export * from "./access/useAccess";
 export * from "./session/useSession";
-export * from "./components/AppMenu";
-export * from "./components/ModuleShell";
-export * from "./components/ForbiddenView";
