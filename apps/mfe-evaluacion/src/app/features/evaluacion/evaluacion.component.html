@@ -1,0 +1,29 @@
+<div class="stepsevaluation-container">
+  <!-- 1. Stepper tipo cápsula centrado en la parte superior -->
+  <header class="stepsevaluation-header">
+    <app-stepper-tabs
+      [steps]="steps()"
+      [currentStep]="currentStep()"
+      (stepChange)="onStepChange($event)"
+    />
+  </header>
+
+  <!-- 2. Contenido del paso activo -->
+  <main class="stepsevaluation-body">
+    <ng-container [ngSwitch]="currentStep()">
+      <app-step-datos-generales
+        *ngSwitchCase="'datos-generales'"
+        [datos]="datosGenerales()"
+        (datosChange)="onDatosChange($event)"
+      />
+
+      <div *ngSwitchCase="'expediente'" class="step-placeholder">
+        <p>Paso 2: Expediente en desarrollo</p>
+      </div>
+
+      <div *ngSwitchCase="'anexo'" class="step-placeholder">
+        <p>Paso 3: Anexo en desarrollo</p>
+      </div>
+    </ng-container>
+  </main>
+</div>

@@ -9,6 +9,7 @@
 @import "./controls.css";
 @import "./azure-theme.css";
 @import "./azure/azure-table.css";
+@import "./evaluacion/evaluacion.css";
 @import "./motion.css";
 @import "./backgrounds.css";
 @import "./modals/banner-modal.css";

@@ -1,0 +1,8 @@
+<div class="datos-generales-container">
+  <div *ngFor="let campo of campos" class="dato-row-card">
+    <span class="dato-label">{{ campo.label }}</span>
+    <div class="dato-badge-capsule" [title]="datos[campo.id]">
+      <span class="dato-badge-text">{{ datos[campo.id] }}</span>
+    </div>
+  </div>
+</div>

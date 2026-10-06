@@ -1,0 +1,258 @@
+/* apps/shell/src/design-tokens/evaluacion/evaluacion.css — Tokens de diseño y estilos dedicados para la vista de evaluación */
+
+:root {
+  /* 1. Fondos y superficies */
+  --ui-eval-bg-root: transparent;
+  --ui-eval-bg-card: var(--ui-background-modal, #ffffff);
+  --ui-eval-bg-capsule: var(--ui-background-modal, #ffffff);
+  --ui-eval-bg-pill-active: #ffffff;
+  --ui-eval-bg-placeholder: #ffffff;
+
+  /* 2. Bordes y contornos */
+  --ui-eval-border-card: rgba(0, 0, 0, 0.12);
+  --ui-eval-border-card-hover: rgba(0, 0, 0, 0.2);
+  --ui-eval-border-capsule: #1a1a1a;
+  --ui-eval-border-stepper: #0a0a0a;
+  --ui-eval-border-stepper-active: #000000;
+
+  /* 3. Radios de curvatura */
+  --ui-eval-radius-card: 14px;
+  --ui-eval-radius-stepper: 9999px;
+  --ui-eval-radius-capsule: 9999px;
+  --ui-eval-radius-placeholder: 12px;
+
+  /* 4. Tipografía y colores de texto */
+  --ui-eval-font-family: var(--ui-font-family-lagu, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  --ui-eval-text-title: #111827;
+  --ui-eval-text-label: #1f2937;
+  --ui-eval-text-value: #111827;
+  --ui-eval-text-muted: #4b5563;
+
+  /* 5. Dimensiones de cápsulas */
+  --ui-eval-capsule-width: 250px;
+  --ui-eval-capsule-min-width: 200px;
+  --ui-eval-capsule-max-width: 280px;
+  --ui-eval-capsule-height: 36px;
+
+  /* 6. Sombras y elevaciones */
+  --ui-eval-shadow-card: 0 2px 6px rgba(0, 0, 0, 0.04);
+  --ui-eval-shadow-card-hover: 0 4px 10px rgba(0, 0, 0, 0.07);
+  --ui-eval-shadow-stepper: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* ==========================================================================
+   1. Layout general a lo largo (100% horizontal)
+   ========================================================================== */
+.mfe-evaluacion-root {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100% !important;
+  padding: 0.5rem 1rem 2rem 1rem !important;
+  box-sizing: border-box !important;
+}
+
+.stepsevaluation-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 1.5rem !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.stepsevaluation-header {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.stepsevaluation-body {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+/* ==========================================================================
+   2. Stepper tipo cápsula centrado superior
+   ========================================================================== */
+.stepper-capsule-container {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 1.25rem !important;
+  background: var(--ui-eval-bg-card) !important;
+  border: 2.2px solid var(--ui-eval-border-stepper) !important;
+  border-radius: var(--ui-eval-radius-stepper) !important;
+  padding: 4px 10px !important;
+  box-shadow: var(--ui-eval-shadow-stepper) !important;
+  user-select: none !important;
+}
+
+.stepper-tab-btn {
+  appearance: none !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.stepper-tab-btn.disabled {
+  cursor: default !important;
+  opacity: 0.95 !important;
+}
+
+.stepper-tab-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: inherit !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  color: var(--ui-eval-text-title) !important;
+  padding: 6px 16px !important;
+  border-radius: var(--ui-eval-radius-stepper) !important;
+  border: 1.5px solid transparent !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+}
+
+/* Paso activo: Píldora interior blanca con borde fino negro */
+.stepper-tab-btn.active .stepper-tab-pill {
+  background: var(--ui-eval-bg-pill-active) !important;
+  border: 1.4px solid var(--ui-eval-border-stepper-active) !important;
+  font-weight: 700 !important;
+  color: var(--ui-eval-border-stepper-active) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ==========================================================================
+   3. Tarjetas de Datos Generales (Ancho completo)
+   ========================================================================== */
+app-step-datos-generales {
+  width: 100% !important;
+  display: block !important;
+}
+
+.datos-generales-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.85rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+}
+
+.dato-row-card {
+  width: 100% !important;
+  background: var(--ui-eval-bg-card) !important;
+  border-radius: var(--ui-eval-radius-card) !important;
+  border: 1px solid var(--ui-eval-border-card) !important;
+  box-shadow: var(--ui-eval-shadow-card) !important;
+  padding: 0.85rem 1.75rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1.5rem !important;
+  box-sizing: border-box !important;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease !important;
+}
+
+.dato-row-card:hover {
+  box-shadow: var(--ui-eval-shadow-card-hover) !important;
+  border-color: var(--ui-eval-border-card-hover) !important;
+}
+
+.dato-label {
+  font-family: inherit !important;
+  font-size: 1.05rem !important;
+  font-weight: 500 !important;
+  color: var(--ui-eval-text-label) !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Cápsulas uniformes estandarizadas a la derecha */
+.dato-badge-capsule {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: var(--ui-eval-capsule-width) !important;
+  min-width: var(--ui-eval-capsule-min-width) !important;
+  max-width: var(--ui-eval-capsule-max-width) !important;
+  height: var(--ui-eval-capsule-height) !important;
+  padding: 0 1.25rem !important;
+  background: var(--ui-eval-bg-capsule) !important;
+  border: 1.3px solid var(--ui-eval-border-capsule) !important;
+  border-radius: var(--ui-eval-radius-capsule) !important;
+  font-family: inherit !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  color: var(--ui-eval-text-value) !important;
+  letter-spacing: 0.02em !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.dato-badge-text {
+  display: inline-block !important;
+  width: 100% !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* ==========================================================================
+   4. Placeholder para pasos en desarrollo
+   ========================================================================== */
+.step-placeholder {
+  background: var(--ui-eval-bg-placeholder) !important;
+  border-radius: var(--ui-eval-radius-placeholder) !important;
+  border: 1px solid var(--ui-eval-border-card) !important;
+  padding: 3rem 1.5rem !important;
+  text-align: center !important;
+  color: var(--ui-eval-text-muted) !important;
+  font-weight: 500 !important;
+}
+
+/* ==========================================================================
+   5. Adaptación Móvil / Responsive
+   ========================================================================== */
+@media (max-width: 640px) {
+  .stepper-capsule-container {
+    gap: 0.5rem !important;
+    padding: 3px 6px !important;
+    width: 100% !important;
+    justify-content: space-around !important;
+  }
+
+  .stepper-tab-pill {
+    font-size: 0.75rem !important;
+    padding: 4px 8px !important;
+  }
+
+  .dato-row-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    padding: 0.85rem 1rem !important;
+  }
+
+  .dato-badge-capsule {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    align-self: stretch !important;
+  }
+
+  .dato-label {
+    font-size: 0.95rem !important;
+  }
+}

@@ -1,0 +1,33 @@
+apps/mfe-evaluacion/src/
+├── design-tokens/                   # ✅ Tokens y estilos dedicados
+│   └── evaluacion.css
+│
+├── app/
+│   ├── core/                        # 🔒 Singletons y lógica transversal
+│   │   ├── services/                # Servicios API y comunicación con Shell
+│   │   │   ├── evaluacion.service.ts
+│   │   │   └── shell-bridge.service.ts
+│   │   └── guards/                  # (Opcional) Protección de pasos o estados
+│   │
+│   ├── shared/                      # 🧩 Reutilizable en cualquier parte del MFE
+│   │   ├── ui/                      # Controles visuales (botones, badges, stepper)
+│   │   │   └── stepper-tabs/
+│   │   └── pipes/ / directives/
+│   │
+│   ├── features/                    # 🚀 Módulos funcionales de negocio
+│   │   └── evaluacion/              # Feature principal de Evaluación
+│   │       ├── steps/               # Vistas específicas de cada paso
+│   │       │   ├── step-datos-generales/
+│   │       │   ├── step-expediente/     # (Futuro Paso 2)
+│   │       │   └── step-anexo/          # (Futuro Paso 3)
+│   │       ├── models/              # Interfaces y contratos de datos
+│   │       │   ├── datos-generales.model.ts
+│   │       │   ├── evaluacion.model.ts
+│   │       │   └── index.ts
+│   │       ├── evaluacion.component.ts  # Contenedor orquestador del wizard
+│   │       ├── evaluacion.component.html
+│   │       └── evaluacion.component.scss
+│   │
+│   ├── app.config.ts
+│   ├── app.routes.ts
+│   └── app.ts

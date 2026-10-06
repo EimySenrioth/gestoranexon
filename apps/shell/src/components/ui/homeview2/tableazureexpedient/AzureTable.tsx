@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { SolicitudFirmaItem } from "./types";
 import { MOCK_SOLICITUDES_FIRMA } from "./mockData";
 import { AzureTableHeader } from "./AzureTableHeader";
@@ -19,6 +20,7 @@ export function AzureTable({
   onEvaluar,
   className = "",
 }: AzureTableProps) {
+  const router = useRouter();
   const [solicitudes, setSolicitudes] = useState<SolicitudFirmaItem[]>(initialSolicitudes);
   const [searchTerm, setSearchTerm] = useState("");
   const [solicitudAEvaluar, setSolicitudAEvaluar] = useState<SolicitudFirmaItem | null>(null);
@@ -71,6 +73,9 @@ export function AzureTable({
 
     setIsModalOpen(false);
     setSolicitudAEvaluar(null);
+
+    // Navegar a la vista de evaluación con los tres pasos
+    router.push("/homeview2/evaluacion");
   };
 
   return (

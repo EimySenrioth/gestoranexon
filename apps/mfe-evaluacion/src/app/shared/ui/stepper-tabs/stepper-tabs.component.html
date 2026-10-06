@@ -1,0 +1,15 @@
+<nav class="stepper-capsule-container" aria-label="Pasos de Evaluación">
+  <button
+    *ngFor="let step of steps"
+    type="button"
+    class="stepper-tab-btn"
+    [class.active]="step.id === currentStep"
+    [class.disabled]="step.disabled"
+    [disabled]="step.disabled"
+    (click)="onSelectStep(step)"
+  >
+    <span class="stepper-tab-pill">
+      {{ step.label }}
+    </span>
+  </button>
+</nav>
