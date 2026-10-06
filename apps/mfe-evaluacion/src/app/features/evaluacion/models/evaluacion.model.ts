@@ -32,12 +32,12 @@ export const EVALUACION_STEPS: StepItem[] = [
     id: 'expediente',
     label: 'EXPEDIENTE',
     active: false,
-    disabled: true,
+    disabled: false,
   },
   {
     id: 'anexo',
     label: 'ANEXO',
     active: false,
-    disabled: true,
+    disabled: false,
   },
 ];

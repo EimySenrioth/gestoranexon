@@ -1,33 +1,53 @@
-apps/mfe-evaluacion/src/
-├── design-tokens/                   # ✅ Tokens y estilos dedicados
-│   └── evaluacion.css
+apps/
 │
-├── app/
-│   ├── core/                        # 🔒 Singletons y lógica transversal
-│   │   ├── services/                # Servicios API y comunicación con Shell
-│   │   │   ├── evaluacion.service.ts
-│   │   │   └── shell-bridge.service.ts
-│   │   └── guards/                  # (Opcional) Protección de pasos o estados
-│   │
-│   ├── shared/                      # 🧩 Reutilizable en cualquier parte del MFE
-│   │   ├── ui/                      # Controles visuales (botones, badges, stepper)
-│   │   │   └── stepper-tabs/
-│   │   └── pipes/ / directives/
-│   │
-│   ├── features/                    # 🚀 Módulos funcionales de negocio
-│   │   └── evaluacion/              # Feature principal de Evaluación
-│   │       ├── steps/               # Vistas específicas de cada paso
-│   │       │   ├── step-datos-generales/
-│   │       │   ├── step-expediente/     # (Futuro Paso 2)
-│   │       │   └── step-anexo/          # (Futuro Paso 3)
-│   │       ├── models/              # Interfaces y contratos de datos
-│   │       │   ├── datos-generales.model.ts
-│   │       │   ├── evaluacion.model.ts
-│   │       │   └── index.ts
-│   │       ├── evaluacion.component.ts  # Contenedor orquestador del wizard
-│   │       ├── evaluacion.component.html
-│   │       └── evaluacion.component.scss
-│   │
-│   ├── app.config.ts
-│   ├── app.routes.ts
-│   └── app.ts
+├── shell/src/design-tokens/
+│   └── evaluacion/
+│       └── evaluacion.css                         # (*) Se agregan tokens de barra vertical, toggles e íconos
+│
+└── mfe-evaluacion/src/
+    ├── design-tokens/
+    │   └── evaluacion.css                         # (existente) Import centralizado
+    │
+    └── app/
+        ├── core/
+        │   └── services/
+        │       ├── evaluacion.service.ts          # (*) Se agregan señales reactivas para expediente y ética
+        │       └── index.ts                       # (existente)
+        │
+        ├── shared/
+        │   └── ui/
+        │       └── stepper-tabs/                  # (existente) Barra horizontal de pestañas superiores
+        │           ├── stepper-tabs.component.ts
+        │           ├── stepper-tabs.component.html
+        │           └── index.ts
+        │
+        └── features/
+            └── evaluacion/
+                ├── models/
+                │   ├── datos-generales.model.ts   # (existente)
+                │   ├── expediente.model.ts        # (+) NUEVO: Modelo de documentos y estados (Recibido/Sin evaluar)
+                │   ├── anexo.model.ts             # (+) NUEVO: Modelo de criterios éticos, toggles y barra vertical
+                │   ├── evaluacion.model.ts        # (*) Se habilitan pestañas para navegación completa
+                │   └── index.ts                   # (*) Re-exporta los nuevos modelos
+                │
+                ├── steps/
+                │   ├── step-datos-generales/      # (existente) Paso 1
+                │   │   ├── step-datos-generales.component.ts
+                │   │   ├── step-datos-generales.component.html
+                │   │   └── index.ts
+                │   │
+                │   ├── step-expediente/           # (+) NUEVO: Paso 2 (5 tarjetas con badges de ojo y código)
+                │   │   ├── step-expediente.component.ts
+                │   │   ├── step-expediente.component.html
+                │   │   └── index.ts
+                │   │
+                │   ├── step-anexo/                # (+) NUEVO: Paso 3 (Barra vertical a la izquierda + formulario ético a la derecha)
+                │   │   ├── step-anexo.component.ts
+                │   │   ├── step-anexo.component.html
+                │   │   └── index.ts
+                │   │
+                │   └── index.ts                   # (*) Re-exporta step-expediente y step-anexo
+                │
+                ├── evaluacion.component.ts        # (*) Registra los nuevos pasos en imports
+                ├── evaluacion.component.html      # (*) Reemplaza placeholders por los componentes reales
+                └── index.ts                       # (existente)

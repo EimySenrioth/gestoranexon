@@ -1,0 +1,34 @@
+<div class="expediente-container">
+  <!-- Filas de documentos del expediente -->
+  <div *ngFor="let doc of documentos" class="dato-row-card">
+    <span class="dato-label">{{ doc.label }}</span>
+
+    <button
+      type="button"
+      class="expediente-badge-capsule"
+      [attr.aria-label]="'Ver documento de ' + doc.label"
+      (click)="onVerClick(doc)"
+    >
+      <!-- Icono de ojo estilizado SVG -->
+      <svg
+        class="expediente-eye-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+        <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+      </svg>
+      <span class="expediente-badge-text">{{ doc.estadoLabel }}</span>
+    </button>
+  </div>
+
+  <!-- Código de expediente inferior derecho -->
+  <div class="expediente-codigo-footer">
+    <span>Codigo: {{ codigoExpediente }}</span>
+  </div>
+</div>

@@ -1,0 +1,182 @@
+<div class="eval-anexo-layout">
+  <!-- 1. Barra de Progreso Vertical (Orientada a la izquierda junto al sidebar) -->
+  <aside class="eval-stepper-v-panel" aria-label="Progreso de Evaluación">
+    <ol class="eval-stepper-v-list">
+      <li
+        *ngFor="let etapa of etapas; let isLast = last"
+        class="eval-stepper-v-item"
+        [class.active]="etapa.estado === 'activo'"
+        [class.completed]="etapa.estado === 'completado'"
+      >
+        <!-- Línea conectora entre hitos -->
+        <div
+          *ngIf="!isLast"
+          class="eval-stepper-v-line"
+          [class.completed]="etapa.estado === 'completado'"
+        ></div>
+
+        <!-- Nodo con ícono vectorial temático -->
+        <div class="eval-stepper-v-node">
+          <!-- Ícono 1: Sobre con carta y consulta -->
+          <svg
+            *ngIf="etapa.tipoIcono === 'sobre'"
+            viewBox="0 0 32 32"
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="8" width="26" height="18" rx="3" fill="#FFEAA7" stroke="#1A1A1A" />
+            <path d="M3 10l13 9 13-9" stroke="#1A1A1A" />
+            <path d="M16 19v-4" stroke="#1A1A1A" stroke-dasharray="2 2" />
+            <circle cx="16" cy="12" r="1.5" fill="#1A1A1A" />
+          </svg>
+
+          <!-- Ícono 2 & 3: Portapapeles con checklist y check verde -->
+          <svg
+            *ngIf="etapa.tipoIcono === 'portapapeles'"
+            viewBox="0 0 32 32"
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="6" y="5" width="20" height="24" rx="3" fill="#F3F4F6" stroke="#1A1A1A" />
+            <rect x="11" y="2" width="10" height="5" rx="1.5" fill="#D97706" stroke="#1A1A1A" />
+            <line x1="10" y1="12" x2="15" y2="12" stroke="#10B981" />
+            <line x1="10" y1="17" x2="15" y2="17" stroke="#10B981" />
+            <line x1="10" y1="22" x2="15" y2="22" stroke="#10B981" />
+            <circle cx="21" cy="18" r="6" fill="#10B981" stroke="#047857" stroke-width="1.5" />
+            <path d="M18.5 18l1.5 1.5 3-3" stroke="#FFFFFF" stroke-width="1.5" />
+          </svg>
+
+          <!-- Ícono 4: Avión de papel (Firma / Envío) -->
+          <svg
+            *ngIf="etapa.tipoIcono === 'avion'"
+            viewBox="0 0 32 32"
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 14l26-10-10 26-4-10-12-6z" stroke="#1A1A1A" fill="#FFFFFF" />
+            <path d="M29 4L15 20" stroke="#1A1A1A" />
+            <path d="M3 28a4 4 0 0 0 4-4" stroke="#1A1A1A" stroke-dasharray="2 2" />
+          </svg>
+        </div>
+
+        <!-- Etiqueta de la etapa -->
+        <span class="eval-stepper-v-label">
+          {{ etapa.titulo }}
+        </span>
+      </li>
+    </ol>
+  </aside>
+
+  <!-- 2. Formulario Principal de Cumplimiento de Principios Éticos -->
+  <main class="eval-form-panel">
+    <h1 class="eval-form-main-title">Cumplimiento de Principios Éticos</h1>
+
+    <!-- Lista de 4 Criterios Éticos -->
+    <section
+      *ngFor="let criterio of criterios"
+      class="criterio-card-block"
+      [attr.aria-label]="criterio.titulo"
+    >
+      <!-- Cabecera de cada criterio: Título, (?) y Toggle [ Cúmple | No Cúmple ] -->
+      <div class="criterio-header-row">
+        <div class="criterio-title-wrapper">
+          <span class="criterio-title-text">{{ criterio.titulo }}</span>
+
+          <!-- Contenedor con tooltip que aparece al acercar el ratón (hover) -->
+          <div
+            class="criterio-help-wrapper"
+            (mouseenter)="criterio.mostrarAyuda = true"
+            (mouseleave)="criterio.mostrarAyuda = false"
+          >
+            <button
+              type="button"
+              class="criterio-help-circle"
+              [class.cumple]="criterio.cumplimiento === 'cumple'"
+              [class.no-cumple]="criterio.cumplimiento === 'no_cumple'"
+              (focus)="criterio.mostrarAyuda = true"
+              (blur)="criterio.mostrarAyuda = false"
+              [attr.aria-label]="'Ayuda informativa para ' + criterio.titulo"
+            >
+              ?
+            </button>
+
+            <!-- Tooltip pequeño flotante que aparece al acercar el ratón -->
+            <div
+              *ngIf="criterio.mostrarAyuda && criterio.descripcionAyuda"
+              class="criterio-tooltip-bubble"
+              role="tooltip"
+            >
+              {{ criterio.descripcionAyuda }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Segmented control cápsula [ Cúmple | No Cúmple ] -->
+        <div class="criterio-toggle-capsule" role="radiogroup">
+          <button
+            type="button"
+            class="criterio-toggle-option criterio-toggle-option--cumple"
+            [class.selected]="criterio.cumplimiento === 'cumple'"
+            (click)="toggleCumplimiento(criterio, 'cumple')"
+          >
+            Cúmple
+          </button>
+          <button
+            type="button"
+            class="criterio-toggle-option criterio-toggle-option--nocumple"
+            [class.selected]="criterio.cumplimiento === 'no_cumple'"
+            (click)="toggleCumplimiento(criterio, 'no_cumple')"
+          >
+            No Cúmple
+          </button>
+        </div>
+      </div>
+
+      <!-- Campo de Observaciones -->
+      <div class="criterio-obs-container">
+        <input
+          [id]="'obs-' + criterio.id"
+          type="text"
+          class="criterio-obs-input"
+          placeholder="Observaciones...."
+          [attr.aria-label]="'Observaciones para ' + criterio.titulo"
+          [ngModel]="criterio.observaciones"
+          (ngModelChange)="onObservacionesChange(criterio, $event)"
+        />
+      </div>
+    </section>
+
+    <!-- Botonera Inferior [ Cancelar ] [ Continuar ] -->
+    <footer class="eval-actions-footer">
+      <button
+        type="button"
+        class="eval-btn-pill"
+        (click)="onCancelar()"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="eval-btn-pill eval-btn-pill--primary"
+        (click)="onContinuar()"
+      >
+        Continuar
+      </button>
+    </footer>
+  </main>
+</div>

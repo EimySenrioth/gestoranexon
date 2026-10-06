@@ -7,6 +7,7 @@
   --ui-eval-bg-capsule: var(--ui-background-modal, #ffffff);
   --ui-eval-bg-pill-active: #ffffff;
   --ui-eval-bg-placeholder: #ffffff;
+  --ui-eval-bg-info-banner: #dedede;
 
   /* 2. Bordes y contornos */
   --ui-eval-border-card: rgba(0, 0, 0, 0.12);
@@ -14,12 +15,15 @@
   --ui-eval-border-capsule: #1a1a1a;
   --ui-eval-border-stepper: #0a0a0a;
   --ui-eval-border-stepper-active: #000000;
+  --ui-eval-border-input: #1a1a1a;
 
   /* 3. Radios de curvatura */
   --ui-eval-radius-card: 14px;
   --ui-eval-radius-stepper: 9999px;
   --ui-eval-radius-capsule: 9999px;
   --ui-eval-radius-placeholder: 12px;
+  --ui-eval-radius-input: 8px;
+  --ui-eval-radius-btn: 12px;
 
   /* 4. Tipografía y colores de texto */
   --ui-eval-font-family: var(--ui-font-family-lagu, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
@@ -38,6 +42,20 @@
   --ui-eval-shadow-card: 0 2px 6px rgba(0, 0, 0, 0.04);
   --ui-eval-shadow-card-hover: 0 4px 10px rgba(0, 0, 0, 0.07);
   --ui-eval-shadow-stepper: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+  /* 7. Barra vertical (Stepper lateral) */
+  --ui-eval-vstepper-line: #d1d5db;
+  --ui-eval-vstepper-line-active: #10b981;
+  --ui-eval-vstepper-node-size: 50px;
+
+  /* 8. Tokens de tipografía con contorno negro y relleno blanco (Outline Hoyoverse/Manga) */
+  --ui-eval-stroke-fill: #ffffff;
+  --ui-eval-stroke-color: #000000;
+  --ui-eval-stroke-width-sm: 1.8px;
+  --ui-eval-stroke-width-md: 2.2px;
+  --ui-eval-stroke-width-lg: 3px;
+  --ui-eval-stroke-font-style: italic;
+  --ui-eval-stroke-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
 }
 
 /* ==========================================================================
@@ -78,7 +96,7 @@
 }
 
 /* ==========================================================================
-   2. Stepper tipo cápsula centrado superior
+   2. Stepper horizontal superior (Cápsula de tabs)
    ========================================================================== */
 .stepper-capsule-container {
   display: inline-flex !important;
@@ -134,14 +152,16 @@
 }
 
 /* ==========================================================================
-   3. Tarjetas de Datos Generales (Ancho completo)
+   3. Tarjetas generales y de Expediente (Paso 1 y Paso 2)
    ========================================================================== */
-app-step-datos-generales {
+app-step-datos-generales,
+app-step-expediente {
   width: 100% !important;
   display: block !important;
 }
 
-.datos-generales-container {
+.datos-generales-container,
+.expediente-container {
   display: flex !important;
   flex-direction: column !important;
   gap: 0.85rem !important;
@@ -178,7 +198,7 @@ app-step-datos-generales {
   letter-spacing: -0.01em !important;
 }
 
-/* Cápsulas uniformes estandarizadas a la derecha */
+/* Cápsula estándar */
 .dato-badge-capsule {
   display: inline-flex !important;
   align-items: center !important;
@@ -209,23 +229,548 @@ app-step-datos-generales {
   text-overflow: ellipsis !important;
 }
 
-/* ==========================================================================
-   4. Placeholder para pasos en desarrollo
-   ========================================================================== */
-.step-placeholder {
-  background: var(--ui-eval-bg-placeholder) !important;
-  border-radius: var(--ui-eval-radius-placeholder) !important;
-  border: 1px solid var(--ui-eval-border-card) !important;
-  padding: 3rem 1.5rem !important;
-  text-align: center !important;
-  color: var(--ui-eval-text-muted) !important;
+/* Cápsula con ícono de ojo para Expediente */
+.expediente-badge-capsule {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  width: var(--ui-eval-capsule-width) !important;
+  min-width: var(--ui-eval-capsule-min-width) !important;
+  max-width: var(--ui-eval-capsule-max-width) !important;
+  height: var(--ui-eval-capsule-height) !important;
+  padding: 0 1.25rem !important;
+  background: var(--ui-eval-bg-capsule) !important;
+  border: 1.3px solid var(--ui-eval-border-capsule) !important;
+  border-radius: var(--ui-eval-radius-capsule) !important;
+  font-family: inherit !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  color: var(--ui-eval-text-value) !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.expediente-badge-capsule:hover {
+  background: #f9fafb !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+.expediente-eye-icon {
+  width: 18px !important;
+  height: 18px !important;
+  stroke-width: 2 !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+.expediente-badge-text {
+  display: inline-block !important;
+  width: auto !important;
+  font-family: inherit !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  color: var(--ui-eval-text-value) !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+}
+
+.expediente-codigo-footer {
+  width: 100% !important;
+  text-align: right !important;
+  font-size: 1rem !important;
   font-weight: 500 !important;
+  color: #111827 !important;
+  padding: 0.75rem 0.5rem 0 0 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* ==========================================================================
+   4. Paso 3: Layout de Evaluación Ética con Barra Vertical Lateral
+   ========================================================================== */
+app-step-anexo {
+  width: 100% !important;
+  display: block !important;
+}
+
+.eval-anexo-layout {
+  display: flex !important;
+  gap: 3rem !important;
+  width: 100% !important;
+  align-items: flex-start !important;
+  box-sizing: border-box !important;
+}
+
+/* 4.1 Barra de Progreso Vertical (Lateral Izquierda) */
+.eval-stepper-v-panel {
+  width: 260px !important;
+  min-width: 240px !important;
+  max-width: 280px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 1rem 0 !important;
+  flex-shrink: 0 !important;
+  user-select: none !important;
+}
+
+.eval-stepper-v-list {
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+}
+
+.eval-stepper-v-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1.25rem !important;
+  position: relative !important;
+  padding-bottom: 2.25rem !important;
+}
+
+.eval-stepper-v-item:last-child {
+  padding-bottom: 0 !important;
+}
+
+/* Línea conectora vertical */
+.eval-stepper-v-line {
+  position: absolute !important;
+  left: 24px !important;
+  top: 48px !important;
+  bottom: 0 !important;
+  width: 4px !important;
+  background-color: var(--ui-eval-vstepper-line) !important;
+  transform: translateX(-50%) !important;
+  border-radius: 2px !important;
+  z-index: 0 !important;
+}
+
+.eval-stepper-v-line.completed {
+  background-color: #10b981 !important;
+}
+
+/* Nodo / Icono circular */
+.eval-stepper-v-node {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  border: 1.5px solid rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.eval-stepper-v-item.active .eval-stepper-v-node {
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.eval-stepper-v-item.completed .eval-stepper-v-node {
+  border-color: #10b981 !important;
+}
+
+/* Utilidades reutilizables de texto contorno negro y relleno blanco */
+.eval-text-outlined {
+  color: var(--ui-eval-stroke-fill, #ffffff) !important;
+  -webkit-text-fill-color: var(--ui-eval-stroke-fill, #ffffff) !important;
+  -webkit-text-stroke: var(--ui-eval-stroke-width-md, 2.2px) var(--ui-eval-stroke-color, #000000) !important;
+  paint-order: stroke fill !important;
+  font-style: var(--ui-eval-stroke-font-style, italic) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+  text-shadow:
+    -1px -1px 0 var(--ui-eval-stroke-color, #000000),
+     1px -1px 0 var(--ui-eval-stroke-color, #000000),
+    -1px  1px 0 var(--ui-eval-stroke-color, #000000),
+     1px  1px 0 var(--ui-eval-stroke-color, #000000),
+    -1.8px 0px 0 var(--ui-eval-stroke-color, #000000),
+     1.8px 0px 0 var(--ui-eval-stroke-color, #000000),
+     0px -1.8px 0 var(--ui-eval-stroke-color, #000000),
+     0px  1.8px 0 var(--ui-eval-stroke-color, #000000),
+     var(--ui-eval-stroke-shadow, 0 2px 4px rgba(0, 0, 0, 0.45)) !important;
+}
+
+.eval-text-outlined--title {
+  color: var(--ui-eval-stroke-fill, #ffffff) !important;
+  -webkit-text-fill-color: var(--ui-eval-stroke-fill, #ffffff) !important;
+  -webkit-text-stroke: var(--ui-eval-stroke-width-lg, 3px) var(--ui-eval-stroke-color, #000000) !important;
+  paint-order: stroke fill !important;
+  font-style: var(--ui-eval-stroke-font-style, italic) !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.02em !important;
+  text-shadow:
+    -1.5px -1.5px 0 var(--ui-eval-stroke-color, #000000),
+     1.5px -1.5px 0 var(--ui-eval-stroke-color, #000000),
+    -1.5px  1.5px 0 var(--ui-eval-stroke-color, #000000),
+     1.5px  1.5px 0 var(--ui-eval-stroke-color, #000000),
+    -2.5px  0px   0 var(--ui-eval-stroke-color, #000000),
+     2.5px  0px   0 var(--ui-eval-stroke-color, #000000),
+     0px   -2.5px 0 var(--ui-eval-stroke-color, #000000),
+     0px    2.5px 0 var(--ui-eval-stroke-color, #000000),
+     var(--ui-eval-stroke-shadow, 0 3px 6px rgba(0, 0, 0, 0.45)) !important;
+}
+
+.eval-stepper-v-label {
+  font-family: inherit !important;
+  font-size: 0.85rem !important;
+  font-weight: 800 !important;
+  font-style: var(--ui-eval-stroke-font-style, italic) !important;
+  color: var(--ui-eval-stroke-fill, #ffffff) !important;
+  -webkit-text-fill-color: var(--ui-eval-stroke-fill, #ffffff) !important;
+  -webkit-text-stroke: var(--ui-eval-stroke-width-sm, 1.8px) var(--ui-eval-stroke-color, #000000) !important;
+  paint-order: stroke fill !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.02em !important;
+  text-shadow:
+    -1px -1px 0 var(--ui-eval-stroke-color, #000000),
+     1px -1px 0 var(--ui-eval-stroke-color, #000000),
+    -1px  1px 0 var(--ui-eval-stroke-color, #000000),
+     1px  1px 0 var(--ui-eval-stroke-color, #000000),
+     0 2px 4px var(--ui-eval-stroke-shadow, rgba(0, 0, 0, 0.45)) !important;
+}
+
+.eval-stepper-v-item.active .eval-stepper-v-label {
+  -webkit-text-stroke: var(--ui-eval-stroke-width-md, 2.2px) var(--ui-eval-stroke-color, #000000) !important;
+}
+
+/* 4.2 Columna Derecha: Formulario de Principios Éticos */
+.eval-form-panel {
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.75rem !important;
+}
+
+.eval-form-main-title {
+  font-family: inherit !important;
+  font-size: 1.95rem !important;
+  font-weight: 900 !important;
+  font-style: var(--ui-eval-stroke-font-style, italic) !important;
+  color: var(--ui-eval-stroke-fill, #ffffff) !important;
+  -webkit-text-fill-color: var(--ui-eval-stroke-fill, #ffffff) !important;
+  -webkit-text-stroke: var(--ui-eval-stroke-width-lg, 3px) var(--ui-eval-stroke-color, #000000) !important;
+  paint-order: stroke fill !important;
+  margin: 0 0 0.5rem 0 !important;
+  letter-spacing: 0.01em !important;
+  text-shadow:
+    -1.5px -1.5px 0 var(--ui-eval-stroke-color, #000000),
+     1.5px -1.5px 0 var(--ui-eval-stroke-color, #000000),
+    -1.5px  1.5px 0 var(--ui-eval-stroke-color, #000000),
+     1.5px  1.5px 0 var(--ui-eval-stroke-color, #000000),
+    -2.5px  0px   0 var(--ui-eval-stroke-color, #000000),
+     2.5px  0px   0 var(--ui-eval-stroke-color, #000000),
+     0px   -2.5px 0 var(--ui-eval-stroke-color, #000000),
+     0px    2.5px 0 var(--ui-eval-stroke-color, #000000),
+     var(--ui-eval-stroke-shadow, 0 3px 6px rgba(0, 0, 0, 0.45)) !important;
+}
+
+/* Bloque de criterio ético individual */
+.criterio-card-block {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  width: 100% !important;
+}
+
+.criterio-header-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1rem !important;
+  flex-wrap: wrap !important;
+}
+
+.criterio-title-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+}
+
+.criterio-title-text {
+  font-family: inherit !important;
+  font-size: 1.3rem !important;
+  font-weight: 800 !important;
+  font-style: var(--ui-eval-stroke-font-style, italic) !important;
+  color: var(--ui-eval-stroke-fill, #ffffff) !important;
+  -webkit-text-fill-color: var(--ui-eval-stroke-fill, #ffffff) !important;
+  -webkit-text-stroke: var(--ui-eval-stroke-width-md, 2.2px) var(--ui-eval-stroke-color, #000000) !important;
+  paint-order: stroke fill !important;
+  letter-spacing: 0.015em !important;
+  text-shadow:
+    -1px -1px 0 var(--ui-eval-stroke-color, #000000),
+     1px -1px 0 var(--ui-eval-stroke-color, #000000),
+    -1px  1px 0 var(--ui-eval-stroke-color, #000000),
+     1px  1px 0 var(--ui-eval-stroke-color, #000000),
+    -1.8px 0px 0 var(--ui-eval-stroke-color, #000000),
+     1.8px 0px 0 var(--ui-eval-stroke-color, #000000),
+     0px -1.8px 0 var(--ui-eval-stroke-color, #000000),
+     0px  1.8px 0 var(--ui-eval-stroke-color, #000000),
+     var(--ui-eval-stroke-shadow, 0 2px 4px rgba(0, 0, 0, 0.45)) !important;
+}
+
+/* Botón circular de ayuda (?) — Estilo blanco con borde negro definido */
+.criterio-help-circle {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 25px !important;
+  height: 25px !important;
+  border-radius: 50% !important;
+  border: 2.2px solid #000000 !important;
+  background: #ffffff !important;
+  font-family: inherit !important;
+  font-size: 0.85rem !important;
+  font-weight: 800 !important;
+  color: #000000 !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  user-select: none !important;
+}
+
+.criterio-help-circle:hover {
+  transform: scale(1.08) !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Estado VERDE si el usuario marca Cumple */
+.criterio-help-circle.cumple {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Estado ROJO si el usuario marca No Cumple */
+.criterio-help-circle.no-cumple {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Contenedor relativo para posicionar el tooltip */
+.criterio-help-wrapper {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* Tooltip emergente pequeño al acercar el ratón */
+.criterio-tooltip-bubble {
+  position: absolute !important;
+  bottom: calc(100% + 10px) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 290px !important;
+  max-width: 320px !important;
+  background: #18181b !important;
+  color: #ffffff !important;
+  border: 1.2px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  font-family: inherit !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45) !important;
+  z-index: 999 !important;
+  pointer-events: none !important;
+  white-space: normal !important;
+  text-align: left !important;
+  letter-spacing: normal !important;
+  animation: tooltipFadeIn 0.16s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Flechita inferior del tooltip */
+.criterio-tooltip-bubble::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 100% !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  border-width: 6px !important;
+  border-style: solid !important;
+  border-color: #18181b transparent transparent transparent !important;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Control Segmented Cápsula [ Cúmple | No Cúmple ] */
+.criterio-toggle-capsule {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: #ffffff !important;
+  border: 1.8px solid #000000 !important;
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+  user-select: none !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+}
+
+.criterio-toggle-option {
+  appearance: none !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 6px 18px !important;
+  font-family: inherit !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  color: #000000 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+}
+
+.criterio-toggle-option:first-child {
+  border-right: 1.5px solid #000000 !important;
+}
+
+/* Selección Cúmple -> Fondo Verde */
+.criterio-toggle-option--cumple.selected,
+.criterio-toggle-option.selected:first-child {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* Selección No Cúmple -> Fondo Rojo */
+.criterio-toggle-option--nocumple.selected,
+.criterio-toggle-option.selected:last-child {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* Input de observaciones */
+.criterio-obs-container {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  gap: 2px !important;
+}
+
+.criterio-obs-label {
+  font-size: 0.82rem !important;
+  color: #374151 !important;
+  font-weight: 500 !important;
+}
+
+.criterio-obs-input {
+  width: 100% !important;
+  height: 38px !important;
+  border: 1.5px solid #1a1a1a !important;
+  border-radius: var(--ui-eval-radius-input) !important;
+  padding: 0 12px !important;
+  font-family: inherit !important;
+  font-size: 0.9rem !important;
+  color: #111827 !important;
+  background: #ffffff !important;
+  outline: none !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+  box-sizing: border-box !important;
+}
+
+.criterio-obs-input:focus {
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15) !important;
+}
+
+.criterio-obs-input::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Banner de ayuda informativo gris */
+.criterio-info-banner {
+  background: var(--ui-eval-bg-info-banner) !important;
+  border-radius: 4px !important;
+  padding: 10px 16px !important;
+  font-size: 0.875rem !important;
+  line-height: 1.45 !important;
+  color: #1f2937 !important;
+  margin-top: 4px !important;
+  animation: fadeIn 0.15s ease !important;
+}
+
+/* Botones de acción inferiores [ Cancelar ] [ Continuar ] */
+.eval-actions-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 1.5rem !important;
+  margin-top: 2rem !important;
+  padding-bottom: 2rem !important;
+  width: 100% !important;
+}
+
+.eval-btn-pill {
+  appearance: none !important;
+  min-width: 140px !important;
+  padding: 8px 30px !important;
+  border-radius: 12px !important;
+  border: 1.6px solid #000000 !important;
+  background: #ffffff !important;
+  font-family: inherit !important;
+  font-size: 1.05rem !important;
+  font-weight: 500 !important;
+  color: #000000 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+  text-align: center !important;
+}
+
+.eval-btn-pill:hover {
+  background: #f3f4f6 !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.eval-btn-pill:active {
+  transform: translateY(1px) !important;
+}
+
+.eval-btn-pill--primary {
+  background: #ffffff !important;
+  font-weight: 600 !important;
 }
 
 /* ==========================================================================
    5. Adaptación Móvil / Responsive
    ========================================================================== */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .eval-anexo-layout {
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+  }
+
+  .eval-stepper-v-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
   .stepper-capsule-container {
     gap: 0.5rem !important;
     padding: 3px 6px !important;
@@ -245,7 +790,8 @@ app-step-datos-generales {
     padding: 0.85rem 1rem !important;
   }
 
-  .dato-badge-capsule {
+  .dato-badge-capsule,
+  .expediente-badge-capsule {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
@@ -254,5 +800,19 @@ app-step-datos-generales {
 
   .dato-label {
     font-size: 0.95rem !important;
+  }
+
+  .criterio-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  .eval-actions-footer {
+    justify-content: stretch !important;
+  }
+
+  .eval-btn-pill {
+    flex: 1 !important;
   }
 }

@@ -11,19 +11,30 @@
   <!-- 2. Contenido del paso activo -->
   <main class="stepsevaluation-body">
     <ng-container [ngSwitch]="currentStep()">
+      <!-- Paso 1: DATOS GENERALES DEL PROYECTO -->
       <app-step-datos-generales
         *ngSwitchCase="'datos-generales'"
         [datos]="datosGenerales()"
         (datosChange)="onDatosChange($event)"
       />
 
-      <div *ngSwitchCase="'expediente'" class="step-placeholder">
-        <p>Paso 2: Expediente en desarrollo</p>
-      </div>
+      <!-- Paso 2: EXPEDIENTE -->
+      <app-step-expediente
+        *ngSwitchCase="'expediente'"
+        [documentos]="documentosExpediente()"
+        [codigoExpediente]="codigoExpediente()"
+        (verDocumento)="onVerDocumento($event)"
+      />
 
-      <div *ngSwitchCase="'anexo'" class="step-placeholder">
-        <p>Paso 3: Anexo en desarrollo</p>
-      </div>
+      <!-- Paso 3: ANEXO / CUMPLIMIENTO DE PRINCIPIOS ÉTICOS (CON BARRA VERTICAL) -->
+      <app-step-anexo
+        *ngSwitchCase="'anexo'"
+        [criterios]="criteriosEticos()"
+        [etapas]="etapasProgresoVertical()"
+        (criteriosChange)="onCriteriosChange($event)"
+        (cancelar)="onCancelar()"
+        (continuar)="onContinuar()"
+      />
     </ng-container>
   </main>
 </div>
