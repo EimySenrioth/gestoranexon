@@ -5,6 +5,7 @@ import { SolicitudFirmaItem } from "./types";
 import { MOCK_SOLICITUDES_FIRMA } from "./mockData";
 import { AzureTableHeader } from "./AzureTableHeader";
 import { AzureTableRow } from "./AzureTableRow";
+import { ModalEvaluacion } from "../modalevaluacion";
 import "@/design-tokens/azure/azure-table.css";
 
 interface AzureTableProps {
@@ -20,6 +21,8 @@ export function AzureTable({
 }: AzureTableProps) {
   const [solicitudes, setSolicitudes] = useState<SolicitudFirmaItem[]>(initialSolicitudes);
   const [searchTerm, setSearchTerm] = useState("");
+  const [solicitudAEvaluar, setSolicitudAEvaluar] = useState<SolicitudFirmaItem | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const filteredSolicitudes = useMemo(() => {
     if (!searchTerm.trim()) return solicitudes;
@@ -33,14 +36,29 @@ export function AzureTable({
     );
   }, [solicitudes, searchTerm]);
 
+  // Al hacer clic en el botón evaluar de la fila, se abre el modal con la solicitud seleccionada
   const handleEvaluarClick = (item: SolicitudFirmaItem) => {
+    setSolicitudAEvaluar(item);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSolicitudAEvaluar(null);
+  };
+
+  // Al presionar "Continuar" en el modal de advertencia
+  const handleConfirmarEvaluacion = (item?: SolicitudFirmaItem) => {
+    const target = item || solicitudAEvaluar;
+    if (!target) return;
+
     if (onEvaluar) {
-      onEvaluar(item);
+      onEvaluar(target);
     } else {
       // Mock firma local
       setSolicitudes((prev) =>
         prev.map((sol) =>
-          sol === item
+          sol === target
             ? {
                 ...sol,
                 etapaActual: "Evaluado",
@@ -50,6 +68,9 @@ export function AzureTable({
         )
       );
     }
+
+    setIsModalOpen(false);
+    setSolicitudAEvaluar(null);
   };
 
   return (
@@ -82,6 +103,14 @@ export function AzureTable({
           </div>
         )}
       </div>
+
+      {/* 4. Modal de confirmación y advertencia normativa antes de iniciar evaluación */}
+      <ModalEvaluacion
+        isOpen={isModalOpen}
+        item={solicitudAEvaluar}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmarEvaluacion}
+      />
     </div>
   );
 }

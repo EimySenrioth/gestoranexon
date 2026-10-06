@@ -7,3 +7,4 @@ export { TextField } from "./login/TextField";
 export { CreateRequestButton } from "./home/CreateRequestButton";
 export * from "./missolicitudes";
 export * from "./homeview2";
+export * from "./modals";

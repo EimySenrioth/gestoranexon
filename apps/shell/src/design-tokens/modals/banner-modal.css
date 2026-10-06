@@ -1,0 +1,275 @@
+/* banner-modal.css — Estilos del modal tipo Hoyoverse / Zenless Zone Zero.
+   Estructura de 3 franjas: Cabecera oscura, cuerpo claro con NOTA y footer oscuro con botones píldora. */
+
+:root {
+  --modal-banner-z: var(--ui-z-modal, 1000);
+  --modal-banner-overlay-bg: rgba(0, 0, 0, 0.72);
+  --modal-banner-frame-border: rgba(255, 255, 255, 0.12);
+  --modal-banner-header-bg: #14121a;
+  --modal-banner-header-accent: #261b33;
+  --modal-banner-body-bg: #EDEDED;
+  --modal-banner-body-text: #171717;
+  --modal-banner-footer-bg: #14121a;
+  --modal-banner-btn-bg: #DCDDE1;
+  --modal-banner-btn-hover: #ECEEF2;
+  --modal-banner-btn-text: #18191D;
+  --modal-banner-badge-mint: #6EE7B7;
+  --modal-banner-badge-mint-border: #059669;
+}
+
+/* 1. Backdrop Overlay */
+.banner-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--modal-banner-z);
+  background-color: var(--modal-banner-overlay-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  animation: bannerModalFadeIn 0.22s ease-out forwards;
+}
+
+/* 2. Contenedor de la Ventana */
+.banner-modal-window {
+  position: relative;
+  width: 100%;
+  max-width: 820px;
+  background: var(--modal-banner-header-bg);
+  border: 1px solid var(--modal-banner-frame-border);
+  border-radius: 18px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.96) translateY(8px);
+  animation: bannerModalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 3. Cabecera Oscura con marca gráfica de agua */
+.banner-modal-header {
+  position: relative;
+  min-height: 72px;
+  background: radial-gradient(ellipse at 50% 120%, var(--modal-banner-header-accent) 0%, var(--modal-banner-header-bg) 75%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+/* Textura / Marca de agua tipográfica inspirada en Hoyoverse */
+.banner-modal-watermark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.06;
+  font-family: inherit;
+  font-size: 4rem;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.35em;
+  white-space: nowrap;
+  color: #FFFFFF;
+  text-transform: uppercase;
+}
+
+.banner-modal-title-wrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.banner-modal-title {
+  color: #FFFFFF;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+  line-height: 1.25;
+}
+
+/* Botón 'X' circular superior derecho */
+.banner-modal-close-btn {
+  position: relative;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #F3F4F6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.banner-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+  color: #FFFFFF;
+}
+
+.banner-modal-close-btn:active {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+/* 4. Franja Central Clara (Body) */
+.banner-modal-body {
+  position: relative;
+  background: var(--modal-banner-body-bg);
+  color: var(--modal-banner-body-text);
+  padding: 2.25rem 2.25rem;
+  display: flex;
+  align-items: center;
+  min-height: 120px;
+  border-top: 2px solid rgba(0, 0, 0, 0.15);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.15);
+}
+
+/* Contenido estilo Imagen 2: NOTA a la izquierda y texto a la derecha */
+.banner-modal-note-layout {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.banner-modal-note-badge {
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #111827;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  padding-right: 0.5rem;
+}
+
+.banner-modal-note-text {
+  font-size: 1.075rem;
+  line-height: 1.5;
+  color: #1F2937;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* 5. Pie Inferior Oscuro (Footer) */
+.banner-modal-footer {
+  position: relative;
+  background: var(--modal-banner-footer-bg);
+  padding: 1.25rem 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+/* Botones en forma de Píldora */
+.banner-modal-pill-btn {
+  appearance: none;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+  background-color: var(--modal-banner-btn-bg);
+  color: var(--modal-banner-btn-text);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.65rem 2.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.15s ease;
+  min-width: 150px;
+  text-align: center;
+}
+
+.banner-modal-pill-btn:hover {
+  background-color: var(--modal-banner-btn-hover);
+}
+
+.banner-modal-pill-btn:active {
+  background-color: #C2C3C9;
+}
+
+.banner-modal-pill-btn--primary {
+  background-color: #E2E3E8;
+}
+
+.banner-modal-pill-btn--secondary {
+  background-color: #CACBD1;
+  color: #1F242E;
+}
+
+.banner-modal-pill-btn--secondary:hover {
+  background-color: #D8D9E0;
+}
+
+/* Animaciones */
+@keyframes bannerModalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bannerModalPopIn {
+  from {
+    transform: scale(0.95) translateY(12px);
+  }
+  to {
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Responsividad */
+@media (max-width: 640px) {
+  .banner-modal-window {
+    border-radius: 14px;
+  }
+
+  .banner-modal-header {
+    padding: 0.75rem 1rem;
+    min-height: 60px;
+  }
+
+  .banner-modal-title {
+    font-size: 1.1rem;
+  }
+
+  .banner-modal-body {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .banner-modal-note-layout {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .banner-modal-note-text {
+    font-size: 0.975rem;
+  }
+
+  .banner-modal-footer {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .banner-modal-pill-btn {
+    width: 100%;
+    min-width: 0;
+    padding: 0.65rem 1.5rem;
+  }
+}

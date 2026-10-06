@@ -11,6 +11,7 @@
 @import "./azure/azure-table.css";
 @import "./motion.css";
 @import "./backgrounds.css";
+@import "./modals/banner-modal.css";
 @import "../designofuiparts/layout-shell.css";
 @import "../designofuiparts/header.css";
 @import "../designofuiparts/footer.css";
