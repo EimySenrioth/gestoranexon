@@ -1,0 +1,54 @@
+/* DevShortcut.css — Selector de Modo Desarrollador sin emojis */
+
+.ui-dev-selector-wrapper {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--ui-background-card-hover, #2d2d38);
+  border: 1px dashed var(--ui-accent-cta, #f5c518);
+  border-radius: var(--ui-radius-pill, 9999px);
+  padding: 6px 14px;
+  font-family: var(--ui-font-family-lagu, sans-serif);
+  font-size: 0.82rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all var(--ui-motion-duration-fast, 150ms) var(--ui-motion-easing-standard, ease);
+}
+
+.ui-dev-selector-wrapper:hover {
+  background: var(--ui-background-panel, #22222b);
+}
+
+.ui-dev-selector-label {
+  color: var(--ui-accent-title, #f5c518);
+  font-weight: var(--ui-font-weight-semibold, 600);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.ui-dev-selector-select {
+  background: #1b1b22;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.ui-dev-selector-select:focus {
+  border-color: var(--ui-accent-cta, #f5c518);
+}
+
+.ui-dev-selector-select option {
+  background: #1b1b22;
+  color: #ffffff;
+  padding: 6px 10px;
+}

@@ -1,0 +1,40 @@
+/* azure-theme.css — Tokens semánticos basados en Microsoft Azure Portal / Fluent UI */
+
+:root {
+  /* 1. Fondos y superficies de Azure */
+  --ui-azure-bg-canvas: #f8f9fa;
+  --ui-azure-bg-card: #ffffff;
+  --ui-azure-bg-row-hover: #f3f2f1;
+  --ui-azure-bg-header: #faf9f8;
+  --ui-azure-bg-input: #ffffff;
+
+  /* 2. Bordes y separadores Fluent */
+  --ui-azure-border-light: #edebe9;
+  --ui-azure-border-neutral: #e1dfdd;
+  --ui-azure-border-focus: #0078d4;
+  --ui-azure-radius-card: 16px;
+  --ui-azure-radius-input: 20px;
+  --ui-azure-radius-pill: 9999px;
+
+  /* 3. Tipografía y textos corporativos */
+  --ui-azure-text-primary: #242424;
+  --ui-azure-text-secondary: #616161;
+  --ui-azure-text-muted: #8a8886;
+  --ui-azure-text-link: #0078d4;
+  --ui-azure-text-link-hover: #106ebe;
+
+  /* 4. Estados y badges */
+  --ui-azure-status-success-bg: #dff6dd;
+  --ui-azure-status-success-text: #107c10;
+  --ui-azure-status-process-bg: #eff6fc;
+  --ui-azure-status-process-text: #0078d4;
+  --ui-azure-status-warning-bg: #fff4ce;
+  --ui-azure-status-warning-text: #795b00;
+
+  /* 5. Botones y controles de acción */
+  --ui-azure-btn-primary-bg: #0078d4;
+  --ui-azure-btn-primary-hover: #106ebe;
+  --ui-azure-btn-primary-text: #ffffff;
+  --ui-azure-btn-secondary-bg: #f3f2f1;
+  --ui-azure-btn-secondary-border: #8a8886;
+}

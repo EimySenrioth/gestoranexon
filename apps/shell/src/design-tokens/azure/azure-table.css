@@ -1,0 +1,206 @@
+/* apps/shell/src/design-tokens/azure/azure-table.css — Estilos para tabla de solicitudes en formato Microsoft Azure Portal */
+
+.azure-table-card {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  background-color: var(--ui-azure-bg-card, #ffffff);
+  border-radius: var(--ui-azure-radius-card, 16px);
+  border: 1px solid var(--ui-azure-border-light, #edebe9);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+  font-family: var(--ui-font-family-lagu, sans-serif);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 1. Header con sobre y buscador */
+.azure-header-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ui-azure-border-light, #edebe9);
+}
+
+@media (min-width: 768px) {
+  .azure-header-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.azure-header-title-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.azure-header-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.azure-header-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ui-azure-text-primary, #242424);
+  letter-spacing: -0.01em;
+}
+
+/* Buscador de expedientes */
+.azure-search-box {
+  display: flex;
+  align-items: center;
+  background: var(--ui-azure-bg-header, #faf9f8);
+  border: 1px solid var(--ui-azure-border-neutral, #e1dfdd);
+  border-radius: var(--ui-azure-radius-input, 20px);
+  padding: 6px 14px;
+  width: 100%;
+  max-width: 320px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.azure-search-box:focus-within {
+  border-color: var(--ui-azure-border-focus, #0078d4);
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+  background: #ffffff;
+}
+
+.azure-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--ui-azure-text-primary, #242424);
+  width: 100%;
+}
+
+.azure-search-input::placeholder {
+  color: var(--ui-azure-text-muted, #8a8886);
+}
+
+.azure-search-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--ui-azure-text-secondary, #616161);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  transition: color 0.15s ease;
+}
+
+.azure-search-btn:hover {
+  color: var(--ui-azure-text-primary, #242424);
+}
+
+/* 2. Barra de columnas Azure */
+.azure-table-head {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr 1.5fr;
+  padding: 10px 16px;
+  background-color: var(--ui-azure-bg-header, #faf9f8);
+  border-top: 1px solid var(--ui-azure-border-light, #edebe9);
+  border-bottom: 1px solid var(--ui-azure-border-light, #edebe9);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ui-azure-text-secondary, #616161);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* 3. Filas de tabla */
+.azure-table-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.azure-table-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr 1.5fr;
+  align-items: center;
+  padding: 14px 16px;
+  background-color: var(--ui-azure-bg-card, #ffffff);
+  border: 1px solid var(--ui-azure-border-light, #edebe9);
+  border-radius: 12px;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.azure-table-row:hover {
+  background-color: var(--ui-azure-bg-row-hover, #f3f2f1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.azure-col-id {
+  font-weight: 600;
+  color: var(--ui-azure-text-primary, #242424);
+  font-size: 0.92rem;
+}
+
+.azure-col-date {
+  color: var(--ui-azure-text-secondary, #616161);
+  font-size: 0.88rem;
+}
+
+.azure-col-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.azure-status-icon-evaluado {
+  color: var(--ui-azure-status-success-text, #107c10);
+}
+
+.azure-status-icon-proceso {
+  color: var(--ui-azure-status-process-text, #0078d4);
+}
+
+/* 4. Columna Evaluar */
+.azure-action-evaluar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--ui-azure-text-link, #0078d4);
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.azure-action-evaluar-btn:hover {
+  color: var(--ui-azure-text-link-hover, #106ebe);
+  background-color: rgba(0, 120, 212, 0.08);
+}
+
+.azure-text-firmado {
+  font-size: 0.88rem;
+  color: var(--ui-azure-text-secondary, #616161);
+  font-weight: 500;
+}
+
+/* Vista móvil responsive */
+@media (max-width: 767px) {
+  .azure-table-head {
+    display: none;
+  }
+
+  .azure-table-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 16px;
+  }
+}
