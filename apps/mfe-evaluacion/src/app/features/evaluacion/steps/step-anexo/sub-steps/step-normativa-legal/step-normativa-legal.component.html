@@ -1,0 +1,164 @@
+<main class="eval-form-panel">
+  <!-- Título con contorno negro y relleno blanco -->
+  <h1 class="eval-form-main-title">Cumplimiento de Normativa Legal</h1>
+
+  <!-- Lista de 4 Normativas Legales (Idéntico formato visual que Principios Éticos) -->
+  <section
+    *ngFor="let criterio of criterios"
+    class="criterio-card-block"
+    [attr.aria-label]="criterio.titulo"
+  >
+    <!-- Cabecera de cada criterio: Título, (?) y Toggle [ Cúmple | No Cúmple ] -->
+    <div class="criterio-header-row">
+      <div class="criterio-title-wrapper">
+        <span class="criterio-title-text">{{ criterio.titulo }}</span>
+      </div>
+
+      <div class="criterio-right-group">
+        <!-- Contenedor con tooltip que aparece al acercar el ratón (hover) -->
+        <div
+          class="criterio-help-wrapper"
+          (mouseenter)="criterio.mostrarAyuda = true"
+          (mouseleave)="criterio.mostrarAyuda = false"
+        >
+          <button
+            type="button"
+            class="criterio-help-circle"
+            [class.cumple]="criterio.cumplimiento === 'cumple'"
+            [class.no-cumple]="criterio.cumplimiento === 'no_cumple'"
+            (focus)="criterio.mostrarAyuda = true"
+            (blur)="criterio.mostrarAyuda = false"
+            [attr.aria-label]="'Ayuda informativa para ' + criterio.titulo"
+          >
+            ?
+          </button>
+
+          <!-- Tooltip pequeño flotante que aparece al acercar el ratón -->
+          <div
+            *ngIf="criterio.mostrarAyuda && criterio.descripcionAyuda"
+            class="criterio-tooltip-bubble"
+            role="tooltip"
+          >
+            {{ criterio.descripcionAyuda }}
+          </div>
+        </div>
+
+        <!-- Segmented control cápsula [ Cúmple | No Cúmple ] -->
+        <div class="criterio-toggle-capsule" role="radiogroup">
+          <button
+            type="button"
+            class="criterio-toggle-option criterio-toggle-option--cumple"
+            [class.selected]="criterio.cumplimiento === 'cumple'"
+            (click)="toggleCumplimiento(criterio, 'cumple')"
+          >
+            Cúmple
+          </button>
+          <button
+            type="button"
+            class="criterio-toggle-option criterio-toggle-option--nocumple"
+            [class.selected]="criterio.cumplimiento === 'no_cumple'"
+            (click)="toggleCumplimiento(criterio, 'no_cumple')"
+          >
+            No Cúmple
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Campo de Observaciones -->
+    <div class="criterio-obs-container">
+      <input
+        [id]="'obs-' + criterio.id"
+        type="text"
+        class="criterio-obs-input"
+        placeholder="Observaciones...."
+        [attr.aria-label]="'Observaciones para ' + criterio.titulo"
+        [value]="criterio.observaciones"
+        (input)="onObservacionChange(criterio, $any($event.target).value)"
+      />
+    </div>
+  </section>
+
+  <!-- Sección: RECOMENDACIONES DEL COMITÉ (Idéntico diseño de cápsula y stroke) -->
+  <section class="criterio-card-block" style="margin-top: 0.75rem;">
+    <div class="eval-recomendaciones-box">
+      <div class="eval-recomendaciones-left">
+        <span class="criterio-title-text" style="font-size: 1.15rem;">
+          RECOMENDACIONES DEL COMITÉ
+        </span>
+      </div>
+
+      <div class="eval-recomendaciones-right">
+        <!-- Ícono (?) con tooltip explicativo con las 3 definiciones solicitadas -->
+        <div
+          class="criterio-help-wrapper"
+          (mouseenter)="mostrarAyudaComite = true"
+          (mouseleave)="mostrarAyudaComite = false"
+        >
+          <button
+            type="button"
+            class="criterio-help-circle"
+            aria-label="Ayuda dictámenes de recomendaciones del comité"
+          >
+            ?
+          </button>
+
+          <div
+            *ngIf="mostrarAyudaComite"
+            class="criterio-tooltip-bubble eval-help-tooltip--multiline"
+            role="tooltip"
+          >
+            <div><strong>Aprobado:</strong> No se identifican observaciones éticas.</div>
+            <div><strong>Aprobado con observaciones:</strong> Se deben subsanar las siguientes observaciones antes de su ejecución:</div>
+            <div><strong>No aprobado:</strong> El proyecto no cumple con los principios éticos requeridos.</div>
+          </div>
+        </div>
+
+        <!-- Dropdown estilizado tipo cápsula con borde negro -->
+        <div class="eval-recomendaciones-select-wrap">
+          <select
+            class="eval-recomendaciones-select"
+            [ngModel]="recomendacion.dictamen"
+            (ngModelChange)="onDictamenChange($event)"
+            aria-label="Dictamen de recomendaciones del comité"
+          >
+            <option value="aprobado">Aprobado</option>
+            <option value="aprobado_observaciones">Aprobado con observaciones</option>
+            <option value="no_aprobado">No aprobado</option>
+          </select>
+          <span class="eval-select-arrow" aria-hidden="true">▼</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input de observaciones generales para recomendaciones del comité -->
+    <div class="criterio-obs-container">
+      <input
+        type="text"
+        class="criterio-obs-input"
+        placeholder="Observaciones...."
+        aria-label="Observaciones para recomendaciones del comité"
+        [value]="recomendacion.observaciones"
+        (input)="onObservacionComiteChange($any($event.target).value)"
+      />
+    </div>
+  </section>
+
+  <!-- Botonera Inferior: Cancelar y Continuar -->
+  <footer class="eval-actions-footer">
+    <button
+      type="button"
+      class="eval-btn-pill"
+      (click)="onCancelar()"
+    >
+      Cancelar
+    </button>
+    <button
+      type="button"
+      class="eval-btn-pill eval-btn-pill--primary"
+      (click)="onContinuar()"
+    >
+      Continuar
+    </button>
+  </footer>
+</main>

@@ -1,0 +1,94 @@
+<div class="eval-form-panel">
+  <!-- Título con contorno y relleno blanco anime/moderno -->
+  <h1 class="eval-form-main-title">Firmar</h1>
+
+  <!-- Franja superior de metadatos (Gris claro) -->
+  <div class="eval-firmar-meta-bar">
+    <span class="eval-firmar-meta-title">{{ firmaState.comiteNombre }}</span>
+    <span class="eval-firmar-meta-time">{{ firmaState.horaRecibido }}</span>
+  </div>
+
+  <!-- Mensaje de éxito al firmar -->
+  <div
+    *ngIf="mensajeExito"
+    style="background: #ecfdf5; border: 1.5px solid #10b981; border-radius: 12px; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; max-width: 460px; margin: 0 auto; box-sizing: border-box;"
+  >
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span style="display: inline-flex; width: 24px; height: 24px; background: #10b981; color: #fff; border-radius: 50%; align-items: center; justify-content: center; font-weight: bold;">✓</span>
+      <div>
+        <p style="margin: 0; font-weight: 700; color: #065f46;">Evaluación firmada con éxito</p>
+        <p style="margin: 0; font-size: 0.85rem; color: #047857;">El dictamen y el Anexo N°9 han sido rubricados y guardados en el sistema.</p>
+      </div>
+    </div>
+    <span style="font-size: 0.85rem; font-weight: 600; color: #065f46; background: #d1fae5; padding: 0.25rem 0.75rem; border-radius: 9999px;">
+      Firmado
+    </span>
+  </div>
+
+  <!-- Tarjeta central de Firma Digital -->
+  <div class="eval-firma-card">
+    <div class="eval-firma-card-header">
+      <h2 class="eval-firma-card-title">Dibuja tu firma</h2>
+      <button
+        type="button"
+        class="eval-firma-btn-borrar"
+        (click)="borrarFirma()"
+      >
+        Borrar
+      </button>
+    </div>
+
+    <!-- Lienzo interactivo HTML5 Canvas -->
+    <div class="eval-firma-canvas-wrapper">
+      <canvas
+        #signatureCanvas
+        class="eval-firma-canvas"
+        (mousedown)="startDrawing($event)"
+        (mousemove)="draw($event)"
+        (mouseup)="stopDrawing()"
+        (mouseleave)="stopDrawing()"
+        (touchstart)="startDrawingTouch($event)"
+        (touchmove)="drawTouch($event)"
+        (touchend)="stopDrawingTouch()"
+      ></canvas>
+
+      <span *ngIf="!hasDrawn" class="eval-firma-canvas-placeholder">
+        Traza tu firma aquí con el mouse o dedo
+      </span>
+    </div>
+
+    <!-- Campo de Contraseña -->
+    <div class="eval-firma-password-group">
+      <label class="eval-firma-password-label" for="eval-password">
+        Escriba su contraseña
+      </label>
+      <input
+        id="eval-password"
+        type="password"
+        class="eval-firma-password-input"
+        [(ngModel)]="password"
+        (ngModelChange)="onPasswordChange()"
+        placeholder="••••••••••••"
+        autocomplete="current-password"
+      />
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="eval-firma-actions">
+      <button
+        type="button"
+        class="eval-firma-btn"
+        (click)="onCancelar()"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="eval-firma-btn eval-firma-btn--primary"
+        (click)="onFirmar()"
+      >
+        Firmar
+      </button>
+    </div>
+  </div>
+</div>

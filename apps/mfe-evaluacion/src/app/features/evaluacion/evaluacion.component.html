@@ -26,15 +26,8 @@
         (verDocumento)="onVerDocumento($event)"
       />
 
-      <!-- Paso 3: ANEXO / CUMPLIMIENTO DE PRINCIPIOS ÉTICOS (CON BARRA VERTICAL) -->
-      <app-step-anexo
-        *ngSwitchCase="'anexo'"
-        [criterios]="criteriosEticos()"
-        [etapas]="etapasProgresoVertical()"
-        (criteriosChange)="onCriteriosChange($event)"
-        (cancelar)="onCancelar()"
-        (continuar)="onContinuar()"
-      />
+      <!-- Paso 3: ANEXO / EVALUACIÓN COMPLETA (CON BARRA VERTICAL Y SUB-ETAPAS) -->
+      <app-step-anexo *ngSwitchCase="'anexo'" />
     </ng-container>
   </main>
 </div>
