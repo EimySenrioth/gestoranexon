@@ -185,47 +185,11 @@ services:
       # URL de WebSockets para evaluacion en tiempo real
       NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:3000}
       # URLs de los microfrontends Angular
-      NEXT_PUBLIC_MFE_EXPEDIENTES_URL: http://localhost:4201
       NEXT_PUBLIC_MFE_EVALUACION_URL: http://localhost:4202
     ports:
       - "${SHELL_PORT:-3001}:3001"
     volumes:
       - ./apps/shell/src:/app/src
-    networks:
-      - estancia_network
-    depends_on:
-      - backend
-
-  # ===========================================================================
-  # ANGULAR MFE - Gestion de Expedientes (Puerto 4201)
-  # ===========================================================================
-  # Microfrontend independiente para el modulo de expedientes.
-  # Destinado al rol: ADMINISTRADOR
-  #
-  # Requisitos que cubre:
-  #   RF-002: Carga y gestion de documentos del expediente
-  #   RF-003: Formulario de datos generales del colaborador
-  #   RF-009: Visualizacion y transicion de estados del expediente
-  #           (INICIADO -> EN_EVALUACION -> APROBADO / RECHAZADO)
-  #   RF-013: Envio final y orquestacion de cierre del expediente
-  #
-  # Se integra al Shell React mediante: iframe / Module Federation / Web Components
-  # Puerto: 4201
-  # ===========================================================================
-  mfe-expedientes:
-    build:
-      context: ./apps/mfe-expedientes
-      dockerfile: Dockerfile
-      target: development
-    container_name: estanciaperu_mfe_expedientes
-    restart: unless-stopped
-    environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      API_URL: http://backend:3000/api/v1
-    ports:
-      - "4201:4201"
-    volumes:
-      - ./apps/mfe-expedientes/src:/app/src
     networks:
       - estancia_network
     depends_on:
