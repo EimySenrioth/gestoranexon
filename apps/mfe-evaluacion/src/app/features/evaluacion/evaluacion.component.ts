@@ -5,6 +5,7 @@ import {
   StepDatosGeneralesComponent,
   StepExpedienteComponent,
   StepAnexoComponent,
+  StepResumenComponent,
 } from './steps';
 import {
   StepEvaluacionId,
@@ -23,6 +24,7 @@ import { EvaluacionService } from '../../core/services';
     StepDatosGeneralesComponent,
     StepExpedienteComponent,
     StepAnexoComponent,
+    StepResumenComponent,
   ],
   templateUrl: './evaluacion.component.html',
 })
@@ -63,5 +65,14 @@ export class EvaluacionComponent {
   onContinuar(): void {
     // Acción de continuar / siguiente etapa
     this.evaluacionService.nextStep();
+  }
+
+  onAnteriorResumen(): void {
+    this.evaluacionService.setStep('anexo');
+  }
+
+  onCompletarEvaluacion(): void {
+    // Finalización formal de la evaluación
+    alert('¡Evaluación completada con éxito!');
   }
 }

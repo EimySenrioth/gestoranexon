@@ -130,7 +130,7 @@ export class EvaluacionService {
   }
 
   nextStep(): void {
-    const ordenPasos: StepEvaluacionId[] = ['datos-generales', 'expediente', 'anexo'];
+    const ordenPasos: StepEvaluacionId[] = ['datos-generales', 'expediente', 'anexo', 'resumen'];
     const currentIndex = ordenPasos.indexOf(this._currentStep());
     if (currentIndex < ordenPasos.length - 1) {
       this.setStep(ordenPasos[currentIndex + 1]);
@@ -138,7 +138,7 @@ export class EvaluacionService {
   }
 
   prevStep(): void {
-    const ordenPasos: StepEvaluacionId[] = ['datos-generales', 'expediente', 'anexo'];
+    const ordenPasos: StepEvaluacionId[] = ['datos-generales', 'expediente', 'anexo', 'resumen'];
     const currentIndex = ordenPasos.indexOf(this._currentStep());
     if (currentIndex > 0) {
       this.setStep(ordenPasos[currentIndex - 1]);
@@ -158,6 +158,9 @@ export class EvaluacionService {
     const index = orden.indexOf(this._subEtapaAnexo());
     if (index < orden.length - 1) {
       this.setSubEtapaAnexo(orden[index + 1]);
+    } else {
+      // Al terminar la última sub-etapa de Anexo ('firmar'), avanzamos al paso Resumen
+      this.setStep('resumen');
     }
   }
 

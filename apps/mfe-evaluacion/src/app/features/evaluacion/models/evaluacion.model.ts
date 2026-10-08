@@ -1,6 +1,6 @@
 import { DatosGeneralesProyecto, DEFAULT_DATOS_GENERALES } from './datos-generales.model';
 
-export type StepEvaluacionId = 'datos-generales' | 'expediente' | 'anexo';
+export type StepEvaluacionId = 'datos-generales' | 'expediente' | 'anexo' | 'resumen';
 
 export interface StepItem {
   id: StepEvaluacionId;
@@ -37,6 +37,12 @@ export const EVALUACION_STEPS: StepItem[] = [
   {
     id: 'anexo',
     label: 'ANEXO',
+    active: false,
+    disabled: false,
+  },
+  {
+    id: 'resumen',
+    label: 'RESUMEN',
     active: false,
     disabled: false,
   },

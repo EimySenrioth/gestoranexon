@@ -1,0 +1,221 @@
+<div class="eval-resumen-layout">
+  <!-- Título principal -->
+  <h1 class="eval-resumen-title">Resumen</h1>
+
+  <!-- Contenedor de 2 columnas: Selector Izquierdo y Tarjeta Derecha -->
+  <div class="eval-resumen-body">
+    <!-- COLUMNA IZQUIERDA: Píldoras de Selección de Expediente y Anexo -->
+    <aside class="eval-resumen-sidebar" aria-label="Navegación de Resumen">
+      <!-- 1. Bloque Expediente -->
+      <div class="eval-resumen-nav-group">
+        <div class="eval-resumen-nav-badge">
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="eval-resumen-nav-icon"
+          >
+            <rect x="3" y="5" width="18" height="14" rx="2" fill="#FFEAA7" stroke="#1A1A1A" />
+            <path d="M3 7l9 6 9-6" stroke="#1A1A1A" />
+          </svg>
+          <span class="eval-resumen-nav-badge-text">Expediente</span>
+        </div>
+        <button
+          type="button"
+          class="eval-resumen-pill-btn"
+          [class.active]="subVista() === 'expediente'"
+          (click)="onSelectVista('expediente')"
+        >
+          {{ codigoExpediente() }}
+        </button>
+      </div>
+
+      <!-- 2. Bloque Evaluar Expediente (Anexo N°9) -->
+      <div class="eval-resumen-nav-group">
+        <div class="eval-resumen-nav-badge">
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="eval-resumen-nav-icon"
+          >
+            <rect x="3" y="5" width="18" height="14" rx="2" fill="#FFEAA7" stroke="#1A1A1A" />
+            <path d="M3 7l9 6 9-6" stroke="#1A1A1A" />
+          </svg>
+          <span class="eval-resumen-nav-badge-text">Evaluar Expediente</span>
+        </div>
+        <button
+          type="button"
+          class="eval-resumen-pill-btn"
+          [class.active]="subVista() === 'anexo'"
+          (click)="onSelectVista('anexo')"
+        >
+          ANEXO N°9
+        </button>
+      </div>
+    </aside>
+
+    <!-- COLUMNA DERECHA: Tarjeta Central de Documentos o Formato Anexo N°9 -->
+    <main class="eval-resumen-content">
+      <!-- TARJETA 1: Documentos del Expediente (Vista activa: expediente) -->
+      <section *ngIf="subVista() === 'expediente'" class="eval-resumen-card">
+        <!-- Cabecera de la tarjeta con título -->
+        <div class="eval-resumen-card-header">
+          <h2 class="eval-resumen-card-title">Documentos del expediente</h2>
+        </div>
+
+        <!-- Línea divisoria superior -->
+        <div class="eval-resumen-card-divider"></div>
+
+        <!-- Lista de documentos con menú desplegable en Editar -->
+        <ul class="eval-resumen-doc-list">
+          <li *ngFor="let doc of documentos()" class="eval-resumen-doc-item">
+            <span class="eval-resumen-doc-name">{{ doc.nombre }}</span>
+
+            <!-- Botón Editar con menú desplegable -->
+            <div class="eval-resumen-doc-action-wrapper">
+              <button
+                type="button"
+                class="eval-resumen-doc-action"
+                (click)="toggleMenuDoc(doc.id, $event)"
+                [attr.aria-expanded]="menuAbiertoDocId() === doc.id"
+              >
+                <span>Editar</span>
+                <svg
+                  viewBox="0 0 20 20"
+                  width="13"
+                  height="13"
+                  fill="currentColor"
+                  class="eval-resumen-chevron-icon"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+
+              <!-- Menú desplegable emergente con Ver y Actualizar -->
+              <div
+                *ngIf="menuAbiertoDocId() === doc.id"
+                class="eval-resumen-dropdown-menu"
+                (click)="$event.stopPropagation()"
+              >
+                <button
+                  type="button"
+                  class="eval-resumen-dropdown-item"
+                  (click)="onVerDoc(doc, $event)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="15"
+                    height="15"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <span>Ver</span>
+                </button>
+                <button
+                  type="button"
+                  class="eval-resumen-dropdown-item"
+                  (click)="onActualizarDoc(doc, $event)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="15"
+                    height="15"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                  </svg>
+                  <span>Actualizar</span>
+                </button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- TARJETA 2: Formato de Revisión Anexo N°9 (Vista activa: anexo) -->
+      <section *ngIf="subVista() === 'anexo'" class="eval-resumen-card">
+        <!-- Cabecera de Anexo con ícono PDF y Título -->
+        <div class="eval-resumen-pdf-header">
+          <div class="eval-resumen-pdf-badge">
+            <span class="eval-resumen-pdf-tag">PDF</span>
+          </div>
+          <h2 class="eval-resumen-pdf-title">
+            FORMATO DE REVISIÓN DEL COMITÉ DE ÉTICA PARA LA INVESTIGACIÓN
+          </h2>
+        </div>
+
+        <!-- Subtítulo con ícono (?) informativo -->
+        <div class="eval-resumen-subhelp-row">
+          <span class="eval-resumen-help-icon">?</span>
+          <span class="eval-resumen-subhelp-text">
+            Porfavor, revisar el archivo final de la revisión
+          </span>
+        </div>
+
+        <!-- Línea divisoria -->
+        <div class="eval-resumen-card-divider"></div>
+
+        <!-- Tabla estructurada con los principios revisados -->
+        <div class="eval-resumen-table-container">
+          <table class="eval-resumen-table">
+            <thead>
+              <tr>
+                <th class="eval-th-principio">Principio</th>
+                <th class="eval-th-check">Cumple</th>
+                <th class="eval-th-check">No Cumple</th>
+                <th class="eval-th-obs">Observaciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let fila of filasTablaAnexo()">
+                <td class="eval-td-principio">{{ fila.principio }}</td>
+                <td class="eval-td-check">{{ fila.cumple }}</td>
+                <td class="eval-td-check">{{ fila.noCumple }}</td>
+                <td class="eval-td-obs">{{ fila.observaciones }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Botonera Inferior: [ Anterior ] y [ Completar ] -->
+      <footer class="eval-resumen-actions">
+        <button
+          type="button"
+          class="eval-btn-pill"
+          (click)="onAnterior()"
+        >
+          Anterior
+        </button>
+        <button
+          type="button"
+          class="eval-btn-pill eval-btn-pill--primary"
+          (click)="onCompletar()"
+        >
+          Completar
+        </button>
+      </footer>
+    </main>
+  </div>
+</div>

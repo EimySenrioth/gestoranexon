@@ -28,6 +28,13 @@
 
       <!-- Paso 3: ANEXO / EVALUACIÓN COMPLETA (CON BARRA VERTICAL Y SUB-ETAPAS) -->
       <app-step-anexo *ngSwitchCase="'anexo'" />
+
+      <!-- Paso 4: RESUMEN (DOCUMENTOS DEL EXPEDIENTE Y FORMATO ANEXO N°9) -->
+      <app-step-resumen
+        *ngSwitchCase="'resumen'"
+        (anterior)="onAnteriorResumen()"
+        (completar)="onCompletarEvaluacion()"
+      />
     </ng-container>
   </main>
 </div>

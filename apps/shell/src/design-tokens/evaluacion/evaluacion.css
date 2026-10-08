@@ -300,7 +300,8 @@ app-step-expediente {
    ========================================================================== */
 app-step-anexo,
 app-step-normativa-legal,
-app-step-firmar {
+app-step-firmar,
+app-step-resumen {
   width: 100% !important;
   display: block !important;
 }
@@ -1167,3 +1168,426 @@ app-step-firmar .eval-form-main-title {
   border-color: #1f2937 !important;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
 }
+
+/* ==========================================================================
+   6. PASO 4: VISTA DE RESUMEN (DOCUMENTOS Y FORMATO ANEXO N°9)
+   ========================================================================== */
+.eval-resumen-layout {
+  width: 100% !important;
+  max-width: 900px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.25rem !important;
+  box-sizing: border-box !important;
+}
+
+.eval-resumen-title {
+  font-family: inherit !important;
+  font-size: 2.1rem !important;
+  font-weight: 900 !important;
+  font-style: var(--ui-eval-stroke-font-style, italic) !important;
+  color: var(--ui-eval-stroke-fill, #ffffff) !important;
+  -webkit-text-fill-color: var(--ui-eval-stroke-fill, #ffffff) !important;
+  -webkit-text-stroke: var(--ui-eval-stroke-width-lg, 3px) var(--ui-eval-stroke-color, #000000) !important;
+  paint-order: stroke fill !important;
+  margin: 0 0 0.75rem 0 !important;
+  letter-spacing: 0.01em !important;
+  text-shadow:
+    -1.5px -1.5px 0 var(--ui-eval-stroke-color, #000000),
+     1.5px -1.5px 0 var(--ui-eval-stroke-color, #000000),
+    -1.5px  1.5px 0 var(--ui-eval-stroke-color, #000000),
+     1.5px  1.5px 0 var(--ui-eval-stroke-color, #000000),
+    -2.5px  0px   0 var(--ui-eval-stroke-color, #000000),
+     2.5px  0px   0 var(--ui-eval-stroke-color, #000000),
+     0px   -2.5px 0 var(--ui-eval-stroke-color, #000000),
+     0px    2.5px 0 var(--ui-eval-stroke-color, #000000),
+     var(--ui-eval-stroke-shadow, 0 3px 6px rgba(0, 0, 0, 0.45)) !important;
+}
+
+.eval-resumen-body {
+  display: flex !important;
+  gap: 3rem !important;
+  width: 100% !important;
+  align-items: flex-start !important;
+  box-sizing: border-box !important;
+}
+
+/* 6.1 Columna Izquierda: Píldoras de Navegación */
+.eval-resumen-sidebar {
+  width: 260px !important;
+  min-width: 240px !important;
+  max-width: 280px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.5rem !important;
+  flex-shrink: 0 !important;
+  user-select: none !important;
+}
+
+.eval-resumen-nav-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.6rem !important;
+  width: 100% !important;
+}
+
+.eval-resumen-nav-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: #ffffff !important;
+  border: 1.5px solid #1a1a1a !important;
+  border-radius: 9999px !important;
+  padding: 4px 14px !important;
+  width: fit-content !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.eval-resumen-nav-icon {
+  flex-shrink: 0 !important;
+}
+
+.eval-resumen-nav-badge-text {
+  font-family: inherit !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: #1f2937 !important;
+}
+
+.eval-resumen-pill-btn {
+  appearance: none !important;
+  width: 100% !important;
+  height: 52px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #ffffff !important;
+  border: 2px solid #1a1a1a !important;
+  border-radius: 9999px !important;
+  font-family: inherit !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+  box-sizing: border-box !important;
+  letter-spacing: 0.02em !important;
+}
+
+.eval-resumen-pill-btn:hover {
+  background: #f9fafb !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08) !important;
+}
+
+.eval-resumen-pill-btn.active {
+  background: #ffffff !important;
+  border-color: #000000 !important;
+  border-width: 2.4px !important;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  font-weight: 700 !important;
+}
+
+/* 6.2 Columna Derecha: Tarjeta Principal y Botonera */
+.eval-resumen-content {
+  width: 580px !important;
+  max-width: 580px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.5rem !important;
+  box-sizing: border-box !important;
+}
+
+.eval-resumen-card {
+  background: #ffffff !important;
+  border: 2px solid #1a1a1a !important;
+  border-radius: 22px !important;
+  padding: 1.5rem 1.75rem !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1rem !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-height: 380px !important;
+}
+
+.eval-resumen-card-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  position: relative !important;
+  width: 100% !important;
+}
+
+.eval-resumen-card-title {
+  font-family: inherit !important;
+  font-size: 1.45rem !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  margin: 0 !important;
+}
+
+.eval-resumen-card-divider {
+  width: 100% !important;
+  height: 1.5px !important;
+  background: #1a1a1a !important;
+  margin: 0.25rem 0 0.5rem 0 !important;
+}
+
+/* Lista de documentos del expediente */
+.eval-resumen-doc-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.15rem !important;
+}
+
+.eval-resumen-doc-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0.25rem 0.5rem !important;
+  position: relative !important;
+}
+
+.eval-resumen-doc-name {
+  font-family: inherit !important;
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+  color: #1f2937 !important;
+}
+
+/* Contenedor del botón Editar con menú desplegable */
+.eval-resumen-doc-action-wrapper {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.eval-resumen-doc-action {
+  appearance: none !important;
+  background: transparent !important;
+  border: none !important;
+  font-family: inherit !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  color: #1f2937 !important;
+  cursor: pointer !important;
+  padding: 4px 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  border-radius: 6px !important;
+  transition: background-color 0.15s ease, opacity 0.15s ease !important;
+}
+
+.eval-resumen-doc-action:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.eval-resumen-chevron-icon {
+  transition: transform 0.15s ease !important;
+}
+
+.eval-resumen-doc-action[aria-expanded="true"] .eval-resumen-chevron-icon {
+  transform: rotate(180deg) !important;
+}
+
+/* Menú desplegable emergente para Ver / Actualizar */
+.eval-resumen-dropdown-menu {
+  position: absolute !important;
+  top: calc(100% + 4px) !important;
+  right: 0 !important;
+  z-index: 50 !important;
+  background: #ffffff !important;
+  border: 1.6px solid #1a1a1a !important;
+  border-radius: 12px !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important;
+  padding: 5px !important;
+  min-width: 140px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  animation: fadeInResumenMenu 0.12s ease-out !important;
+}
+
+@keyframes fadeInResumenMenu {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.eval-resumen-dropdown-item {
+  appearance: none !important;
+  background: transparent !important;
+  border: none !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  padding: 8px 12px !important;
+  font-family: inherit !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  color: #1f2937 !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+}
+
+.eval-resumen-dropdown-item:hover {
+  background: #f3f4f6 !important;
+  color: #000000 !important;
+}
+
+/* 6.3 Cabecera de Formato PDF Anexo N°9 */
+.eval-resumen-pdf-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.85rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.eval-resumen-pdf-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-radius: 4px !important;
+  width: 36px !important;
+  height: 44px !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15) !important;
+  flex-shrink: 0 !important;
+}
+
+.eval-resumen-pdf-tag {
+  font-family: inherit !important;
+  font-size: 0.8rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.05em !important;
+}
+
+.eval-resumen-pdf-title {
+  font-family: inherit !important;
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+}
+
+.eval-resumen-subhelp-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  margin-left: 0.25rem !important;
+}
+
+.eval-resumen-help-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  border: 1.8px solid #000000 !important;
+  background: #ffffff !important;
+  font-family: inherit !important;
+  font-size: 0.85rem !important;
+  font-weight: 800 !important;
+  color: #000000 !important;
+  flex-shrink: 0 !important;
+}
+
+.eval-resumen-subhelp-text {
+  font-family: inherit !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  color: #4b5563 !important;
+}
+
+/* 6.4 Tabla del Formato Anexo N°9 */
+.eval-resumen-table-container {
+  width: 100% !important;
+  overflow-x: auto !important;
+  max-height: 380px !important;
+  overflow-y: auto !important;
+}
+
+.eval-resumen-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border: 1.5px solid #1a1a1a !important;
+  font-family: inherit !important;
+  font-size: 0.88rem !important;
+}
+
+.eval-resumen-table th {
+  background: #f9fafb !important;
+  border: 1.5px solid #1a1a1a !important;
+  padding: 8px 10px !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+}
+
+.eval-resumen-table td {
+  border: 1.2px solid #1a1a1a !important;
+  padding: 8px 10px !important;
+  vertical-align: middle !important;
+  color: #1f2937 !important;
+}
+
+.eval-th-principio,
+.eval-td-principio {
+  width: 48% !important;
+  font-size: 0.84rem !important;
+  line-height: 1.35 !important;
+}
+
+.eval-th-check,
+.eval-td-check {
+  width: 13% !important;
+  text-align: center !important;
+  font-weight: 600 !important;
+}
+
+.eval-th-obs,
+.eval-td-obs {
+  width: 26% !important;
+  font-size: 0.84rem !important;
+}
+
+/* 6.5 Botonera Inferior: alineada con el fin del formulario (lado derecho) */
+.eval-resumen-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 1.5rem !important;
+  width: 100% !important;
+  margin-top: 1.5rem !important;
+  box-sizing: border-box !important;
+}
+
+.eval-resumen-actions .eval-btn-pill {
+  min-width: 140px !important;
+  padding: 8px 30px !important;
+}
+
