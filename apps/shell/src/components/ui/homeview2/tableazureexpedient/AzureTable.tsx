@@ -78,6 +78,11 @@ export function AzureTable({
     router.push("/homeview2/evaluacion");
   };
 
+  // Al hacer clic en la etapa actual de una fila, navega a la vista de estado del expediente
+  const handleEtapaClick = (item: SolicitudFirmaItem) => {
+    router.push(`/homeview2/statusexpediente?id=${encodeURIComponent(item.id)}`);
+  };
+
   return (
     <div className={`azure-table-card ${className}`}>
       {/* 1. Encabezado con título e input buscador de expedientes */}
@@ -100,6 +105,7 @@ export function AzureTable({
               key={`${item.id}-${idx}`}
               item={item}
               onEvaluar={handleEvaluarClick}
+              onEtapaClick={handleEtapaClick}
             />
           ))
         ) : (

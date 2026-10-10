@@ -6,9 +6,10 @@ import { SolicitudFirmaItem } from "./types";
 interface AzureTableRowProps {
   item: SolicitudFirmaItem;
   onEvaluar?: (item: SolicitudFirmaItem) => void;
+  onEtapaClick?: (item: SolicitudFirmaItem) => void;
 }
 
-export function AzureTableRow({ item, onEvaluar }: AzureTableRowProps) {
+export function AzureTableRow({ item, onEvaluar, onEtapaClick }: AzureTableRowProps) {
   const isEvaluado = item.etapaActual === "Evaluado";
 
   return (
@@ -31,41 +32,48 @@ export function AzureTableRow({ item, onEvaluar }: AzureTableRowProps) {
         {item.fechaEvaluacion}
       </div>
 
-      {/* 4. Etapa Actual con Icono de Status Azure */}
+      {/* 4. Etapa Actual con Icono de Status Azure (Clicable hacia StatusExpediente) */}
       <div className="azure-col-status">
         <span className="md:hidden font-semibold text-gray-500 mr-2">Etapa:</span>
-        {isEvaluado ? (
-          <>
-            <svg
-              className="azure-status-icon-evaluado"
-              width="18"
-              height="18"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span className="text-gray-900 font-medium">Evaluado</span>
-          </>
-        ) : (
-          <>
-            <svg
-              className="azure-status-icon-proceso"
-              width="18"
-              height="18"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="2" fill="none" />
-              <path d="M10 6v4l2.5 2.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-            <span className="text-gray-900 font-medium">En evaluación</span>
-          </>
-        )}
+        <button
+          type="button"
+          onClick={() => onEtapaClick?.(item)}
+          className="inline-flex items-center gap-1.5 hover:opacity-75 transition-opacity cursor-pointer group text-left p-0 border-0 bg-transparent"
+          title={`Ver estado del expediente (${item.etapaActual})`}
+        >
+          {isEvaluado ? (
+            <>
+              <svg
+                className="azure-status-icon-evaluado flex-shrink-0"
+                width="18"
+                height="18"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="text-gray-900 font-medium group-hover:underline">Evaluado</span>
+            </>
+          ) : (
+            <>
+              <svg
+                className="azure-status-icon-proceso flex-shrink-0"
+                width="18"
+                height="18"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="2" fill="none" />
+                <path d="M10 6v4l2.5 2.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              <span className="text-gray-900 font-medium group-hover:underline">En evaluación</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* 5. Evaluar (Botón con documento y pluma / Firmado el ...) */}

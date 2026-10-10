@@ -1,0 +1,302 @@
+// =====================================================================
+// CEI - Esquema en DBML (generado desde cei_migration_v3.sql)
+// OJO: la v3 solo muestra por completo las tablas que CREA
+// (migracion_aplicada, config_cei, feriado, decision_comite).
+// Las demás tablas vienen de v1/v2: aquí solo aparecen las columnas
+// que la v3 menciona. Marcadas con [note: 'parcial'].
+// Vistas, funciones, triggers y políticas RLS no existen en DBML:
+// se listan en las Notes al final.
+// =====================================================================
+
+Project cei {
+  database_type: 'PostgreSQL'
+  Note: 'Comité de Ética en Investigación - esquema tras migración v3'
+}
+
+// ---------------------------------------------------------------------
+// ENUMS (valores inferidos de la v3; pueden existir más en v1/v2)
+// ---------------------------------------------------------------------
+Enum tipo_recomendacion {
+  APROBADO
+  APROBADO_CON_OBSERVACIONES
+  NO_APROBADO
+}
+
+Enum metodo_decision {
+  MAYORIA_ABSOLUTA
+  DELIBERACION_COMITE
+  NUEVA_VOTACION
+}
+
+Enum estado_dictamen {
+  EN_DELIBERACION
+  EMITIDO
+}
+
+Enum resultado_criterio {
+  CUMPLE
+  NO_CUMPLE
+  NO_APLICA
+}
+
+Enum estado_evaluacion {
+  PENDIENTE
+  ENVIADA
+}
+
+Enum estado_asignacion {
+  PENDIENTE
+  RECHAZADA
+}
+
+Enum estado_validacion_firma {
+  VALIDA
+}
+
+Enum estado_envio {
+  PENDIENTE
+  ENVIADO
+  RECEPCION_CONFIRMADA
+  FALLIDO
+}
+
+// ---------------------------------------------------------------------
+// TABLAS NUEVAS EN v3
+// ---------------------------------------------------------------------
+Table migracion_aplicada {
+  version     text [pk]
+  aplicada_en timestamptz [not null, default: `now()`]
+}
+
+Table config_cei {
+  clave       varchar(50) [pk]
+  valor       text [not null]
+  descripcion text
+
+  Note: '''
+  Claves iniciales:
+  - num_evaluadores_requeridos = 5
+  - tipo_dias_plazo = CALENDARIO | HABILES
+  - observaciones_bloqueantes = DICTAMEN | FINALIZACION
+  '''
+}
+
+Table feriado {
+  fecha       date [pk]
+  descripcion varchar(100)
+}
+
+Table decision_comite {
+  decision_id  bigserial [pk]
+  dictamen_id  bigint [not null, ref: > dictamen_final.dictamen_id, note: 'ON DELETE CASCADE']
+  metodo       metodo_decision [not null, note: "CHECK: solo 'DELIBERACION_COMITE' o 'NUEVA_VOTACION'"]
+  resultado    tipo_recomendacion [note: "Obligatorio salvo que metodo = 'NUEVA_VOTACION'"]
+  acta         text [not null, note: 'CHECK: length(btrim(acta)) > 0']
+  decidido_por bigint [not null, ref: > usuario.usuario_id]
+  decidido_en  timestamptz [not null, default: `now()`]
+
+  Indexes {
+    dictamen_id [name: 'ix_decision_dictamen']
+  }
+  Note: 'RLS activado. Registro trazable de la deliberación del Comité.'
+}
+
+// ---------------------------------------------------------------------
+// TABLAS MODIFICADAS EN v3 (columnas parciales)
+// ---------------------------------------------------------------------
+Table expediente {
+  expediente_id      bigint [pk, note: 'parcial']
+  codigo             varchar
+  titulo             varchar
+  solicitante_id     bigint [not null, ref: > usuario.usuario_id]
+  estado_id          smallint [not null, ref: > estado_expediente.estado_id]
+  es_ensayo_clinico  boolean
+  fecha_presentacion date [note: 'v3: sin default y nullable. CHECK: estado_id = 0 OR fecha_presentacion IS NOT NULL. Se asigna al pasar de Nuevo(0) a Creado(1)']
+  creado_en          timestamptz [note: 'Fecha del borrador']
+  enviado_en         timestamptz
+  actualizado_en     timestamptz
+  ultima_notificacion_en timestamptz
+  plazo_inicio       date
+  plazo_limite       date
+
+  Note: 'Tabla parcial: faltan columnas definidas en v1/v2.'
+}
+
+Table evaluacion_individual {
+  expediente_id  bigint [not null, ref: > expediente.expediente_id]
+  evaluador_id   bigint [not null, ref: > usuario.usuario_id]
+  ronda          smallint [not null]
+  estado         estado_evaluacion
+  veredicto      tipo_recomendacion [note: 'CHECK: APROBADO_CON_OBSERVACIONES exige observaciones no vacías']
+  observaciones  text
+
+  Indexes {
+    (expediente_id, evaluador_id, ronda) [pk, note: 'PK supuesta (v1/v2): la v3 dice que impide duplicados por ronda']
+  }
+  Note: 'Parcial. Trigger trg_evalind_asignado: el evaluador debe tener asignación vigente.'
+}
+
+Table evaluacion_criterio {
+  expediente_id bigint [not null, ref: > expediente.expediente_id]
+  criterio_id   bigint [not null, ref: > criterio_etico.criterio_id]
+  evaluador_id  bigint [not null, ref: > usuario.usuario_id]
+  ronda         smallint [not null, default: 1, note: 'Nuevo en v3']
+  resultado     resultado_criterio [not null]
+  observaciones text [note: "CHECK: si resultado = 'NO_CUMPLE', observaciones no vacías"]
+
+  Indexes {
+    (expediente_id, criterio_id, evaluador_id, ronda) [pk, name: 'evaluacion_criterio_pkey']
+  }
+  Note: 'Parcial. Trigger trg_evalcrit_asignado: el evaluador debe tener asignación vigente.'
+}
+
+Table dictamen_final {
+  dictamen_id               bigint [pk]
+  expediente_id             bigint [not null, ref: > expediente.expediente_id]
+  ronda                     smallint
+  total_evaluadores         smallint
+  mayoria_requerida         smallint
+  votos_aprobado            smallint
+  votos_aprobado_obs        smallint
+  votos_no_aprobado         smallint
+  resultado                 tipo_recomendacion [note: "CHECK: APROBADO_CON_OBSERVACIONES exige observaciones_consolidadas no vacías"]
+  estado                    estado_dictamen
+  metodo                    metodo_decision
+  regla_aplicada            text
+  observaciones_consolidadas text
+  acta_deliberacion         text
+  fecha_emision             date
+  emitido_por               bigint [ref: > usuario.usuario_id]
+
+  Note: 'Parcial.'
+}
+
+Table observacion {
+  observacion_id     bigint [pk, note: 'nombre de PK supuesto']
+  expediente_id      bigint [not null, ref: > expediente.expediente_id]
+  dictamen_id        bigint [ref: > dictamen_final.dictamen_id]
+  autor_id           bigint [ref: > usuario.usuario_id]
+  texto              text [not null, note: 'CHECK: length(btrim(texto)) > 0']
+  bloquea_aprobacion boolean
+  resuelta_en        timestamptz
+
+  Note: 'Parcial.'
+}
+
+Table firma_expediente {
+  expediente_id      bigint [ref: > expediente.expediente_id]
+  rol_id             int [ref: > rol.rol_id]
+  estado_validacion  estado_validacion_firma
+  firmado_en         timestamptz
+  validado_en        timestamptz
+  hash_documento     text
+  evidencia_firma    text
+  firma_valor        text [note: 'Nuevo v3: firma criptográfica (la verifica la app/PKI)']
+  certificado_huella text [note: 'Nuevo v3']
+
+  Note: '''
+  CHECK ck_firma_valida: estado_validacion = 'VALIDA' exige firmado_en, validado_en,
+  hash_documento, evidencia_firma, firma_valor y certificado_huella.
+  '''
+}
+
+Table envio_resultado {
+  expediente_id           bigint [ref: > expediente.expediente_id]
+  documento_id            bigint [ref: > documento.documento_id]
+  estado_envio            estado_envio
+  enviado_en              timestamptz [note: 'v3: sin default y nullable']
+  recepcion_confirmada_en timestamptz
+  error_envio             text
+
+  Note: '''
+  CHECK ck_envio_coherente. Trigger trg_envio_sync mantiene estado_envio y enviado_en.
+  fn_validar_anexo9: el documento debe ser tipo ANEXO_9 del mismo expediente.
+  '''
+}
+
+// ---------------------------------------------------------------------
+// TABLAS REFERENCIADAS (definidas en v1/v2; solo columnas mencionadas)
+// ---------------------------------------------------------------------
+Table usuario {
+  usuario_id bigint [pk]
+  nombre     varchar
+  activo     boolean
+}
+
+Table rol {
+  rol_id int [pk, note: '3 Presidente, 4 Vicepresidente, 5 Sec. Técnica, 6 Sec. Administrativa, 7 Vocal, 8 Admin']
+  nombre varchar
+}
+
+Table usuario_rol {
+  usuario_id bigint [ref: > usuario.usuario_id]
+  rol_id     int [ref: > rol.rol_id]
+
+  Indexes {
+    (usuario_id, rol_id) [pk, note: 'supuesto']
+  }
+}
+
+Table asignacion_evaluador {
+  expediente_id bigint [ref: > expediente.expediente_id]
+  evaluador_id  bigint [ref: > usuario.usuario_id]
+  activa        boolean
+  estado        estado_asignacion [note: 'PENDIENTE, RECHAZADA, ... (otros valores en v1/v2)']
+}
+
+Table criterio_etico {
+  criterio_id bigint [pk]
+  nombre      varchar
+  grupo       varchar
+  critico     boolean
+  condicional boolean
+  activo      boolean
+}
+
+Table documento {
+  documento_id  bigint [pk]
+  expediente_id bigint [ref: > expediente.expediente_id]
+  tipo          varchar [note: "p. ej. 'ANEXO_9'"]
+}
+
+Table estado_expediente {
+  estado_id       smallint [pk]
+  nombre          varchar
+  rol_destino_id  int [ref: > rol.rol_id]
+}
+
+Table transicion_estado {
+  desde_id smallint [ref: > estado_expediente.estado_id]
+  hasta_id smallint [ref: > estado_expediente.estado_id]
+
+  Indexes {
+    (desde_id, hasta_id) [pk, note: 'supuesto']
+  }
+}
+
+Table historial_estado {
+  expediente_id   bigint [ref: > expediente.expediente_id]
+  estado_anterior smallint [ref: > estado_expediente.estado_id]
+  estado_nuevo    smallint [ref: > estado_expediente.estado_id]
+  usuario_id      bigint [ref: > usuario.usuario_id]
+}
+
+Table expediente_participante {
+  expediente_id  bigint [ref: > expediente.expediente_id]
+  nombre         varchar
+  orden          int
+  es_responsable boolean
+}
+
+// ---------------------------------------------------------------------
+// NO REPRESENTABLE EN DBML (referencia)
+// ---------------------------------------------------------------------
+// Vistas: v_criterio_consolidado, v_cumplimiento_expediente, v_cola_trabajo,
+//         v_seguimiento_expediente (v_vencimiento_proximo viene de v2)
+// Funciones: fn_agregar_dias_plazo, fn_dias_restantes, fn_usuario_actual,
+//   fn_tiene_rol, fn_es_evaluador_de, fn_emitir_dictamen,
+//   fn_resolver_deliberacion, fn_validar_evaluador_asignado,
+//   fn_sync_envio, fn_validar_anexo9, fn_registrar_cambio_estado
+// Rol de BD: cei_app (RLS con políticas sobre usuario, expediente,
+//   evaluacion_individual, evaluacion_criterio, dictamen_final,
+//   observacion y decision_comite)
