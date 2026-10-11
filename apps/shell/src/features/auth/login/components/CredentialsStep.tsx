@@ -1,26 +1,73 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { TextField, PillButton } from "@/components/ui";
+import { loginWithApi } from "../../services/auth.service";
+import { saveStoredSession } from "@/navigation/session/session.store";
+import type { Role } from "@/navigation/registry/types";
 
 export function CredentialsStep() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // ⏳ PENDIENTE: enviar credenciales al backend (POST /auth/login) y gestionar sesión
-    console.info("[CredentialsStep] Submit pendiente de integración con el backend:", { email });
+    if (!email.trim()) {
+      setError("Por favor ingrese su correo institucional.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await loginWithApi({ email, password });
+
+      // Guardar estado de sesión en almacenamiento local
+      saveStoredSession({
+        user: {
+          id: response.user.id,
+          email: response.user.email,
+          nombre: response.user.nombre ?? "",
+          roles: response.user.roles as Role[],
+        },
+        roles: response.user.roles as Role[],
+        token: response.accessToken,
+        homeView: response.homeView,
+      });
+
+      // Redirigir según la directiva homeView devuelta por el backend:
+      // - 'inicio' (Vista 1 para Solicitante)
+      // - 'homeview2' (Vista 2 para Comité CEI, Evaluadores y Administrador)
+      router.push(`/${response.homeView}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error al iniciar sesión";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleForgotPassword = (e: React.MouseEvent) => {
     e.preventDefault();
-    // ⏳ PENDIENTE: flujo de recuperación de contraseña
-    console.info("[CredentialsStep] Recuperación de contraseña pendiente de backend.");
+    alert("Para restablecer su contraseña, contacte a la Secretaría Administrativa del CEI (cei@untels.edu.pe).");
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col w-full">
+      {/* Mensaje de error si falla la autenticación */}
+      {error && (
+        <div
+          role="alert"
+          className="mb-4 p-3 text-sm text-red-700 bg-red-100 rounded-md border border-red-300"
+        >
+          {error}
+        </div>
+      )}
 
       {/* Campo: Correo Electrónico */}
       <TextField
@@ -30,7 +77,8 @@ export function CredentialsStep() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         autoComplete="email"
-        placeholder=""
+        placeholder="ejemplo@estanciaperu.gob.pe"
+        required
       />
 
       {/* Campo: Contraseña */}
@@ -44,9 +92,9 @@ export function CredentialsStep() {
         placeholder=""
       />
 
-      {/* Botón: Iniciar sesion */}
-      <PillButton type="submit">
-        Iniciar sesion
+      {/* Botón: Iniciar sesión */}
+      <PillButton type="submit" disabled={loading}>
+        {loading ? "Iniciando sesión..." : "Iniciar sesión"}
       </PillButton>
 
       {/* Divisor horizontal inferior */}

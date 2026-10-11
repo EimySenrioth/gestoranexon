@@ -1,0 +1,24 @@
+// Agrega este modelo a apps/backend/prisma/schema.prisma
+// y en el modelo Usuario agrega:   refreshTokens RefreshToken[]
+
+model RefreshToken {
+  id             String    @id @default(uuid())
+  tokenHash      String    @unique          // sha256 del token (nunca el token en claro)
+  familyId       String                      // misma cadena de rotación = un login/dispositivo
+  familiaInicio  DateTime                    // inicio de la familia (para el máximo absoluto)
+  usuarioId      String
+  revocado       Boolean   @default(false)
+  revocadoEn     DateTime?
+  reemplazadoPor String?                     // id del token que lo sustituyó al rotar
+  expiraEn       DateTime
+  creadoEn       DateTime  @default(now())
+  userAgent      String?
+  ip             String?
+
+  usuario        Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@index([familyId])
+  @@index([expiraEn])
+  @@map("refresh_tokens")
+}

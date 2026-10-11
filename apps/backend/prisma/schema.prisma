@@ -1,4 +1,4 @@
-﻿generator client {
+generator client {
   provider = "prisma-client-js"
 }
 
@@ -7,30 +7,48 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Rol {
-  SOLICITANTE
-  EVALUADOR
-  ADMINISTRADOR
-  SUPERADMIN
+model Rol {
+  id          Int          @id
+  codigo      String       @unique
+  nombre      String
+  descripcion String?
+  usuarios    UsuarioRol[]
+
+  @@map("roles")
 }
 
 model Usuario {
-  id            String   @id @default(cuid())
-  email         String   @unique
+  id            String       @id @default(cuid())
+  email         String       @unique
+  password      String       @default("")
   nombre        String
   apellido      String
-  rol           Rol      @default(SOLICITANTE)
-  activo        Boolean  @default(true)
-  creadoEn      DateTime @default(now())
-  actualizadoEn DateTime @updatedAt
+  activo        Boolean      @default(true)
+  creadoEn      DateTime     @default(now())
+  actualizadoEn DateTime     @updatedAt
 
+  roles         UsuarioRol[]
   solicitudes   Solicitud[]
   expedientes   Expediente[]
   evaluaciones  Evaluacion[]
   firmas        Firma[]
   historial     Historial[]
+  refreshTokens RefreshToken[]
 
   @@map("usuarios")
+}
+
+model UsuarioRol {
+  usuarioId String
+  rolId     Int
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  rol     Rol     @relation(fields: [rolId], references: [id], onDelete: Cascade)
+
+  asignadoEn DateTime @default(now())
+
+  @@id([usuarioId, rolId])
+  @@map("usuario_roles")
 }
 
 enum EstadoSolicitud {
@@ -192,3 +210,26 @@ model Notificacion {
 
   @@map("notificaciones")
 }
+
+model RefreshToken {
+  id             String    @id @default(uuid())
+  tokenHash      String    @unique          // sha256 del token (nunca el token en claro)
+  familyId       String                      // misma cadena de rotación = un login/dispositivo
+  familiaInicio  DateTime                    // inicio de la familia (para el máximo absoluto)
+  usuarioId      String
+  revocado       Boolean   @default(false)
+  revocadoEn     DateTime?
+  reemplazadoPor String?                     // id del token que lo sustituyó al rotar
+  expiraEn       DateTime
+  creadoEn       DateTime  @default(now())
+  userAgent      String?
+  ip             String?
+
+  usuario        Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@index([familyId])
+  @@index([expiraEn])
+  @@map("refresh_tokens")
+}
+

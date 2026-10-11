@@ -1,13 +1,21 @@
-// ⏳ PENDIENTE: validaciones de acceso por rol y rutas de inicio (canAccess, homePathFor)
 import type { Role, ModuleId } from "../registry/types";
 import { MODULES } from "../registry/modules";
 
-export function canAccess(role: Role, moduleId: ModuleId): boolean {
+export function canAccess(roles: Role | Role[], moduleId: ModuleId): boolean {
   const mod = MODULES.find((m) => m.id === moduleId);
-  return Boolean(mod?.roles.includes(role));
+  if (!mod) return false;
+
+  const userRoles = Array.isArray(roles) ? roles : [roles];
+  return userRoles.some((r) => mod.roles.includes(r));
 }
 
-export function homePathFor(_role?: Role): string {
-  void _role;
-  return "/inicio";
+export function homePathFor(role?: Role | Role[]): string {
+  if (!role) return "/inicio";
+
+  const userRoles = Array.isArray(role) ? role : [role];
+  const isOnlySolicitante =
+    userRoles.length === 1 &&
+    (userRoles[0] === "SOLICITANTE" || userRoles[0] === "solicitante");
+
+  return isOnlySolicitante ? "/inicio" : "/homeview2";
 }

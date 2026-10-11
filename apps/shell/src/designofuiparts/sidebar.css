@@ -272,3 +272,64 @@
   border: 1.5px solid #121316;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
+
+/* ----------------------------------------------------
+   3. SECCIÓN DE CIERRE DE SESIÓN (LOG OUT)
+---------------------------------------------------- */
+.layout-sidebar-dock-divider {
+  width: 24px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 6px 0;
+}
+
+.layout-sidebar-dock-btn.layout-sidebar-dock-logout {
+  color: #ef4444;
+}
+
+.layout-sidebar-dock-btn.layout-sidebar-dock-logout:hover {
+  background-color: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+}
+
+.layout-sidebar-account-section {
+  width: 100%;
+  padding: 8px 12px;
+  margin-top: auto;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+.layout-sidebar-logout-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: #dc2626;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--ui-duration-fast, 0.2s) ease;
+}
+
+.layout-sidebar-logout-action:hover {
+  background-color: rgba(239, 68, 68, 0.08);
+  color: #b91c1c;
+}
+
+.layout-sidebar-logout-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.layout-sidebar-logout-text {
+  letter-spacing: -0.01em;
+}
+

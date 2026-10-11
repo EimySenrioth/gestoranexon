@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarItem, SidebarItemData } from "./SidebarItem";
 import { GripDots } from "./Sidebar";
+import { useSession } from "@/navigation/session/useSession";
 
 export interface Sidebar2Props {
   items?: SidebarItemData[];
@@ -26,6 +27,7 @@ export function Sidebar2({
   const isNotHome2 = pathname !== "/homeview2";
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed ?? isNotHome2);
   const [internalActiveId, setInternalActiveId] = useState<string>("evaluacion-proyectos");
+  const { logout } = useSession();
 
   useEffect(() => {
     if (pathname !== "/homeview2") {
@@ -98,6 +100,31 @@ export function Sidebar2({
                 onClick={() => handleSelect(item.id)}
               />
             ))}
+
+            {/* Separador y botón de Log Out en dock */}
+            <div className="layout-sidebar-dock-divider" />
+            <button
+              type="button"
+              className="layout-sidebar-dock-btn layout-sidebar-dock-logout"
+              onClick={logout}
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
           </div>
 
           <GripDots variant="light" />
@@ -148,6 +175,35 @@ export function Sidebar2({
               />
             ))}
           </ul>
+
+          {/* Sección de cierre de sesión en modo expandido */}
+          <div className="layout-sidebar-account-section">
+            <button
+              type="button"
+              className="layout-sidebar-logout-action"
+              onClick={logout}
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
+            >
+              <span className="layout-sidebar-logout-icon" aria-hidden="true">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+              </span>
+              <span className="layout-sidebar-logout-text">Cerrar sesión</span>
+            </button>
+          </div>
 
           <div
             className="layout-sidebar-footer"

@@ -5,7 +5,6 @@ import { Dialog } from "@/components/ui";
 import { AccountStep } from "./components/AccountStep";
 import { CredentialsStep } from "./components/CredentialsStep";
 import { LoginBackground } from "./LoginBackground";
-import { DevShortcut } from "./DevShortcut";
 import "./login.css";
 
 export function LoginView() {
@@ -28,9 +27,6 @@ export function LoginView() {
             <CredentialsStep />
           </Dialog>
         )}
-
-        {/* Acceso a tokens en modo desarrollo */}
-        <DevShortcut />
       </div>
     </main>
   );
