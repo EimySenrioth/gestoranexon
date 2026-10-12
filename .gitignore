@@ -17,3 +17,6 @@ tools/codebase-memory/
 
 # Habilidades de IA
 IAskill/
+
+# Instaladores y binarios
+*.exe
