@@ -2,7 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { Header, Footer, Sidebar } from "@/componentforlayout";
 
-import { SolicitudWizard } from "@/components/ui/missolicitudes";
+import { SolicitudWizard } from "@/features/solicitudes";
 
 export const metadata: Metadata = {
   title: "Solicitudes",

@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Header, Footer, Sidebar2 } from "@/componentforlayout";
-import { HomeView2 } from "@/components/ui";
+import { HomeView2 } from "@/features/evaluacion";
 
 export const metadata: Metadata = {
   title: "Evaluación de Proyectos | ANEXO N°9",

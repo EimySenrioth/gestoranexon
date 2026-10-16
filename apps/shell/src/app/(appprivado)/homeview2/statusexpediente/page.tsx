@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Header, Footer, Sidebar2 } from "@/componentforlayout";
-import { StatusExpediente } from "@/components/ui/homeview2";
+import { StatusExpediente } from "@/features/evaluacion";
 
 export const metadata: Metadata = {
   title: "Estado del Expediente | UNTELS",

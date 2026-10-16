@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Tabs, AccountCard, PillButton } from "@/components/ui";
+import { Tabs, PillButton } from "@/components/ui";
+import { AccountCard } from "./AccountCard";
 
 interface AccountStepProps {
   onNext: () => void;

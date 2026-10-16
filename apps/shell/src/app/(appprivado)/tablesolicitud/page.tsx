@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Header, Footer, Sidebar } from "@/componentforlayout";
-import { TableSolicitud } from "@/components/ui/tablesolicitud";
+import { TableSolicitud } from "@/features/solicitudes";
 
 export const metadata: Metadata = {
   title: "Tabla de Solicitudes | ANEXO N°9",
