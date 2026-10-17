@@ -5,6 +5,8 @@ import { UserManagementService } from './usermanagement.service.js';
 import { UserTokenService } from './usertoken/user-token.service.js';
 import { RefreshTokenService } from './refreshtoken/refresh-token.service.js';
 
+import { JwtAuthGuard, RolesGuard, ServiceTokenGuard } from './guards/index.js';
+
 @Module({
   imports: [
     JwtModule.register({
@@ -18,7 +20,17 @@ import { RefreshTokenService } from './refreshtoken/refresh-token.service.js';
     UserTokenService,
     RefreshTokenService,
     CsrfGuard,
+    JwtAuthGuard,
+    RolesGuard,
+    ServiceTokenGuard,
   ],
-  exports: [UserManagementService, UserTokenService, RefreshTokenService],
+  exports: [
+    UserManagementService,
+    UserTokenService,
+    RefreshTokenService,
+    JwtAuthGuard,
+    RolesGuard,
+    ServiceTokenGuard,
+  ],
 })
 export class UserManagementModule {}
