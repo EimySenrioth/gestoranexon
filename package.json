@@ -4,12 +4,14 @@
   "private": true,
   "workspaces": [
     "apps/backend",
+    "apps/shell",
     "apps/mfe-evaluacion",
     "packages/*"
   ],
   "scripts": {
     "dev:shell": "npm run dev --workspace=apps/shell",
     "dev:backend": "npm run start:dev --workspace=apps/backend",
-    "dev:mfe-evaluacion": "npm run start --workspace=apps/mfe-evaluacion"
+    "dev:mfe-evaluacion": "npm run start --workspace=apps/mfe-evaluacion",
+    "seed:backend": "npm run seed --workspace=apps/backend"
   }
 }

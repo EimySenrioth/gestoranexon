@@ -1,11 +1,39 @@
+# Dependencias y compilados
 node_modules/
-.env
 dist/
 .angular/
 .next/
-*.log
-*.tsbuildinfo
 .turbo/
+*.tsbuildinfo
+*.log
+
+# Variables de entorno y credenciales (Base de Datos y API)
+.env
+.env.local
+.env.*.local
+.env.docker.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+!.env.docker.example
+
+# Base de datos local y backups (excluye dumps y volúmenes, preserva migraciones y seeds)
+postgres_data/
+pgdata/
+db_backup/
+*.dump
+*.backup
+*.sql.gz
+*.sql.bak
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# Almacenamiento local de archivos y documentos subidos
+apps/backend/uploads/
+uploads/
 
 # Codebase Memory
 .codebase-memory/
@@ -20,3 +48,4 @@ IAskill/
 
 # Instaladores y binarios
 *.exe
+

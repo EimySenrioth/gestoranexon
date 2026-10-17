@@ -1,3 +1,7 @@
+import { IsArray, IsInt } from 'class-validator';
+
 export class AssignRolesDto {
-  roleIds: number[]; // IDs de roles: 1 al 8
+  @IsArray()
+  @IsInt({ each: true })
+  roleIds: number[];
 }

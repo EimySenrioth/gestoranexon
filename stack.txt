@@ -249,38 +249,53 @@ http://localhost:4201	El Shell la carga dentro de sí mismo	❌ No directamente
 http://localhost:4202	El Shell la carga dentro de sí mismo	❌ No directamente
 
 
-navegacion tentavia
-navigation/
-├─ registry/
-│  ├─ modules.ts            ← FUENTE: módulos, rutas, rol permitido, tipo (react | mfe)
-│  ├─ mfe-manifest.ts       ← URL, puerto, tag del custom element de cada MFE
-│  └─ types.ts              ← ModuleId, Role, ModuleDefinition, MfeDefinition
-├─ access/
-│  ├─ roles.ts              ← solicitante | administrador | evaluador
-│  ├─ guards.ts             ← canAccess(role, moduleId)
-│  └─ useAccess.ts          ← hook: módulos visibles para el usuario actual
-├─ state/
-│  ├─ navigation.store.ts   ← módulo activo, historial, estado del menú
-│  └─ selectors.ts
-├─ hosts/                   ← CÓMO se monta cada tipo de vista
-│  ├─ ReactModuleHost.tsx   ← módulos propios del Shell (login, inicio)
-│  ├─ MfeHost.tsx           ← monta un MFE Angular (loader + error + reintento)
-│  ├─ MfeBoundary.tsx       ← error boundary si el MFE no carga
-│  └─ MfeLoader.ts          ← carga el script/iframe una sola vez
-├─ bridge/                  ← COMUNICACIÓN Shell ↔ MFE
-│  ├─ events.ts             ← contratos tipados (auth:token, nav:change, expediente:updated)
-│  ├─ shell-bus.ts          ← emite y escucha CustomEvents
-│  └─ auth-context.ts       ← entrega token, rol y usuario al MFE
-├─ components/
-│  ├─ AppMenu.tsx           ← menú lateral/superior generado desde el registro
-│  ├─ Breadcrumbs.tsx
-│  ├─ ModuleShell.tsx       ← marco común (título, pestañas, botón X)
-│  ├─ TabBar.tsx / TabButton.tsx / CloseButton.tsx
-│  └─ ForbiddenView.tsx
-├─ realtime/
-│  └─ useEvaluationSocket.ts ← WebSocket de evaluación en tiempo real (RF-006)
-├─ README.md
-└─ index.ts
+apps/shell/src/
+├── components/ui/                      <-- SOLO PIEZAS GENÉRICAS Y REUTILIZABLES
+│   ├── index.ts
+│   ├── BannerModal.tsx                 (Modal genérico base)
+│   ├── Dialog.tsx                      (Diálogo genérico)
+│   ├── PillButton.tsx                  (Botón píldora estándar)
+│   ├── Tabs.tsx                        (Selector de pestañas genérico)
+│   ├── TextField.tsx                   (Campo de texto reutilizable)
+│   └── icons/
+│       └── GoogleIcon.tsx              (Ícono genérico)
+│
+├── features/                           <-- DOMINIOS DE NEGOCIO AISLADOS
+│   ├── auth/                           <-- Módulo de Autenticación
+│   │   ├── index.ts
+│   │   ├── login/
+│   │   │   ├── LoginView.tsx
+│   │   │   ├── LoginBackground.tsx
+│   │   │   ├── login.css
+│   │   │   └── components/
+│   │   │       ├── AccountStep.tsx
+│   │   │       ├── CredentialsStep.tsx
+│   │   │       └── AccountCard.tsx     (Movido aquí por ser exclusivo de login)
+│   │   └── services/
+│   │       └── auth.service.ts
+│   │
+│   ├── solicitudes/                    <-- Flujo completo del Solicitante
+│   │   ├── index.ts
+│   │   ├── types/                      (wizard.types.ts, tabla.types.ts)
+│   │   ├── hooks/                      (useSolicitudWizard.ts -> estado y envío a API)
+│   │   ├── services/                   (expedientes.service.ts -> llamadas fetch)
+│   │   ├── wizard/                     (SolicitudWizard, DatosGenerales, Expediente, Revisar)
+│   │   ├── tabla/                      (TableSolicitud, filas, seguimiento de progreso)
+│   │   └── components/                 (CreateRequestButton)
+│   │
+│   └── evaluacion/                     <-- Flujo completo del Comité CEI (HomeView2)
+│       ├── index.ts
+│       ├── types/                      (evaluacion.types.ts)
+│       ├── componentes/                (HomeView2, AzureTable, StatusExpediente)
+│       ├── modales/                    (ModalEvaluacion, IconDocumentoA)
+│       ├── mocks/                      (mockData.ts)
+│       └── services/
+│
+├── componentforlayout/                 <-- Layouts globales (Header, Footer, Sidebar, DragDocument)
+├── design-tokens/                      <-- Tokens de diseño y temas CSS
+├── designofuiparts/                    <-- Estilos de cascarón
+└── navigation/                         <-- Sesión y Guards de acceso
+
 
 
 flowchart TD

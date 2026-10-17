@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Rol {
@@ -27,13 +26,18 @@ model Usuario {
   creadoEn      DateTime     @default(now())
   actualizadoEn DateTime     @updatedAt
 
-  roles         UsuarioRol[]
-  solicitudes   Solicitud[]
-  expedientes   Expediente[]
-  evaluaciones  Evaluacion[]
-  firmas        Firma[]
-  historial     Historial[]
-  refreshTokens RefreshToken[]
+  roles               UsuarioRol[]
+  solicitudes         Solicitud[]
+  expedientes         Expediente[]
+  evaluaciones        Evaluacion[]
+  firmas              Firma[]
+  historial           Historial[]
+  refreshTokens       RefreshToken[]
+  tickets             Ticket[]            @relation("TicketSolicitante")
+  ticketsAsignados    Ticket[]            @relation("TicketAsignado")
+  ticketDocumentos    TicketDocumento[]   @relation("TicketDocumentoSubidoPor")
+  ticketObservaciones TicketObservacion[] @relation("TicketObservacionAutor")
+  ticketHistorial     TicketHistorial[]   @relation("TicketHistorialUsuario")
 
   @@map("usuarios")
 }
@@ -89,13 +93,14 @@ model Expediente {
   id            String           @id @default(cuid())
   codigo        String           @unique
   estado        EstadoExpediente @default(INICIADO)
-  solicitudId   String           @unique
-  gestorId      String
+  solicitudId   String?          @unique
+  gestorId      String?
   creadoEn      DateTime         @default(now())
   actualizadoEn DateTime         @updatedAt
 
-  solicitud    Solicitud    @relation(fields: [solicitudId], references: [id])
-  gestor       Usuario      @relation(fields: [gestorId], references: [id])
+  solicitud    Solicitud?   @relation(fields: [solicitudId], references: [id])
+  gestor       Usuario?     @relation(fields: [gestorId], references: [id])
+  ticket       Ticket?      @relation("ExpedienteTicket")
   documentos   Documento[]
   evaluaciones Evaluacion[]
   historial    Historial[]
@@ -104,15 +109,17 @@ model Expediente {
 }
 
 model Documento {
-  id           String   @id @default(cuid())
-  nombre       String
-  url          String
-  tipo         String
-  expedienteId String
-  creadoEn     DateTime @default(now())
+  id                String           @id @default(cuid())
+  nombre            String
+  url               String
+  tipo              String
+  expedienteId      String
+  ticketDocumentoId String?          @unique
+  creadoEn          DateTime         @default(now())
 
-  expediente Expediente @relation(fields: [expedienteId], references: [id])
-  votos      Voto[]
+  expediente      Expediente       @relation(fields: [expedienteId], references: [id])
+  ticketDocumento TicketDocumento? @relation(fields: [ticketDocumentoId], references: [id], onDelete: Restrict)
+  votos           Voto[]
 
   @@map("documentos")
 }
@@ -213,13 +220,13 @@ model Notificacion {
 
 model RefreshToken {
   id             String    @id @default(uuid())
-  tokenHash      String    @unique          // sha256 del token (nunca el token en claro)
-  familyId       String                      // misma cadena de rotación = un login/dispositivo
-  familiaInicio  DateTime                    // inicio de la familia (para el máximo absoluto)
+  tokenHash      String    @unique
+  familyId       String
+  familiaInicio  DateTime
   usuarioId      String
   revocado       Boolean   @default(false)
   revocadoEn     DateTime?
-  reemplazadoPor String?                     // id del token que lo sustituyó al rotar
+  reemplazadoPor String?
   expiraEn       DateTime
   creadoEn       DateTime  @default(now())
   userAgent      String?
@@ -233,3 +240,189 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
+// ============================================================================
+// DOMINIO DE MESA DE ENTRADA: TICKETMANAGER & DOCUMENTMANAGEMENT
+// ============================================================================
+
+enum EstadoTicket {
+  BORRADOR
+  REGISTRADO           // Transitorio: solo dentro de la transacción de submit
+  EN_REVISION_PREVIA   // Reservado (triaje futuro)
+  OBSERVADO            // Reservado
+  SUBSANADO            // Reservado
+  ADMITIDO             // Reservado
+  EXPEDIENTE_GENERADO  // Estado terminal de la mesa de entrada
+  RECHAZADO            // Reservado (rechazo administrativo futuro)
+  CANCELADO            // Borrador descartado (POST /:id/cancel)
+  RETIRADO             // Reservado (sin ruta HTTP)
+  ARCHIVADO            // Reservado (job futuro)
+}
+
+enum PrioridadTicket {
+  BAJA
+  NORMAL
+  ALTA
+  URGENTE
+}
+
+enum EstadoDocumentoAdjunto {
+  PENDIENTE_VALIDACION
+  CONFORME
+  OBSERVADO
+  REEMPLAZADO
+}
+
+model TipoTramite {
+  id         String                @id @default(cuid())
+  codigo     String                @unique
+  nombre     String
+  activo     Boolean               @default(true)
+  requisitos RequisitoDocumental[]
+  tickets    Ticket[]
+
+  @@map("tipos_tramite")
+}
+
+model RequisitoDocumental {
+  id             String      @id @default(cuid())
+  tipoTramiteId  String
+  tipoTramite    TipoTramite @relation(fields: [tipoTramiteId], references: [id])
+  tipoDocumental String
+  obligatorio    Boolean     @default(true)
+
+  @@unique([tipoTramiteId, tipoDocumental])
+  @@map("requisitos_documentales")
+}
+
+model Secuencia {
+  clave  String @id          // 'TCK-2026', 'EXP-2026'
+  ultimo Int    @default(0)
+
+  @@map("secuencias")
+}
+
+model Ticket {
+  id                    String          @id @default(cuid())
+  codigo                String          @unique @db.VarChar(20)   // TCK-YYYY-XXXX (generado por sistema)
+  titulo                String          @db.VarChar(500)
+  descripcion           String?         @db.Text
+  categoria             String?         @db.VarChar(100)
+  tipoTramiteId         String?
+  tipoTramite           TipoTramite?    @relation(fields: [tipoTramiteId], references: [id])
+  estado                EstadoTicket    @default(BORRADOR)
+  prioridad             PrioridadTicket @default(NORMAL)
+  claveDuplicidad       String?         @db.VarChar(500)          // Título + codigoSolicitante (fijado en submit)
+
+  // Paso 1: Datos Generales
+  investigadores        String[]        @default([])
+  unidadAcademica       String?         @default("NA") @db.VarChar(100)
+  tipoInvestigacion     String?         @db.VarChar(50)
+  tipoInvestigacionOtro String?         @db.VarChar(255)
+  fechaPresentacion     DateTime?                                 // Servidor lo fija en submit
+  financiamiento        String?         @db.VarChar(20)
+  financiamientoDetalle String?         @db.VarChar(255)
+
+  // Paso 2: Expediente
+  codigoSolicitante     String?         @db.VarChar(100)          // Referencia propia manual del solicitante
+  naturalezaProyecto    String?         @db.VarChar(255)
+  participantes         String[]        @default([])
+  modalidad             String?         @db.VarChar(100)
+  planProyecto          String?         @db.Text
+
+  solicitanteId         String
+  solicitante           Usuario         @relation("TicketSolicitante", fields: [solicitanteId], references: [id])
+  asignadoAId           String?
+  asignadoA             Usuario?        @relation("TicketAsignado", fields: [asignadoAId], references: [id])
+
+  // R3: ÚNICA FK de la relación 1:1 con Expediente
+  expedienteId          String?         @unique
+  expediente            Expediente?     @relation("ExpedienteTicket", fields: [expedienteId], references: [id])
+
+  metadata              Json?
+
+  // Reservados (SLA futuro)
+  plazoSubsanacion      DateTime?
+  prorrogaDias          Int             @default(0)
+  slaPausadoDesde       DateTime?
+  diasPausados          Int             @default(0)
+  plazoReconsideracion  DateTime?
+  fechaRespuesta        DateTime?
+
+  // Consenso del CEI
+  resultadoEvaluacionExterna String?    @db.VarChar(30)  // APROBADO | APROBADO_CON_OBSERVACIONES | NO_APROBADO
+  calificacionExternaJson    Json?
+  fechaRecepcionEvaluacion   DateTime?
+
+  creadoEn              DateTime        @default(now())
+  actualizadoEn         DateTime        @updatedAt
+  cerradoEn             DateTime?
+
+  documentos            TicketDocumento[]
+  historial             TicketHistorial[]
+  observaciones         TicketObservacion[]
+
+  @@index([solicitanteId])
+  @@index([asignadoAId])
+  @@index([estado])
+  @@map("tickets")
+}
+
+model TicketDocumento {
+  id              String                 @id @default(cuid())
+  ticketId        String
+  ticket          Ticket                 @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  nombreOriginal  String                 @db.VarChar(255)
+  nombreArchivo   String                 @db.VarChar(255)
+  tipoDocumental  String                 @db.VarChar(100)
+  mimeType        String                 @db.VarChar(100)
+  tamanioBytes    Int
+  hashSha256      String                 @db.Char(64)
+  storagePath     String                 @db.VarChar(1000)
+  version         Int                    @default(1)
+  estado          EstadoDocumentoAdjunto @default(PENDIENTE_VALIDACION)
+  subidoPorId     String
+  subidoPor       Usuario                @relation("TicketDocumentoSubidoPor", fields: [subidoPorId], references: [id])
+  observaciones   TicketObservacion[]
+  copiaExpediente Documento?             // Lado inverso de Documento.ticketDocumentoId (R5)
+  creadoEn        DateTime               @default(now())
+  actualizadoEn   DateTime               @updatedAt
+
+  @@unique([ticketId, tipoDocumental, version])
+  @@index([ticketId])
+  @@index([hashSha256])
+  @@map("ticket_documentos")
+}
+
+model TicketObservacion {
+  id          String           @id @default(cuid())
+  ticketId    String
+  ticket      Ticket           @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  autorId     String
+  autor       Usuario          @relation("TicketObservacionAutor", fields: [autorId], references: [id])
+  contenido   String           @db.Text
+  documentoId String?
+  documento   TicketDocumento? @relation(fields: [documentoId], references: [id], onDelete: SetNull)
+  resuelta    Boolean          @default(false)
+  creadoEn    DateTime         @default(now())
+  resueltaEn  DateTime?
+
+  @@index([ticketId])
+  @@map("ticket_observaciones")
+}
+
+model TicketHistorial {
+  id             String        @id @default(cuid())
+  ticketId       String
+  ticket         Ticket        @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  estadoAnterior EstadoTicket?
+  estadoNuevo    EstadoTicket
+  motivo         String?
+  accion         String        @db.VarChar(50)
+  usuarioId      String?       // null = SISTEMA
+  usuario        Usuario?      @relation("TicketHistorialUsuario", fields: [usuarioId], references: [id])
+  metadata       Json?
+  creadoEn       DateTime      @default(now())
+
+  @@index([ticketId])
+  @@map("ticket_historial")
+}

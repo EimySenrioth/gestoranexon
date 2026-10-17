@@ -26,15 +26,6 @@ export const USERS_BY_ROLE_SEED: SeedUser[] = [
     passwordHash: '$2b$10$wO3vR0K6l5aX8N3wQW6r7eE5n4K0f6F9q0V4u2o9n4y9x0p1q2r3s',
   },
   {
-    email: 'evaluador@estanciaperu.gob.pe',
-    nombre: 'Elena',
-    apellido: 'Paredes Castro',
-    rolId: 2,
-    rolCodigo: 'EVALUADOR',
-    cargo: 'Evaluador Externo / Revisor Temático',
-    passwordHash: '$2b$10$wO3vR0K6l5aX8N3wQW6r7eE5n4K0f6F9q0V4u2o9n4y9x0p1q2r3s',
-  },
-  {
     email: 'presidente.cei@estanciaperu.gob.pe',
     nombre: 'Ricardo',
     apellido: 'Palma Benavides',
