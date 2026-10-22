@@ -29,6 +29,36 @@ export function RevisarSolicitud({
       value: datosGenerales.titulo || "Sin especificar",
     },
     {
+      key: "tipoSolicitud",
+      label: "Tipo de Solicitud",
+      value: datosGenerales.tipoSolicitud || "NA",
+    },
+    {
+      key: "motivoSolicitud",
+      label: "Motivo de Solicitud",
+      value: datosGenerales.motivoSolicitud || "Sin especificar",
+    },
+    {
+      key: "audioAsunto",
+      label: "Registro de Audio (Asunto)",
+      value: datosGenerales.audioAsunto
+        ? `${datosGenerales.audioAsunto.name} (${(
+            datosGenerales.audioAsunto.size /
+            (1024 * 1024)
+          ).toFixed(2)} MB)`
+        : "No adjuntado",
+    },
+    {
+      key: "archivosAsunto",
+      label: "Archivos Adjuntos (Asunto)",
+      value:
+        datosGenerales.archivosAsunto && datosGenerales.archivosAsunto.length > 0
+          ? `${datosGenerales.archivosAsunto.length} archivo(s): ${datosGenerales.archivosAsunto
+              .map((f) => f.name)
+              .join(", ")}`
+          : "Ninguno adjuntado",
+    },
+    {
       key: "investigadores",
       label: "Investigador(es) Responsable(s)",
       value:

@@ -26,6 +26,8 @@ export async function guardarExpediente(
   const payload = {
     // Paso 1: Datos Generales
     titulo: data.datosGenerales.titulo?.trim(),
+    tipoSolicitud: data.datosGenerales.tipoSolicitud || "NA",
+    motivoSolicitud: data.datosGenerales.motivoSolicitud?.trim(),
     investigadores: data.datosGenerales.investigadores || [],
     unidadAcademica: data.datosGenerales.unidadAcademica || "NA",
     tipoInvestigacion: data.datosGenerales.tipoInvestigacion || undefined,
@@ -42,6 +44,24 @@ export async function guardarExpediente(
   };
 
   return await apiClient.post<ExpedienteResponse>("/api/v1/expedientes", payload);
+}
+
+/**
+ * Sube un archivo (audio o anexo) asociado a un expediente/ticket.
+ */
+export async function subirDocumentoExpediente(
+  ticketId: string,
+  file: File,
+  tipoDocumental: string
+): Promise<any> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("tipoDocumental", tipoDocumental);
+
+  return await apiClient.postFormData(
+    `/api/v1/documents/upload/ticket/${ticketId}`,
+    formData
+  );
 }
 
 /**

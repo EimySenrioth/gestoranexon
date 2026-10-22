@@ -7,3 +7,60 @@ export const DOCUMENTOS_EXPEDIENTE_OBLIGATORIOS = [
 
 export type DocumentoExpedienteObligatorio =
   (typeof DOCUMENTOS_EXPEDIENTE_OBLIGATORIOS)[number];
+
+export const TIPO_SOLICITUD_DEFAULT = 'NA';
+export const TIPOS_SOLICITUD_PERMITIDOS = ['NA'] as const;
+
+export const TIPO_DOC_AUDIO_ASUNTO = 'AUDIO_ASUNTO';
+export const PREFIJO_ANEXO_ASUNTO = 'ANEXO_ASUNTO_';
+
+// Audio rules
+export const MIME_AUDIO_PERMITIDOS = ['audio/mpeg', 'audio/mp3'];
+export const MAX_AUDIO_BYTES = 10 * 1024 * 1024; // 10 MB
+
+// Attachments rules (Office / PDF)
+export const MIME_DOCUMENTOS_PERMITIDOS = [
+  'application/pdf',
+  'application/msword', // .doc
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+  'application/vnd.ms-excel', // .xls
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+  'application/vnd.ms-powerpoint', // .ppt
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+];
+
+export const EXTENSIONES_DOCUMENTOS_PERMITIDAS = [
+  '.pdf',
+  '.doc',
+  '.docx',
+  '.xls',
+  '.xlsx',
+  '.ppt',
+  '.pptx',
+];
+
+export const EXTENSIONES_PROHIBIDAS = [
+  '.exe',
+  '.bat',
+  '.cmd',
+  '.msi',
+  '.sh',
+  '.bin',
+  '.js',
+  '.mjs',
+  '.ts',
+  '.php',
+  '.html',
+  '.htm',
+  '.vbs',
+  '.zip',
+  '.rar',
+  '.7z',
+  '.tar',
+  '.gz',
+];
+
+export const MAX_ANEXO_INDIVIDUAL_BYTES = 25 * 1024 * 1024; // 25 MB
+export const MAX_TOTAL_ANEXOS_BYTES = 50 * 1024 * 1024; // 50 MB
+export const MAX_CANTIDAD_ANEXOS = 5;
+

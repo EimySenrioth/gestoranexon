@@ -6,6 +6,7 @@ import {
   IconAgregarInvestigador,
   IconChevronDown,
 } from "./WizardIcons";
+import { AsuntoPedidoSection } from "./AsuntoPedidoSection";
 
 interface DatosGeneralesFormProps {
   initialData?: Partial<DatosGeneralesFormData>;
@@ -20,6 +21,10 @@ export function DatosGeneralesForm({
 }: DatosGeneralesFormProps) {
   const [formData, setFormData] = useState<DatosGeneralesFormData>({
     titulo: initialData?.titulo || "",
+    tipoSolicitud: initialData?.tipoSolicitud || "NA",
+    motivoSolicitud: initialData?.motivoSolicitud || "",
+    audioAsunto: initialData?.audioAsunto || null,
+    archivosAsunto: initialData?.archivosAsunto || [],
     investigadores: initialData?.investigadores || [""],
     unidadAcademica: initialData?.unidadAcademica || "NA",
     tipoInvestigacion: initialData?.tipoInvestigacion || "",
@@ -89,7 +94,69 @@ export function DatosGeneralesForm({
           </div>
         </div>
 
-        {/* 2. Investigador(es) Responsable(s) */}
+        {/* 2. Tipo de Solicitud */}
+        <div className="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-6">
+          <label
+            htmlFor="tipo-solicitud"
+            className="md:col-span-5 text-base md:text-lg font-medium text-black"
+            style={{ fontFamily: "var(--ui-font-family-lagu, sans-serif)" }}
+          >
+            Tipo de solicitud
+          </label>
+          <div className="md:col-span-7 relative">
+            <select
+              id="tipo-solicitud"
+              value={formData.tipoSolicitud || "NA"}
+              disabled
+              className="w-full h-12 pl-4 pr-10 rounded-2xl border-2 border-black/80 bg-gray-100 text-black outline-none appearance-none text-sm md:text-base cursor-not-allowed font-medium"
+              style={{ fontFamily: "var(--ui-font-family-lagu, sans-serif)" }}
+            >
+              <option value="NA">NA</option>
+            </select>
+            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
+              <IconChevronDown size={20} />
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Motivo de Solicitud */}
+        <div className="grid grid-cols-1 md:grid-cols-12 items-start gap-2 md:gap-6">
+          <div className="md:col-span-5 flex flex-col gap-1">
+            <label
+              htmlFor="motivo-solicitud"
+              className="text-base md:text-lg font-medium text-black"
+              style={{ fontFamily: "var(--ui-font-family-lagu, sans-serif)" }}
+            >
+              Motivo de solicitud
+            </label>
+            <p className="text-xs text-gray-500">
+              Especifique la justificación y objetivo principal del trámite (mínimo 5 caracteres).
+            </p>
+          </div>
+          <div className="md:col-span-7 flex flex-col gap-1">
+            <textarea
+              id="motivo-solicitud"
+              rows={4}
+              value={formData.motivoSolicitud}
+              onChange={(e) => updateField("motivoSolicitud", e.target.value)}
+              placeholder="Describa de forma detallada el motivo de la solicitud..."
+              className="w-full p-4 rounded-2xl border-2 border-black/80 bg-white text-black outline-none transition-all focus:border-black focus:ring-1 focus:ring-black text-sm md:text-base resize-y min-h-[100px]"
+              style={{ fontFamily: "var(--ui-font-family-lagu, sans-serif)" }}
+            />
+            <div className="flex justify-between items-center text-[11px] text-gray-500 px-1">
+              <span>
+                {formData.motivoSolicitud.trim().length < 5 ? (
+                  <span className="text-amber-600 font-medium">Requerido (mín. 5 caracteres)</span>
+                ) : (
+                  <span className="text-emerald-600 font-medium">✓ Correcto</span>
+                )}
+              </span>
+              <span>{formData.motivoSolicitud.length} / 5000</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Investigador(es) Responsable(s) */}
         <div className="grid grid-cols-1 md:grid-cols-12 items-start md:items-center gap-2 md:gap-6">
           <label
             htmlFor="investigador-responsable"
@@ -264,6 +331,14 @@ export function DatosGeneralesForm({
           </div>
         </div>
       </div>
+
+      {/* Sección - ASUNTO DEL PEDIDO */}
+      <AsuntoPedidoSection
+        audioFile={formData.audioAsunto}
+        onAudioChange={(file) => updateField("audioAsunto", file)}
+        archivos={formData.archivosAsunto || []}
+        onArchivosChange={(files) => updateField("archivosAsunto", files)}
+      />
     </div>
   );
 }

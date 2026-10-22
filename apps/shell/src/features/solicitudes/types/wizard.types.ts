@@ -9,6 +9,10 @@ export interface WizardStep {
 
 export interface DatosGeneralesFormData {
   titulo: string;
+  tipoSolicitud: string;
+  motivoSolicitud: string;
+  audioAsunto?: File | null;
+  archivosAsunto?: File[];
   investigadores: string[];
   unidadAcademica: string;
   tipoInvestigacion?: string;

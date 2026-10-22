@@ -314,6 +314,8 @@ model Ticket {
   claveDuplicidad       String?         @db.VarChar(500)          // Título + codigoSolicitante (fijado en submit)
 
   // Paso 1: Datos Generales
+  tipoSolicitud         String          @default("NA") @db.VarChar(100)
+  motivoSolicitud       String?         @db.Text
   investigadores        String[]        @default([])
   unidadAcademica       String?         @default("NA") @db.VarChar(100)
   tipoInvestigacion     String?         @db.VarChar(50)

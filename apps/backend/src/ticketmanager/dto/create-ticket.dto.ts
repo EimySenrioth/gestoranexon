@@ -43,6 +43,21 @@ export class CreateTicketDto {
   titulo: string;
 
   @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' && value.trim() !== '' ? value.trim() : 'NA',
+  )
+  @IsString()
+  @MaxLength(100)
+  tipoSolicitud?: string;
+
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsString()
+  @IsNotEmpty({ message: 'El motivo de solicitud es obligatorio' })
+  @MinLength(5, { message: 'El motivo debe tener al menos 5 caracteres' })
+  @MaxLength(5000, { message: 'El motivo no puede exceder los 5000 caracteres' })
+  motivoSolicitud: string;
+
+  @IsOptional()
   @Transform(limpiarLista)
   @IsArray()
   @ArrayMaxSize(20, { message: 'No se permiten más de 20 investigadores' })

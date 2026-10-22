@@ -14,6 +14,15 @@ import type { AuthenticatedUser } from '../common/guards/jwt-auth.guard.js';
 import { ROLES_CEI } from '../common/constants/roles.constants.js';
 import { esErrorConexionBD } from '../common/utils/db-error.util.js';
 import { MOCK_DEV_TICKETS } from '../ticketmanager/mocks/ticket-dev.store.js';
+import {
+  TIPO_DOC_AUDIO_ASUNTO,
+  PREFIJO_ANEXO_ASUNTO,
+  MIME_AUDIO_PERMITIDOS,
+  MAX_AUDIO_BYTES,
+  EXTENSIONES_DOCUMENTOS_PERMITIDAS,
+  EXTENSIONES_PROHIBIDAS,
+  MAX_ANEXO_INDIVIDUAL_BYTES,
+} from '../common/constants/expedientes.constants.js';
 
 
 @Injectable()
@@ -30,8 +39,9 @@ export class DocumentManagementService {
   }
 
   /**
-   * Sube un documento asociado a un ticket en estado BORRADOR:
-   * - Verifica que el usuario sea el dueño del ticket y esté en BORRADOR.
+   * Sube un documento asociado a un ticket en estado BORRADOR o REGISTRADO:
+   * - Verifica que el usuario sea el dueño del ticket y esté en BORRADOR o REGISTRADO.
+   * - Valida seguridad de extensiones y tamaños máximos.
    * - Calcula SHA-256 y persiste el archivo en disco.
    * - R1: Si ya existe un documento vigente para el mismo tipoDocumental,
    *   lo marca como REEMPLAZADO e incrementa la versión en una transacción atómica.
@@ -47,6 +57,40 @@ export class DocumentManagementService {
     }
 
     const tipoDocumental = tipoDocumentalRaw.trim().toUpperCase();
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    // Validaciones de seguridad por extensión prohibida
+    if (EXTENSIONES_PROHIBIDAS.includes(ext)) {
+      throw new BadRequestException(
+        `El tipo de archivo "${ext}" no está permitido por motivos de seguridad.`,
+      );
+    }
+
+    // Validación de Audio
+    if (tipoDocumental === TIPO_DOC_AUDIO_ASUNTO) {
+      if (ext !== '.mp3' && !MIME_AUDIO_PERMITIDOS.includes(file.mimetype || '')) {
+        throw new BadRequestException('El archivo de audio debe ser en formato MP3.');
+      }
+      if (file.size > MAX_AUDIO_BYTES) {
+        throw new BadRequestException(
+          `El audio excede el límite máximo permitido de ${MAX_AUDIO_BYTES / (1024 * 1024)} MB.`,
+        );
+      }
+    }
+
+    // Validación de Anexos del Asunto del Pedido (PDF / Office)
+    if (tipoDocumental.startsWith(PREFIJO_ANEXO_ASUNTO)) {
+      if (!EXTENSIONES_DOCUMENTOS_PERMITIDAS.includes(ext)) {
+        throw new BadRequestException(
+          'Extensión no permitida para anexos. Formatos permitidos: PDF, Word (.doc, .docx), Excel (.xls, .xlsx) o PowerPoint (.ppt, .pptx).',
+        );
+      }
+      if (file.size > MAX_ANEXO_INDIVIDUAL_BYTES) {
+        throw new BadRequestException(
+          `El archivo adjunto supera el tamaño máximo permitido de ${MAX_ANEXO_INDIVIDUAL_BYTES / (1024 * 1024)} MB.`,
+        );
+      }
+    }
 
     // 1. Verificación previa de pertenencia y estado
     try {
@@ -59,9 +103,9 @@ export class DocumentManagementService {
         throw new NotFoundException('Solicitud no encontrada');
       }
 
-      if (ticket.estado !== 'BORRADOR') {
+      if (ticket.estado !== 'BORRADOR' && ticket.estado !== 'REGISTRADO') {
         throw new ConflictException(
-          `No se pueden adjuntar documentos a una solicitud en estado ${ticket.estado}. Solo permitido en BORRADOR.`,
+          `No se pueden adjuntar documentos a una solicitud en estado ${ticket.estado}. Solo permitido en BORRADOR o REGISTRADO.`,
         );
       }
 
@@ -76,14 +120,18 @@ export class DocumentManagementService {
       // 3. Transacción atómica R1: reemplazo de versión previa
       return await this.prisma.$transaction(async (tx) => {
         const ticketBloqueado = await tx.ticket.findFirst({
-          where: { id: ticketId, solicitanteId: userId, estado: 'BORRADOR' },
+          where: {
+            id: ticketId,
+            solicitanteId: userId,
+            estado: { in: ['BORRADOR', 'REGISTRADO'] },
+          },
           select: { id: true },
         });
 
         if (!ticketBloqueado) {
           await fs.promises.unlink(storagePath).catch(() => {});
           throw new ConflictException(
-            'La solicitud ya no se encuentra en estado BORRADOR',
+            'La solicitud no se encuentra en estado BORRADOR o REGISTRADO',
           );
         }
 
@@ -132,9 +180,9 @@ export class DocumentManagementService {
         throw new NotFoundException('Solicitud no encontrada');
       }
 
-      if (ticket.estado !== 'BORRADOR') {
+      if (ticket.estado !== 'BORRADOR' && ticket.estado !== 'REGISTRADO') {
         throw new ConflictException(
-          `No se pueden adjuntar documentos a una solicitud en estado ${ticket.estado}. Solo permitido en BORRADOR.`,
+          `No se pueden adjuntar documentos a una solicitud en estado ${ticket.estado}. Solo permitido en BORRADOR o REGISTRADO.`,
         );
       }
 

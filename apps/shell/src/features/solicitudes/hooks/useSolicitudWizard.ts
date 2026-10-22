@@ -10,6 +10,7 @@ import {
 } from "../types/wizard.types";
 import {
   guardarExpediente,
+  subirDocumentoExpediente,
   type ExpedienteResponse,
 } from "../services/expedientes.service";
 
@@ -32,6 +33,10 @@ export function useSolicitudWizard({
   // Estado del paso 1: Datos Generales
   const [formData, setFormData] = useState<DatosGeneralesFormData>({
     titulo: "",
+    tipoSolicitud: "NA",
+    motivoSolicitud: "",
+    audioAsunto: null,
+    archivosAsunto: [],
     investigadores: [],
     unidadAcademica: "NA",
     tipoInvestigacion: "",
@@ -61,6 +66,14 @@ export function useSolicitudWizard({
 
   const handleContinue = async () => {
     if (currentStep === "datos-generales") {
+      if (!formData.titulo.trim()) {
+        setSubmitError("El título del proyecto es obligatorio.");
+        return;
+      }
+      if (!formData.motivoSolicitud.trim() || formData.motivoSolicitud.trim().length < 5) {
+        setSubmitError("El motivo de solicitud es obligatorio y debe tener al menos 5 caracteres.");
+        return;
+      }
       setSubmitError(null);
       setCurrentStep("expediente");
     } else if (currentStep === "expediente") {
@@ -71,11 +84,39 @@ export function useSolicitudWizard({
         setIsSubmitting(true);
         setSubmitError(null);
 
-        // Envío directo a PostgreSQL a través de nuestro servicio dedicado
+        // 1. Envío directo a PostgreSQL a través de nuestro servicio dedicado
         const respuesta = await guardarExpediente({
           datosGenerales: formData,
           expediente: expedienteData,
         });
+
+        // 2. Subida de audio opcional a ticket_documentos
+        if (formData.audioAsunto && respuesta.id) {
+          try {
+            await subirDocumentoExpediente(
+              respuesta.id,
+              formData.audioAsunto,
+              "AUDIO_ASUNTO"
+            );
+          } catch (audioErr) {
+            console.error("Error al subir audio adjunto:", audioErr);
+          }
+        }
+
+        // 3. Subida de anexos opcionales a ticket_documentos
+        if (formData.archivosAsunto && formData.archivosAsunto.length > 0 && respuesta.id) {
+          const uploadPromises = formData.archivosAsunto.map((file, idx) =>
+            subirDocumentoExpediente(
+              respuesta.id,
+              file,
+              `ANEXO_ASUNTO_${idx + 1}`
+            ).catch((err) => {
+              console.error(`Error al subir anexo ${file.name}:`, err);
+              return null;
+            })
+          );
+          await Promise.allSettled(uploadPromises);
+        }
 
         setExpedienteCreado(respuesta);
         setCurrentStep("envio");

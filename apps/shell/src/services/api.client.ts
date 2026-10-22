@@ -47,10 +47,15 @@ export async function apiRequest<T = unknown>(
   const session = typeof window !== "undefined" ? loadStoredSession() : null;
   const token = session?.token;
 
+  const isFormData = typeof FormData !== "undefined" && restOptions.body instanceof FormData;
+
   const defaultHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
     "X-Requested-With": "EstanciaPeru",
   };
+
+  if (!isFormData) {
+    defaultHeaders["Content-Type"] = "application/json";
+  }
 
   if (token) {
     defaultHeaders["Authorization"] = `Bearer ${token}`;
@@ -102,6 +107,13 @@ export const apiClient = {
       ...options,
       method: "POST",
       body: body ? JSON.stringify(body) : undefined,
+    }),
+
+  postFormData: <T>(endpoint: string, formData: FormData, options?: RequestOptions) =>
+    apiRequest<T>(endpoint, {
+      ...options,
+      method: "POST",
+      body: formData,
     }),
 
   put: <T>(endpoint: string, body?: unknown, options?: RequestOptions) =>
