@@ -10,7 +10,10 @@ import {
 } from '@nestjs/common';
 import { ExpedientesService } from './expedientes.service.js';
 import { CreateTicketDto } from '../ticketmanager/dto/index.js';
-import { QueryMisSolicitudesDto } from './dto/query-mis-solicitudes.dto.js';
+import {
+  QueryMisSolicitudesDto,
+  AsignarExpedienteDto,
+} from './dto/index.js';
 import { JwtAuthGuard, RolesGuard } from '../common/guards/index.js';
 import { CurrentUser, Roles } from '../common/decorators/index.js';
 
@@ -47,6 +50,65 @@ export class ExpedientesController {
   }
 
   /**
+   * Bandeja de entrada para miembros del Comité de Ética (CEI):
+   * Lista los expedientes asignados al miembro autenticado (Presidente, Vicepresidente,
+   * Secretaría Técnica, Secretaría Administrativa o Vocal).
+   */
+  @Get('asignados-a-mi')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(
+    'PRESIDENTE_CEI',
+    'VICEPRESIDENTE_CEI',
+    'SECRETARIA_TECNICA_CEI',
+    'SECRETARIA_ADMINISTRATIVA_CEI',
+    'VOCAL_CEI',
+  )
+  async listarAsignadosAMi(
+    @CurrentUser('id') miembroCeiId: string,
+    @Query() query: QueryMisSolicitudesDto,
+  ) {
+    return this.expedientesService.listarAsignadosAMiembroCei(miembroCeiId, query);
+  }
+
+  /**
+   * Lista los miembros activos del CEI disponibles para asignación con su carga actual.
+   * Reservado para roles con facultad de gestión o presidencia.
+   */
+  @Get('miembros-cei-disponibles')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(
+    'ADMINISTRADOR',
+    'PRESIDENTE_CEI',
+    'SECRETARIA_TECNICA_CEI',
+    'SECRETARIA_ADMINISTRATIVA_CEI',
+  )
+  async listarMiembrosCeiDisponibles() {
+    return this.expedientesService.listarMiembrosCeiDisponibles();
+  }
+
+  /**
+   * [PRESERVADO PARA EL FUTURO / REASIGNACIÓN ADMINISTRATIVA]
+   * Permite a la Presidencia o Administración reasignar de forma manual un expediente
+   * a un miembro específico del CEI (por licencias, conflicto de interés o sustitución).
+   */
+  @Post(':id/asignar')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(
+    'ADMINISTRADOR',
+    'PRESIDENTE_CEI',
+    'SECRETARIA_TECNICA_CEI',
+    'SECRETARIA_ADMINISTRATIVA_CEI',
+  )
+  async asignarExpediente(
+    @Param('id') id: string,
+    @Body() dto: AsignarExpedienteDto,
+    @CurrentUser('id') adminId: string,
+  ) {
+    return this.expedientesService.asignarExpediente(id, dto, adminId);
+  }
+
+  /**
    * Lista TODOS los datos del expediente/trámite (sin proyección, incluye documentos completos).
    * NOTA: Este endpoint está reservado para los otros 4 roles (Comité / Mesa de Entrada / Gestión).
    * El rol Solicitante consume de forma eficiente y segura: GET /api/v1/expedientes/mis-solicitudes.
@@ -66,4 +128,5 @@ export class ExpedientesController {
     return this.expedientesService.obtenerPorId(id);
   }
 }
+
 

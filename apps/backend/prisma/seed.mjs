@@ -18,89 +18,65 @@ const roles = [
 ];
 
 const users = [
+  // Solicitante Oficial
   {
     id: 'usr_solicitante_1',
     email: 'solicitante@estanciaperu.gob.pe',
     nombre: 'Carlos',
     apellido: 'Mendoza Rivera',
+    password: '',
     rolId: 1,
   },
-  {
-    id: 'usr_evaluador_1',
-    email: 'evaluador@estanciaperu.gob.pe',
-    nombre: 'Elena',
-    apellido: 'Paredes Castro',
-    rolId: 2,
-  },
+
+  // 5 Evaluadores Oficiales del CEI
   {
     id: 'usr_presidente_1',
     email: 'presidente.cei@estanciaperu.gob.pe',
-    nombre: 'Ricardo',
+    nombre: 'Dr. Ricardo',
     apellido: 'Palma Benavides',
+    password: 'Estancia2026!#',
     rolId: 3,
   },
   {
     id: 'usr_vicepresidente_1',
     email: 'vicepresidente.cei@estanciaperu.gob.pe',
-    nombre: 'Rosa',
+    nombre: 'Dra. Rosa',
     apellido: 'Alva Montoya',
+    password: 'Estancia2026!#',
     rolId: 4,
   },
   {
     id: 'usr_secretaria_tec_1',
     email: 'secretaria.tecnica@estanciaperu.gob.pe',
-    nombre: 'Andrés',
+    nombre: 'Mg. Andrés',
     apellido: 'Salazar Córdova',
+    password: 'Estancia2026!#',
     rolId: 5,
   },
   {
     id: 'usr_secretaria_adm_1',
     email: 'secretaria.admin@estanciaperu.gob.pe',
-    nombre: 'Patricia',
+    nombre: 'Lic. Patricia',
     apellido: 'Vega Zeballos',
+    password: 'Estancia2026!#',
     rolId: 6,
   },
   {
     id: 'usr_vocal_1',
     email: 'vocal.cei@estanciaperu.gob.pe',
-    nombre: 'Manuel',
+    nombre: 'Dr. Manuel',
     apellido: 'Quispe Huamán',
+    password: 'Estancia2026!#',
     rolId: 7,
   },
-  {
-    id: 'usr_admin_1',
-    email: 'admin@estanciaperu.gob.pe',
-    nombre: 'Administrador',
-    apellido: 'Principal',
-    rolId: 8,
-  },
-  // Correos alias/de prueba adicionales
-  {
-    id: 'usr_solicitante_2',
-    email: 'solicitante@estancia.pe',
-    nombre: 'Investigador',
-    apellido: 'Principal',
-    rolId: 1,
-  },
-  {
-    id: 'usr_presidente_2',
-    email: 'presidente@estancia.pe',
-    nombre: 'Presidente',
-    apellido: 'CEI',
-    rolId: 3,
-  },
-  {
-    id: 'usr_secretaria_2',
-    email: 'secretaria@estancia.pe',
-    nombre: 'Secretaria',
-    apellido: 'Tecnica',
-    rolId: 5,
-  },
+
+  // Administrador Oficial
   {
     id: 'usr_admin_2',
     email: 'admin@estancia.pe',
     nombre: 'Administrador',
     apellido: 'Sistema',
+    password: '',
     rolId: 8,
   },
 ];
