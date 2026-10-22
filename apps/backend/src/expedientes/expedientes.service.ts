@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateTicketDto } from '../ticketmanager/dto/index.js';
 import {
@@ -6,6 +6,10 @@ import {
   formatearCorrelativo,
 } from '../common/utils/correlativo.util.js';
 import { normalizarCondicionales } from '../common/utils/duplicidad.util.js';
+import { QueryMisSolicitudesDto } from './dto/query-mis-solicitudes.dto.js';
+import { PaginadoResultadoDto, SolicitudFilaDto } from './dto/solicitud-fila.dto.js';
+import { mapTicketToSolicitudFila } from './mappers/solicitud-estado.mapper.js';
+import { ExpedienteNoEncontradoException } from '../common/errors/index.js';
 
 export interface ExpedienteCreado {
   id: string;
@@ -88,7 +92,57 @@ export class ExpedientesService {
   }
 
   /**
+   * Lista las solicitudes paginadas y proyectadas para el rol de Solicitante.
+   * Filtra estrictamente por solicitanteId para garantizar propiedad de los datos.
+   */
+  async listarMisSolicitudes(
+    solicitanteId: string,
+    query: QueryMisSolicitudesDto,
+  ): Promise<PaginadoResultadoDto<SolicitudFilaDto>> {
+    const page = query.page && query.page > 0 ? query.page : 1;
+    const limit = query.limit && query.limit > 0 ? query.limit : 10;
+    const skip = (page - 1) * limit;
+
+    const where = { solicitanteId };
+
+    const [total, rows] = await this.prisma.$transaction([
+      this.prisma.ticket.count({ where }),
+      this.prisma.ticket.findMany({
+        where,
+        select: {
+          id: true,
+          codigo: true,
+          estado: true,
+          creadoEn: true,
+          resultadoEvaluacionExterna: true,
+          expediente: {
+            select: {
+              codigo: true,
+              estado: true,
+            },
+          },
+        },
+        orderBy: [{ creadoEn: 'desc' }, { id: 'desc' }],
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    const items = rows.map((r) => mapTicketToSolicitudFila(r));
+    const totalPages = Math.ceil(total / limit) || 1;
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      totalPages,
+    };
+  }
+
+  /**
    * Lista todos los expedientes / trámites creados por un solicitante.
+   * NOTA: Utilizado para vistas completas de otros roles.
    */
   async listarPorSolicitante(solicitanteId: string) {
     return await this.prisma.ticket.findMany({
@@ -117,7 +171,7 @@ export class ExpedientesService {
     });
 
     if (!ticket) {
-      throw new NotFoundException(`Expediente con ID ${id} no encontrado.`);
+      throw new ExpedienteNoEncontradoException(id);
     }
 
     return ticket;

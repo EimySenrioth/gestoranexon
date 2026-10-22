@@ -1,3 +1,13 @@
+export type EvaluacionEstado =
+  | "En espera"
+  | "Entregada"
+  | "ENTREGADA"
+  | "En revisión"
+  | "Aprobada"
+  | "Observada"
+  | "Rechazada"
+  | "Pendiente";
+
 export type ProgresoEstado =
   | "recibido"
   | "observado por forma"
@@ -6,36 +16,22 @@ export type ProgresoEstado =
   | "en evaluación"
   | "en deliberación"
   | "dictaminado"
-  | "archivado";
+  | "archivado"
+  | "pendiente";
 
 export interface SolicitudItem {
   id: string;
+  ticketId?: string;
   fecha: string;
-  finalizado: "NO" | "Si";
-  evaluacion: "En espera" | "ENTREGADA" | "En revisión" | "Aprobada" | "Observada";
+  finalizado: boolean | "Si" | "NO";
+  evaluacion: EvaluacionEstado;
   progreso: ProgresoEstado;
 }
 
-export const MOCK_SOLICITUDES: SolicitudItem[] = [
-  {
-    id: "UID Solicitud",
-    fecha: "9/26/2026",
-    finalizado: "NO",
-    evaluacion: "En espera",
-    progreso: "en evaluación",
-  },
-  {
-    id: "UID Solicitud",
-    fecha: "9/26/2026",
-    finalizado: "Si",
-    evaluacion: "ENTREGADA",
-    progreso: "dictaminado",
-  },
-  {
-    id: "SOL-2026-003",
-    fecha: "10/02/2026",
-    finalizado: "NO",
-    evaluacion: "En revisión",
-    progreso: "en deliberación",
-  },
-];
+export interface PaginadoResultado<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

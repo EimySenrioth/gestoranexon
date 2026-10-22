@@ -16,7 +16,20 @@ export function TableSolicitudRow({
   onVerExpediente,
   className = "",
 }: TableSolicitudRowProps) {
-  const isFinalizado = solicitud.finalizado === "Si";
+  const isFinalizado =
+    solicitud.finalizado === true || solicitud.finalizado === "Si";
+  const textoFinalizado = isFinalizado ? "Sí" : "No";
+
+  let fechaLegible = solicitud.fecha;
+  if (solicitud.fecha && !isNaN(Date.parse(solicitud.fecha))) {
+    const fechaObj = new Date(solicitud.fecha);
+    fechaLegible = fechaObj.toLocaleDateString("es-PE", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "UTC",
+    });
+  }
 
   return (
     <div
@@ -31,12 +44,12 @@ export function TableSolicitudRow({
 
         {/* 2. Fecha */}
         <div className="text-center font-normal text-black text-sm md:text-base">
-          {solicitud.fecha}
+          {fechaLegible}
         </div>
 
         {/* 3. Finalizado */}
         <div className="text-center font-medium text-black text-sm md:text-base">
-          {solicitud.finalizado}
+          {textoFinalizado}
         </div>
 
         {/* 4. Evaluación (Cápsula redondeada con borde) */}

@@ -2,11 +2,11 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { ROLES_KEY } from '../decorators/roles.decorator.js';
+import { RolesNoAsignadosException, PermisosInsuficientesException } from '../errors/index.js';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -24,7 +24,7 @@ export class RolesGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest<Request>();
     if (!user || !user.roles) {
-      throw new ForbiddenException('Acceso denegado: usuario sin roles asignados');
+      throw new RolesNoAsignadosException();
     }
 
     const hasRole = requiredRoles.some((role) =>
@@ -32,7 +32,7 @@ export class RolesGuard implements CanActivate {
     );
 
     if (!hasRole) {
-      throw new ForbiddenException('Acceso denegado: permisos insuficientes para esta operación');
+      throw new PermisosInsuficientesException();
     }
 
     return true;

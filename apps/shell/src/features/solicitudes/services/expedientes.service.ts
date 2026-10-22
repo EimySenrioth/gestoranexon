@@ -5,6 +5,12 @@
 
 import { apiClient } from "@/services/api.client";
 import { SolicitudCompletaData } from "../types/wizard.types";
+import { SolicitudItem, PaginadoResultado } from "../types/tabla.types";
+
+export interface QueryMisSolicitudesParams {
+  page?: number;
+  limit?: number;
+}
 
 export interface ExpedienteResponse {
   id: string;
@@ -66,6 +72,7 @@ export async function subirDocumentoExpediente(
 
 /**
  * Consulta la lista de expedientes registrados en PostgreSQL para el usuario autenticado.
+ * (Mantenido para compatibilidad con otros roles o vistas completas).
  */
 export async function listarExpedientes(): Promise<ExpedienteResponse[]> {
   try {
@@ -77,8 +84,22 @@ export async function listarExpedientes(): Promise<ExpedienteResponse[]> {
 }
 
 /**
+ * Consulta la lista paginada de solicitudes del solicitante actual
+ * optimizada exclusivamente para las columnas de la tabla.
+ */
+export async function listarMisSolicitudes(
+  params: QueryMisSolicitudesParams = { page: 1, limit: 10 }
+): Promise<PaginadoResultado<SolicitudItem>> {
+  return await apiClient.get<PaginadoResultado<SolicitudItem>>(
+    "/api/v1/expedientes/mis-solicitudes",
+    { params: { page: params.page, limit: params.limit } }
+  );
+}
+
+/**
  * Consulta el detalle de un expediente por su ID.
  */
 export async function obtenerExpediente(id: string): Promise<any> {
   return await apiClient.get(`/api/v1/expedientes/${id}`);
 }
+

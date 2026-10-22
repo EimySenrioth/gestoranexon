@@ -3,7 +3,7 @@
  * Centraliza headers institucionales, manejo de cookies/tokens y parseo de errores.
  */
 
-import { loadStoredSession } from "@/navigation/session/session.store";
+import { loadStoredSession, clearStoredSession } from "@/navigation/session/session.store";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
@@ -85,6 +85,10 @@ export async function apiRequest<T = unknown>(
       }
     } catch {
       // Ignorar fallo de parseo JSON en errores HTTP 404/500 planos
+    }
+
+    if (response.status === 401 && typeof window !== "undefined") {
+      clearStoredSession();
     }
 
     throw new ApiError(response.status, errorMsg, errorData);

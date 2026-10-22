@@ -4,12 +4,15 @@ import React from "react";
 import { SolicitudItem } from "../types/tabla.types";
 import { TableSolicitudHeader } from "./TableSolicitudHeader";
 import { TableSolicitudRow } from "./TableSolicitudRow";
+import { TablePaginacion } from "./TablePaginacion";
 import { InformacionSolicitudProgreso } from "./InformacionSolicitudProgreso";
 import { InformacionExpediente } from "./InformacionExpediente";
 import { useSolicitudesTabla } from "../hooks/useSolicitudesTabla";
 
 interface TableSolicitudProps {
   initialSolicitudes?: SolicitudItem[];
+  initialPage?: number;
+  limit?: number;
   onConsultarEstatus?: (solicitud: SolicitudItem) => void;
   onVerExpediente?: (solicitud: SolicitudItem) => void;
   className?: string;
@@ -17,20 +20,30 @@ interface TableSolicitudProps {
 
 export function TableSolicitud({
   initialSolicitudes,
+  initialPage = 1,
+  limit = 10,
   onConsultarEstatus,
   onVerExpediente,
   className = "",
 }: TableSolicitudProps) {
   const {
     solicitudes,
+    total,
+    page,
+    totalPages,
+    cambiarPagina,
     isLoading,
+    error,
     vista,
     solicitudSeleccionada,
     handleConsultar,
     handleVerExpediente,
     handleVolver,
+    recargar,
   } = useSolicitudesTabla({
     initialSolicitudes,
+    initialPage,
+    limit,
     onConsultarEstatus,
     onVerExpediente,
   });
@@ -84,6 +97,19 @@ export function TableSolicitud({
               <div className="w-full py-12 text-center text-gray-400 font-medium animate-pulse">
                 Cargando solicitudes...
               </div>
+            ) : error ? (
+              <div className="w-full py-8 px-6 text-center rounded-2xl border-2 border-red-200 bg-red-50/60 flex flex-col items-center gap-3">
+                <p className="text-sm md:text-base font-semibold text-red-700">
+                  {error}
+                </p>
+                <button
+                  type="button"
+                  onClick={recargar}
+                  className="px-5 py-1.5 rounded-full border-2 border-black/80 bg-white text-black hover:bg-black hover:text-white text-xs md:text-sm font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+                >
+                  Reintentar
+                </button>
+              </div>
             ) : solicitudes.length > 0 ? (
               solicitudes.map((sol, index) => (
                 <TableSolicitudRow
@@ -99,6 +125,17 @@ export function TableSolicitud({
               </div>
             )}
           </div>
+
+          {/* 4. Paginación institucional */}
+          {!error && !isLoading && solicitudes.length > 0 && (
+            <TablePaginacion
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              onPageChange={cambiarPagina}
+              disabled={isLoading}
+            />
+          )}
         </>
       )}
     </div>
