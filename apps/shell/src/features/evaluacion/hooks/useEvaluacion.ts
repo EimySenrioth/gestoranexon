@@ -10,16 +10,24 @@ import { useDebounce } from "@/hooks/useDebounce";
 
 interface UseEvaluacionOptions {
   initialSolicitudes?: SolicitudFirmaItem[];
+  initialPage?: number;
+  limit?: number;
   onEvaluarSuccess?: (item: SolicitudFirmaItem) => void;
 }
 
 export function useEvaluacion({
   initialSolicitudes,
+  initialPage = 1,
+  limit = 10,
   onEvaluarSuccess,
 }: UseEvaluacionOptions = {}) {
   const [solicitudes, setSolicitudes] = useState<SolicitudFirmaItem[]>(
     initialSolicitudes || []
   );
+  const [page, setPage] = useState(initialPage);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(initialSolicitudes?.length || 0);
+
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
 
@@ -29,27 +37,42 @@ export function useEvaluacion({
   const [isLoading, setIsLoading] = useState(!initialSolicitudes);
   const [isFirmando, setIsFirmando] = useState(false);
 
-  // Cargar solicitudes iniciales si no se pasaron por props
+  // Carga de datos reales paginados desde el backend
+  const cargarSolicitudes = useCallback(
+    async (targetPage: number) => {
+      setIsLoading(true);
+      try {
+        const res = await listarSolicitudesParaEvaluar({
+          page: targetPage,
+          limit,
+        });
+        setSolicitudes(res.items);
+        setTotal(res.total);
+        setTotalPages(res.totalPages);
+        setPage(res.page);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [limit]
+  );
+
   useEffect(() => {
     if (initialSolicitudes && initialSolicitudes.length > 0) return;
+    cargarSolicitudes(page);
+  }, [cargarSolicitudes, initialSolicitudes, page]);
 
-    let isMounted = true;
-    setIsLoading(true);
+  // Cambiar página
+  const cambiarPagina = useCallback(
+    (nuevaPagina: number) => {
+      if (nuevaPagina >= 1 && (nuevaPagina <= totalPages || totalPages === 0)) {
+        setPage(nuevaPagina);
+      }
+    },
+    [totalPages]
+  );
 
-    listarSolicitudesParaEvaluar()
-      .then((data) => {
-        if (isMounted) setSolicitudes(data);
-      })
-      .finally(() => {
-        if (isMounted) setIsLoading(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [initialSolicitudes]);
-
-  // Filtrado reactivo mediante useDebounce
+  // Filtrado reactivo en cliente sobre la página actual mediante searchTerm
   const filteredSolicitudes = useMemo(() => {
     if (!debouncedSearchTerm.trim()) return solicitudes;
     const term = debouncedSearchTerm.toLowerCase();
@@ -58,7 +81,8 @@ export function useEvaluacion({
         sol.id.toLowerCase().includes(term) ||
         sol.fechaSolicitud.toLowerCase().includes(term) ||
         sol.fechaEvaluacion.toLowerCase().includes(term) ||
-        sol.etapaActual.toLowerCase().includes(term)
+        sol.etapaActual.toLowerCase().includes(term) ||
+        (sol.titulo && sol.titulo.toLowerCase().includes(term))
     );
   }, [solicitudes, debouncedSearchTerm]);
 
@@ -81,10 +105,17 @@ export function useEvaluacion({
       try {
         await firmarSolicitudEvaluacion(target.id);
 
+        const fechaHoy = new Date().toLocaleDateString("es-PE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+
         const updatedItem: SolicitudFirmaItem = {
           ...target,
+          fechaEvaluacion: fechaHoy,
           etapaActual: "Evaluado",
-          evaluar: { firmado: true, fechaFirma: new Date().toLocaleDateString() },
+          evaluar: { firmado: true, fechaFirma: fechaHoy },
         };
 
         setSolicitudes((prev) =>
@@ -98,12 +129,17 @@ export function useEvaluacion({
         setSolicitudAEvaluar(null);
       }
     },
-    [solicitudAEvaluar, onEvaluarSuccess]
+    [onEvaluarSuccess, solicitudAEvaluar]
   );
 
   return {
     solicitudes: filteredSolicitudes,
-    totalCount: solicitudes.length,
+    rawSolicitudes: solicitudes,
+    page,
+    totalPages,
+    total,
+    limit,
+    cambiarPagina,
     searchTerm,
     setSearchTerm,
     solicitudAEvaluar,
@@ -113,5 +149,6 @@ export function useEvaluacion({
     handleEvaluarClick,
     handleCloseModal,
     handleConfirmarEvaluacion,
+    recargar: () => cargarSolicitudes(page),
   };
 }

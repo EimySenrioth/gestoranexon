@@ -487,7 +487,19 @@ export class ExpedientesService {
       this.prisma.ticket.findMany({
         where,
         include: {
-          expediente: true,
+          expediente: {
+            include: {
+              evaluaciones: {
+                where: { evaluadorId: miembroCeiId },
+                select: {
+                  id: true,
+                  resultado: true,
+                  actualizadoEn: true,
+                  creadoEn: true,
+                },
+              },
+            },
+          },
           solicitante: {
             select: {
               id: true,

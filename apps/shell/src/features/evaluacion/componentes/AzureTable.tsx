@@ -5,18 +5,23 @@ import { useRouter } from "next/navigation";
 import { SolicitudFirmaItem } from "../types/evaluacion.types";
 import { AzureTableHeader } from "./AzureTableHeader";
 import { AzureTableRow } from "./AzureTableRow";
+import { AzureTablePaginacion } from "./AzureTablePaginacion";
 import { ModalEvaluacion } from "../modales/ModalEvaluacion";
 import { useEvaluacion } from "../hooks/useEvaluacion";
 import "@/design-tokens/azure/azure-table.css";
 
 interface AzureTableProps {
   initialSolicitudes?: SolicitudFirmaItem[];
+  initialPage?: number;
+  limit?: number;
   onEvaluar?: (item: SolicitudFirmaItem) => void;
   className?: string;
 }
 
 export function AzureTable({
   initialSolicitudes,
+  initialPage = 1,
+  limit = 10,
   onEvaluar,
   className = "",
 }: AzureTableProps) {
@@ -24,6 +29,10 @@ export function AzureTable({
 
   const {
     solicitudes,
+    page,
+    totalPages,
+    total,
+    cambiarPagina,
     searchTerm,
     setSearchTerm,
     solicitudAEvaluar,
@@ -34,6 +43,8 @@ export function AzureTable({
     handleConfirmarEvaluacion: confirmarEvaluacionHook,
   } = useEvaluacion({
     initialSolicitudes,
+    initialPage,
+    limit,
     onEvaluarSuccess: (item) => {
       onEvaluar?.(item);
       router.push("/homeview2/evaluacion");
@@ -79,12 +90,23 @@ export function AzureTable({
           ))
         ) : (
           <div className="w-full py-12 text-center text-gray-500 font-medium">
-            No se encontraron expedientes para la búsqueda &quot;{searchTerm}&quot;.
+            {searchTerm.trim()
+              ? `No se encontraron expedientes para la búsqueda "${searchTerm}".`
+              : "No tienes expedientes asignados para evaluación en este momento."}
           </div>
         )}
       </div>
 
-      {/* 4. Modal de confirmación y advertencia normativa antes de iniciar evaluación */}
+      {/* 4. Paginación con estilo de la vista de solicitante (10 expedientes por página) */}
+      <AzureTablePaginacion
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={cambiarPagina}
+        disabled={isLoading}
+      />
+
+      {/* 5. Modal de confirmación y advertencia normativa antes de iniciar evaluación */}
       <ModalEvaluacion
         isOpen={isModalOpen}
         item={solicitudAEvaluar}

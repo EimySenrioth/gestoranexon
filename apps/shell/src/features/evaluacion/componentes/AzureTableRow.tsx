@@ -10,26 +10,30 @@ interface AzureTableRowProps {
 }
 
 export function AzureTableRow({ item, onEvaluar, onEtapaClick }: AzureTableRowProps) {
-  const isEvaluado = item.etapaActual === "Evaluado";
+  const isEvaluado = item.etapaActual === "Evaluado" || item.etapaActual === "Dictaminado";
+  const isObservado = item.etapaActual === "Observado";
+  const isIniciado = item.etapaActual === "Iniciado";
 
   return (
     <div className="azure-table-row">
       {/* 1. ID */}
       <div className="azure-col-id">
         <span className="md:hidden font-semibold text-gray-500 mr-2">ID:</span>
-        {item.id}
+        <span className="font-semibold">{item.id}</span>
       </div>
 
       {/* 2. Fecha Solicitud */}
       <div className="azure-col-date">
         <span className="md:hidden font-semibold text-gray-500 mr-2">Fecha Solicitud:</span>
-        {item.fechaSolicitud}
+        <span>{item.fechaSolicitud || "-"}</span>
       </div>
 
-      {/* 3. Fecha de Evaluación */}
+      {/* 3. Fecha de Evaluación (Solo se muestra cuando la evaluación terminó; caso contrario '-') */}
       <div className="azure-col-date">
         <span className="md:hidden font-semibold text-gray-500 mr-2">Fecha Evaluación:</span>
-        {item.fechaEvaluacion}
+        <span className={item.fechaEvaluacion === "-" ? "text-gray-400 font-medium" : "text-gray-800"}>
+          {item.fechaEvaluacion || "-"}
+        </span>
       </div>
 
       {/* 4. Etapa Actual con Icono de Status Azure (Clicable hacia StatusExpediente) */}
@@ -56,7 +60,38 @@ export function AzureTableRow({ item, onEvaluar, onEtapaClick }: AzureTableRowPr
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-gray-900 font-medium group-hover:underline">Evaluado</span>
+              <span className="text-gray-900 font-medium group-hover:underline">{item.etapaActual}</span>
+            </>
+          ) : isObservado ? (
+            <>
+              <svg
+                className="text-amber-500 flex-shrink-0"
+                width="18"
+                height="18"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="text-amber-700 font-medium group-hover:underline">Observado</span>
+            </>
+          ) : isIniciado ? (
+            <>
+              <svg
+                className="text-blue-500 flex-shrink-0"
+                width="18"
+                height="18"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="2" fill="none" />
+                <path d="M10 6v4l2 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              <span className="text-blue-700 font-medium group-hover:underline">Iniciado</span>
             </>
           ) : (
             <>
@@ -76,7 +111,7 @@ export function AzureTableRow({ item, onEvaluar, onEtapaClick }: AzureTableRowPr
         </button>
       </div>
 
-      {/* 5. Evaluar (Botón con documento y pluma / Firmado el ...) */}
+      {/* 5. Evaluar (Botón con documento y pluma / Firmado el ... preservado intacto) */}
       <div className="azure-col-action">
         <span className="md:hidden font-semibold text-gray-500 mr-2">Evaluar:</span>
         {item.evaluar.firmado ? (
