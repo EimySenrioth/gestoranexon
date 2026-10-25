@@ -17,8 +17,11 @@ export function Dialog({
   closeLabel = "Cerrar ventana",
   className = "",
 }: DialogProps) {
-  // ⏳ PENDIENTE: acción de cierre del modal o retorno
-  const handleClose = () => {
+  const handleClose = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (onClose) {
       onClose();
     }

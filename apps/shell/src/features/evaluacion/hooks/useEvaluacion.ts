@@ -34,6 +34,11 @@ export function useEvaluacion({
   const [solicitudAEvaluar, setSolicitudAEvaluar] =
     useState<SolicitudFirmaItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [solicitudAAprobar, setSolicitudAAprobar] =
+    useState<SolicitudFirmaItem | null>(null);
+  const [isModalAprobarOpen, setIsModalAprobarOpen] = useState(false);
+
   const [isLoading, setIsLoading] = useState(!initialSolicitudes);
   const [isFirmando, setIsFirmando] = useState(false);
 
@@ -132,6 +137,64 @@ export function useEvaluacion({
     [onEvaluarSuccess, solicitudAEvaluar]
   );
 
+  const handleAprobarClick = useCallback((item: SolicitudFirmaItem) => {
+    setSolicitudAAprobar(item);
+    setIsModalAprobarOpen(true);
+  }, []);
+
+  const handleCloseModalAprobar = useCallback(() => {
+    setIsModalAprobarOpen(false);
+    setSolicitudAAprobar(null);
+  }, []);
+
+  const handleConfirmarAprobacion = useCallback(
+    (item?: SolicitudFirmaItem) => {
+      const target = item || solicitudAAprobar;
+      if (!target) return;
+
+      const fechaHoy = new Date().toLocaleDateString("es-PE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+
+      const updatedItem: SolicitudFirmaItem = {
+        ...target,
+        etapaActual: "Dictaminado",
+        aprobar: { aprobado: true, fechaAprobacion: fechaHoy },
+      };
+
+      setSolicitudes((prev) =>
+        prev.map((s) => (s.id === target.id ? updatedItem : s))
+      );
+
+      setIsModalAprobarOpen(false);
+      setSolicitudAAprobar(null);
+    },
+    [solicitudAAprobar]
+  );
+
+  const handleConfirmarRechazo = useCallback(
+    (item?: SolicitudFirmaItem) => {
+      const target = item || solicitudAAprobar;
+      if (!target) return;
+
+      const updatedItem: SolicitudFirmaItem = {
+        ...target,
+        etapaActual: "Observado",
+        aprobar: { aprobado: false },
+      };
+
+      setSolicitudes((prev) =>
+        prev.map((s) => (s.id === target.id ? updatedItem : s))
+      );
+
+      setIsModalAprobarOpen(false);
+      setSolicitudAAprobar(null);
+    },
+    [solicitudAAprobar]
+  );
+
   return {
     solicitudes: filteredSolicitudes,
     rawSolicitudes: solicitudes,
@@ -144,11 +207,17 @@ export function useEvaluacion({
     setSearchTerm,
     solicitudAEvaluar,
     isModalOpen,
+    solicitudAAprobar,
+    isModalAprobarOpen,
     isLoading,
     isFirmando,
     handleEvaluarClick,
     handleCloseModal,
     handleConfirmarEvaluacion,
+    handleAprobarClick,
+    handleCloseModalAprobar,
+    handleConfirmarAprobacion,
+    handleConfirmarRechazo,
     recargar: () => cargarSolicitudes(page),
   };
 }

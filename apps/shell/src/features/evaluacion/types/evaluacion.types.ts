@@ -16,6 +16,10 @@ export interface SolicitudFirmaItem {
     firmado: boolean;
     fechaFirma?: string;
   };
+  aprobar?: {
+    aprobado: boolean;
+    fechaAprobacion?: string;
+  };
 }
 
 export interface PaginadoResultado<T> {

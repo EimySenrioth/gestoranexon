@@ -89,7 +89,11 @@ export function BannerModal({
             <button
               type="button"
               className="banner-modal-close-btn"
-              onClick={onClose}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }}
               aria-label={closeLabel}
             >
               <svg

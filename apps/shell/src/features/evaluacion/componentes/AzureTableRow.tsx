@@ -5,11 +5,19 @@ import { SolicitudFirmaItem } from "../types/evaluacion.types";
 
 interface AzureTableRowProps {
   item: SolicitudFirmaItem;
+  isPresidente?: boolean;
   onEvaluar?: (item: SolicitudFirmaItem) => void;
+  onAprobar?: (item: SolicitudFirmaItem) => void;
   onEtapaClick?: (item: SolicitudFirmaItem) => void;
 }
 
-export function AzureTableRow({ item, onEvaluar, onEtapaClick }: AzureTableRowProps) {
+export function AzureTableRow({
+  item,
+  isPresidente = false,
+  onEvaluar,
+  onAprobar,
+  onEtapaClick,
+}: AzureTableRowProps) {
   const isEvaluado = item.etapaActual === "Evaluado" || item.etapaActual === "Dictaminado";
   const isObservado = item.etapaActual === "Observado";
   const isIniciado = item.etapaActual === "Iniciado";
@@ -143,6 +151,46 @@ export function AzureTableRow({ item, onEvaluar, onEtapaClick }: AzureTableRowPr
           </button>
         )}
       </div>
+
+      {/* 6. Aprobar (Columna exclusiva para Presidente del CEI - al lado de Evaluar) */}
+      {isPresidente && (
+        <div className="azure-col-action">
+          <span className="md:hidden font-semibold text-gray-500 mr-2">Aprobar:</span>
+          {item.aprobar?.aprobado ? (
+            <span className="azure-text-aprobado">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>Aprobado</span>
+            </span>
+          ) : (
+            <button
+              type="button"
+              className="azure-action-aprobar-btn"
+              onClick={() => onAprobar?.(item)}
+              title="Aprobar y dictaminar formalmente el expediente"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span>Aprobar</span>
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

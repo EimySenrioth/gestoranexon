@@ -7,14 +7,19 @@ import { AzureTableHeader } from "./AzureTableHeader";
 import { AzureTableRow } from "./AzureTableRow";
 import { AzureTablePaginacion } from "./AzureTablePaginacion";
 import { ModalEvaluacion } from "../modales/ModalEvaluacion";
+import { ModalDecisionPresidente } from "../modales/ModalDecisionPresidente";
 import { useEvaluacion } from "../hooks/useEvaluacion";
+import { useSession } from "@/navigation/session/useSession";
 import "@/design-tokens/azure/azure-table.css";
 
 interface AzureTableProps {
   initialSolicitudes?: SolicitudFirmaItem[];
   initialPage?: number;
   limit?: number;
+  isPresidente?: boolean;
   onEvaluar?: (item: SolicitudFirmaItem) => void;
+  onAprobar?: (item: SolicitudFirmaItem) => void;
+  onRechazar?: (item: SolicitudFirmaItem) => void;
   className?: string;
 }
 
@@ -22,10 +27,19 @@ export function AzureTable({
   initialSolicitudes,
   initialPage = 1,
   limit = 10,
+  isPresidente: isPresidenteProp,
   onEvaluar,
+  onAprobar,
+  onRechazar,
   className = "",
 }: AzureTableProps) {
   const router = useRouter();
+  const { roles } = useSession();
+
+  const isPresidente =
+    isPresidenteProp !== undefined
+      ? isPresidenteProp
+      : roles.some((r) => r === "PRESIDENTE_CEI");
 
   const {
     solicitudes,
@@ -37,10 +51,16 @@ export function AzureTable({
     setSearchTerm,
     solicitudAEvaluar,
     isModalOpen,
+    solicitudAAprobar,
+    isModalAprobarOpen,
     isLoading,
     handleEvaluarClick,
     handleCloseModal,
     handleConfirmarEvaluacion: confirmarEvaluacionHook,
+    handleAprobarClick,
+    handleCloseModalAprobar,
+    handleConfirmarAprobacion,
+    handleConfirmarRechazo,
   } = useEvaluacion({
     initialSolicitudes,
     initialPage,
@@ -55,12 +75,26 @@ export function AzureTable({
     confirmarEvaluacionHook(item);
   };
 
+  const handleAprobarExpediente = (item?: SolicitudFirmaItem) => {
+    handleConfirmarAprobacion(item);
+    onAprobar?.(item || solicitudAAprobar!);
+  };
+
+  const handleRechazarExpediente = (item?: SolicitudFirmaItem) => {
+    handleConfirmarRechazo(item);
+    onRechazar?.(item || solicitudAAprobar!);
+  };
+
   const handleEtapaClick = (item: SolicitudFirmaItem) => {
     router.push(`/homeview2/statusexpediente?id=${encodeURIComponent(item.id)}`);
   };
 
   return (
-    <div className={`azure-table-card ${className}`}>
+    <div
+      className={`azure-table-card ${
+        isPresidente ? "azure-table-card--presidente" : ""
+      } ${className}`}
+    >
       {/* 1. Encabezado con título e input buscador de expedientes */}
       <AzureTableHeader searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
@@ -71,6 +105,7 @@ export function AzureTable({
         <span>Fecha de Evaluacion</span>
         <span>Etapa Actual</span>
         <span>Evaluar</span>
+        {isPresidente && <span>Aprobar</span>}
       </div>
 
       {/* 3. Filas de solicitudes */}
@@ -84,7 +119,9 @@ export function AzureTable({
             <AzureTableRow
               key={`${item.id}-${idx}`}
               item={item}
+              isPresidente={isPresidente}
               onEvaluar={handleEvaluarClick}
+              onAprobar={handleAprobarClick}
               onEtapaClick={handleEtapaClick}
             />
           ))
@@ -112,6 +149,15 @@ export function AzureTable({
         item={solicitudAEvaluar}
         onClose={handleCloseModal}
         onConfirm={handleConfirmarEvaluacion}
+      />
+
+      {/* 6. Modal visual de decisión/aprobación exclusivo para Presidente del CEI */}
+      <ModalDecisionPresidente
+        isOpen={isModalAprobarOpen}
+        item={solicitudAAprobar}
+        onClose={handleCloseModalAprobar}
+        onConfirm={handleAprobarExpediente}
+        onRechazar={handleRechazarExpediente}
       />
     </div>
   );

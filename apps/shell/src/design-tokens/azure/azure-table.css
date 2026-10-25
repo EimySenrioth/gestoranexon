@@ -192,6 +192,49 @@
   font-weight: 500;
 }
 
+/* 5. Columna Aprobar (Exclusiva para Presidente del CEI) */
+.azure-action-aprobar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #107c10;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: 1px solid #0e6b0e;
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(16, 124, 16, 0.2);
+}
+
+.azure-action-aprobar-btn:hover {
+  background-color: #0b6a0b;
+  border-color: #095909;
+  box-shadow: 0 2px 8px rgba(16, 124, 16, 0.35);
+  transform: translateY(-1px);
+}
+
+.azure-action-aprobar-btn:active {
+  transform: translateY(0);
+}
+
+.azure-text-aprobado {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.88rem;
+  color: #107c10;
+  font-weight: 600;
+}
+
+/* Modificador de 6 columnas cuando el usuario es Presidente del CEI */
+.azure-table-card--presidente .azure-table-head,
+.azure-table-card--presidente .azure-table-row {
+  grid-template-columns: 1.8fr 1.3fr 1.3fr 1.3fr 1.15fr 1.15fr;
+}
+
 /* Vista móvil responsive */
 @media (max-width: 767px) {
   .azure-table-head {

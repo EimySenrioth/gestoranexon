@@ -5,6 +5,7 @@ export { AzureTableRow } from "./componentes/AzureTableRow";
 export { AzureTablePaginacion } from "./componentes/AzureTablePaginacion";
 export { StatusExpediente } from "./componentes/StatusExpediente";
 export { ModalEvaluacion } from "./modales/ModalEvaluacion";
+export { ModalDecisionPresidente } from "./modales/ModalDecisionPresidente";
 export { useEvaluacion } from "./hooks/useEvaluacion";
 export {
   listarSolicitudesParaEvaluar,
