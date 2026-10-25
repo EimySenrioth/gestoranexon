@@ -150,6 +150,18 @@ export class CreateTicketDto {
   @IsOptional()
   @IsString()
   tipoTramiteId?: string;
+
+  // ---------- Asunto del Pedido / Anexos ----------
+  @IsOptional()
+  tieneAudioAsunto?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  archivosAsuntoInfo?: Array<{
+    nombre: string;
+    tamanioBytes: number;
+    formato?: string;
+  }>;
 }
 
 export class UpdateTicketDto extends PartialType(CreateTicketDto) {}

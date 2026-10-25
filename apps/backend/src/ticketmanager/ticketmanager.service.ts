@@ -70,13 +70,21 @@ export class TicketManagerService {
         const codigo = formatearCorrelativo('TCK', anio, num);
 
         const dataLimpia = normalizarCondicionales(dto);
+        const { tieneAudioAsunto, archivosAsuntoInfo, ...ticketCampos } = dataLimpia;
 
         const ticket = await tx.ticket.create({
           data: {
-            ...dataLimpia,
+            ...ticketCampos,
             codigo,
             solicitanteId,
             estado: 'BORRADOR',
+            metadata: {
+              asuntoPedido: {
+                tieneAudio: Boolean(tieneAudioAsunto),
+                totalArchivos: Array.isArray(archivosAsuntoInfo) ? archivosAsuntoInfo.length : 0,
+                archivos: Array.isArray(archivosAsuntoInfo) ? archivosAsuntoInfo : [],
+              },
+            },
           },
         });
 

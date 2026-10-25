@@ -147,12 +147,19 @@ export class ExpedientesService {
           },
           comiteSnapshot,
         },
+        asuntoPedido: {
+          tieneAudio: Boolean(dto.tieneAudioAsunto),
+          totalArchivos: Array.isArray(dto.archivosAsuntoInfo) ? dto.archivosAsuntoInfo.length : 0,
+          archivos: Array.isArray(dto.archivosAsuntoInfo) ? dto.archivosAsuntoInfo : [],
+        },
       };
 
       // 5. Crear el trámite en la tabla 'tickets' vinculado al expediente con sus metadatos
+      const { tieneAudioAsunto, archivosAsuntoInfo, ...ticketCampos } = dataLimpia;
+
       const ticket = await tx.ticket.create({
         data: {
-          ...dataLimpia,
+          ...ticketCampos,
           codigo: codigoTicket,
           solicitanteId,
           expedienteId: expediente.id,

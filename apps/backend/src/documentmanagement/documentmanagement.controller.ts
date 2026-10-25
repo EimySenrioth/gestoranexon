@@ -41,13 +41,13 @@ export class DocumentManagementController {
     @UploadedFile()
     file: { originalname: string; mimetype?: string; size: number; buffer: Buffer },
     @Body() dto: UploadDocumentDto,
-    @CurrentUser('id') userId: string,
+    @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.documentManagementService.uploadTicketDocument(
       ticketId,
       file,
       dto.tipoDocumental,
-      userId,
+      user,
     );
   }
 

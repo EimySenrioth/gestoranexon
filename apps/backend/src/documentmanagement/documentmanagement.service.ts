@@ -50,11 +50,43 @@ export class DocumentManagementService {
     ticketId: string,
     file: { originalname: string; mimetype?: string; size: number; buffer: Buffer },
     tipoDocumentalRaw: string,
-    userId: string,
+    userOrId: AuthenticatedUser | string,
   ) {
     if (!file) {
       throw new BadRequestException('Debe enviar un archivo en el campo "file"');
     }
+
+    const userId = typeof userOrId === 'string' ? userOrId : userOrId?.id;
+    let roles: string[] =
+      typeof userOrId === 'object' && Array.isArray(userOrId?.roles)
+        ? userOrId.roles
+        : [];
+
+    if (roles.length === 0 && userId) {
+      try {
+        const usuarioDb = await this.prisma.usuario.findUnique({
+          where: { id: userId },
+          select: {
+            roles: {
+              select: {
+                rol: {
+                  select: { codigo: true },
+                },
+              },
+            },
+          },
+        });
+        if (usuarioDb?.roles) {
+          roles = usuarioDb.roles.map((r) => r.rol.codigo);
+        }
+      } catch (err) {
+        this.logger.debug(`No se pudieron cargar roles de BD para ${userId}: ${err}`);
+      }
+    }
+
+    const isSolicitante =
+      roles.length === 0 ||
+      roles.some((r) => r.toUpperCase() === 'SOLICITANTE');
 
     const tipoDocumental = tipoDocumentalRaw.trim().toUpperCase();
     const ext = path.extname(file.originalname).toLowerCase();
@@ -64,6 +96,20 @@ export class DocumentManagementService {
       throw new BadRequestException(
         `El tipo de archivo "${ext}" no está permitido por motivos de seguridad.`,
       );
+    }
+
+    // Validación de archivos ZIP: solo permitidos para el rol de solicitante en Asunto del Pedido
+    if (ext === '.zip') {
+      if (!tipoDocumental.startsWith(PREFIJO_ANEXO_ASUNTO)) {
+        throw new BadRequestException(
+          'Los archivos comprimidos ZIP solo están permitidos en los anexos de la sección Asunto del Pedido.',
+        );
+      }
+      if (!isSolicitante) {
+        throw new BadRequestException(
+          'Los archivos comprimidos ZIP están reservados exclusivamente para el rol de Solicitante.',
+        );
+      }
     }
 
     // Validación de Audio
@@ -78,11 +124,11 @@ export class DocumentManagementService {
       }
     }
 
-    // Validación de Anexos del Asunto del Pedido (PDF / Office)
+    // Validación de Anexos del Asunto del Pedido (PDF / Office / ZIP)
     if (tipoDocumental.startsWith(PREFIJO_ANEXO_ASUNTO)) {
       if (!EXTENSIONES_DOCUMENTOS_PERMITIDAS.includes(ext)) {
         throw new BadRequestException(
-          'Extensión no permitida para anexos. Formatos permitidos: PDF, Word (.doc, .docx), Excel (.xls, .xlsx) o PowerPoint (.ppt, .pptx).',
+          'Extensión no permitida para anexos. Formatos permitidos: PDF, Word (.doc, .docx), Excel (.xls, .xlsx), PowerPoint (.ppt, .pptx) o ZIP (.zip).',
         );
       }
       if (file.size > MAX_ANEXO_INDIVIDUAL_BYTES) {
@@ -90,6 +136,11 @@ export class DocumentManagementService {
           `El archivo adjunto supera el tamaño máximo permitido de ${MAX_ANEXO_INDIVIDUAL_BYTES / (1024 * 1024)} MB.`,
         );
       }
+    }
+
+    let finalMimeType = (file.mimetype || 'application/octet-stream').slice(0, 100);
+    if ((!file.mimetype || file.mimetype === 'application/octet-stream') && ext === '.zip') {
+      finalMimeType = 'application/zip';
     }
 
     // 1. Verificación previa de pertenencia y estado
@@ -159,7 +210,7 @@ export class DocumentManagementService {
             nombreOriginal: file.originalname.slice(0, 255),
             nombreArchivo: uniqueFileName,
             tipoDocumental,
-            mimeType: (file.mimetype || 'application/octet-stream').slice(0, 100),
+            mimeType: finalMimeType,
             tamanioBytes: file.size,
             hashSha256,
             storagePath,
@@ -214,7 +265,7 @@ export class DocumentManagementService {
         nombreOriginal: file.originalname.slice(0, 255),
         nombreArchivo: uniqueFileName,
         tipoDocumental,
-        mimeType: (file.mimetype || 'application/octet-stream').slice(0, 100),
+        mimeType: finalMimeType,
         tamanioBytes: file.size,
         hashSha256,
         storagePath,
@@ -264,7 +315,7 @@ export class DocumentManagementService {
         return this.resolverArchivo(doc);
       }
 
-      if (isCei && doc.ticket.estado === 'EXPEDIENTE_GENERADO') {
+      if (isCei && doc.ticket.estado !== 'BORRADOR') {
         return this.resolverArchivo(doc);
       }
 
@@ -294,7 +345,7 @@ export class DocumentManagementService {
         ROLES_CEI.includes(r.toUpperCase() as any),
       );
 
-      if (isOwner || (isCei && ticketEncontrado.estado === 'EXPEDIENTE_GENERADO')) {
+      if (isOwner || (isCei && ticketEncontrado.estado !== 'BORRADOR')) {
         return this.resolverArchivo(encontrado);
       }
 

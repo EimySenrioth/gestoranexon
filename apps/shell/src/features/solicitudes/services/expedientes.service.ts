@@ -41,6 +41,14 @@ export async function guardarExpediente(
     financiamiento: data.datosGenerales.financiamiento || undefined,
     financiamientoDetalle: data.datosGenerales.financiamientoDetalle || undefined,
 
+    // Datos de Asunto del Pedido (Audio y Archivos Adjuntos - ZIP, PDF, Office)
+    tieneAudioAsunto: !!data.datosGenerales.audioAsunto,
+    archivosAsuntoInfo: (data.datosGenerales.archivosAsunto || []).map((f) => ({
+      nombre: f.name,
+      tamanioBytes: f.size,
+      formato: f.name.split(".").pop()?.toLowerCase() || "",
+    })),
+
     // Paso 2: Expediente
     codigoSolicitante: data.expediente.codigoSolicitante || undefined,
     naturalezaProyecto: data.expediente.naturalezaProyecto || undefined,

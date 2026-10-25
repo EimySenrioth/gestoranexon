@@ -10,7 +10,7 @@ interface AsuntoPedidoSectionProps {
 }
 
 const MAX_AUDIO_BYTES = 10 * 1024 * 1024; // 10 MB
-const MAX_ANEXO_BYTES = 25 * 1024 * 1024; // 25 MB
+const MAX_ANEXO_BYTES = 10 * 1024 * 1024; // 10 MB
 const MAX_TOTAL_BYTES = 50 * 1024 * 1024; // 50 MB
 const MAX_ARCHIVOS = 5;
 
@@ -22,6 +22,7 @@ const EXTENSIONES_PERMITIDAS = [
   ".xlsx",
   ".ppt",
   ".pptx",
+  ".zip",
 ];
 
 const EXTENSIONES_PROHIBIDAS = [
@@ -38,7 +39,6 @@ const EXTENSIONES_PROHIBIDAS = [
   ".html",
   ".htm",
   ".vbs",
-  ".zip",
   ".rar",
   ".7z",
   ".tar",
@@ -71,6 +71,8 @@ function getBadgeColor(ext: string): { bg: string; text: string; label: string }
     case ".ppt":
     case ".pptx":
       return { bg: "bg-orange-50 border-orange-200", text: "text-orange-700", label: "PPT" };
+    case ".zip":
+      return { bg: "bg-purple-50 border-purple-200", text: "text-purple-700", label: "ZIP" };
     default:
       return { bg: "bg-gray-50 border-gray-200", text: "text-gray-700", label: "DOC" };
   }
@@ -151,7 +153,7 @@ export function AsuntoPedidoSection({
 
       if (EXTENSIONES_PROHIBIDAS.includes(ext)) {
         setAnexosError(
-          `Archivo bloqueado por seguridad: "${f.name}". No se permiten scripts, ejecutables ni archivos comprimidos.`
+          `Archivo bloqueado por seguridad: "${f.name}". No se permiten scripts ni ejecutables.`
         );
         if (fileInputRef.current) fileInputRef.current.value = "";
         return;
@@ -159,7 +161,7 @@ export function AsuntoPedidoSection({
 
       if (!EXTENSIONES_PERMITIDAS.includes(ext)) {
         setAnexosError(
-          `Formato no permitido en "${f.name}". Solo se admiten documentos PDF, Word (.doc, .docx), Excel (.xls, .xlsx) y PowerPoint (.ppt, .pptx).`
+          `Formato no permitido en "${f.name}". Solo se admiten documentos PDF, Word (.doc, .docx), Excel (.xls, .xlsx), PowerPoint (.ppt, .pptx) y archivos comprimidos ZIP (.zip).`
         );
         if (fileInputRef.current) fileInputRef.current.value = "";
         return;
@@ -167,7 +169,7 @@ export function AsuntoPedidoSection({
 
       if (f.size > MAX_ANEXO_BYTES) {
         setAnexosError(
-          `El archivo "${f.name}" (${formatBytes(f.size)}) supera el límite individual de 25 MB.`
+          `El archivo "${f.name}" (${formatBytes(f.size)}) supera el límite individual de 10 MB.`
         );
         if (fileInputRef.current) fileInputRef.current.value = "";
         return;
@@ -331,7 +333,7 @@ export function AsuntoPedidoSection({
               <span className="text-xs font-normal text-gray-500">(Opcional)</span>
             </h4>
             <p className="text-xs text-gray-500 mt-0.5">
-              Formatos: <strong>PDF, Word, Excel, PowerPoint</strong> • Máx. 5 archivos
+              Formatos: <strong>PDF, Word, Excel, PowerPoint, ZIP</strong> • Máx. 10 MB por archivo • Máx. 5 archivos
             </p>
           </div>
 
@@ -340,7 +342,7 @@ export function AsuntoPedidoSection({
               ref={fileInputRef}
               type="file"
               multiple
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed,multipart/x-zip"
               onChange={handleArchivosSelect}
               className="hidden"
               id="input-archivos-asunto"
