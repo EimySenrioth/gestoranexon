@@ -27,7 +27,15 @@ export function ModalEvaluacion({
   titulo = "Antes de iniciar la evaluación",
   notaTexto = "Como Vocal del CEI evalúas aspectos éticos y normativos, no la calidad ni el diseño metodológico del proyecto.",
 }: ModalEvaluacionProps) {
-  const handleContinuar = () => {
+  const handleRegresar = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onClose();
+  };
+
+  const handleContinuar = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     onConfirm(item || undefined);
   };
 
@@ -42,13 +50,15 @@ export function ModalEvaluacion({
         <>
           <button
             type="button"
+            id="btn-evaluar-modal-regresar"
             className="banner-modal-pill-btn banner-modal-pill-btn--secondary"
-            onClick={onClose}
+            onClick={handleRegresar}
           >
             Regresar
           </button>
           <button
             type="button"
+            id="btn-evaluar-modal-continuar"
             className="banner-modal-pill-btn banner-modal-pill-btn--primary"
             onClick={handleContinuar}
           >

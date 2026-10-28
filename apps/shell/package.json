@@ -7,7 +7,7 @@
     "tokens:check": "node --no-warnings src/design-tokens/sync/generate.ts --check",
     "predev": "npm run tokens:sync",
     "prebuild": "npm run tokens:sync",
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

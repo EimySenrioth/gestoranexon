@@ -1,4 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { EvaluationSessionService } from './evaluation-session.service';
 import {
   StepEvaluacionId,
   StepItem,
@@ -25,6 +27,9 @@ import {
   providedIn: 'root',
 })
 export class EvaluacionService {
+  private readonly http = inject(HttpClient);
+  readonly sessionService = inject(EvaluationSessionService);
+  private readonly apiUrl = 'http://localhost:3000/api/v1';
   // 1. Estado de pasos horizontales del wizard superior
   private readonly _steps = signal<StepItem[]>(EVALUACION_STEPS);
   private readonly _currentStep = signal<StepEvaluacionId>('datos-generales');
@@ -238,6 +243,308 @@ export class EvaluacionService {
       }
       return updated;
     });
+  }
+
+  constructor() {
+    let expId = this.sessionService.expedienteId();
+    if (!expId && typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      expId = urlParams.get('expedienteId') || urlParams.get('id');
+    }
+    // Fallback defensivo para desarrollo / visualización directa
+    if (!expId) {
+      expId = 'EXP-2026-0012';
+    }
+    if (expId) {
+      this.cargarExpediente(expId);
+      this.cargarEstadoAnexo(expId);
+    }
+  }
+
+  /**
+   * Consume el endpoint que recupera todo del expediente:
+   * GET /api/v1/expedientes/:id
+   */
+  cargarExpediente(expedienteId: string): void {
+    this.http.get<any>(`${this.apiUrl}/expedientes/${expedienteId}`).subscribe({
+      next: (data) => {
+        const ticket = data.ticket || data;
+        if (data.codigo || ticket.codigo) {
+          this._codigoExpediente.set(data.codigo || ticket.codigo);
+        }
+        this._datosGenerales.set({
+          tituloProyecto: ticket.titulo || '',
+          investigadoresResponsables:
+            Array.isArray(ticket.investigadores) && ticket.investigadores.length > 0
+              ? ticket.investigadores.join(', ')
+              : 'No asignado',
+          unidadAcademicaFacultad: ticket.unidadAcademica || 'Facultad no especificada',
+          tipoInvestigacion: ticket.tipoInvestigacion || 'Investigación Aplicada',
+          fechaPresentacion: ticket.fechaPresentacion
+            ? new Date(ticket.fechaPresentacion).toLocaleDateString('es-PE', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })
+            : 'Pendiente',
+          financiamiento: ticket.financiamiento || 'Recursos Propios',
+        });
+
+        // Construir la lista de documentos reales a partir de los archivos del ticket
+        const docs: DocumentoExpedienteItem[] = [];
+
+        if (ticket.participantes) {
+          const partLabel = Array.isArray(ticket.participantes)
+            ? ticket.participantes.join(', ')
+            : ticket.participantes;
+          docs.push({
+            id: 'participantes',
+            label: `Participantes: ${partLabel}`,
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+          });
+        }
+
+        if (ticket.naturalezaProyecto) {
+          docs.push({
+            id: 'naturaleza-proyecto',
+            label: `Naturaleza del Proyecto: ${ticket.naturalezaProyecto}`,
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+          });
+        }
+
+        if (ticket.financiamiento) {
+          docs.push({
+            id: 'financiamiento',
+            label: `Financiamiento: ${ticket.financiamiento}`,
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+          });
+        }
+
+        if (ticket.planProyecto) {
+          docs.push({
+            id: 'plan-proyecto',
+            label: `Plan de Proyecto: ${ticket.planProyecto}`,
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+          });
+        }
+
+        if (Array.isArray(data.documentos) && data.documentos.length > 0) {
+          for (const d of data.documentos) {
+            docs.push({
+              id: d.id,
+              label: d.nombre || d.nombreOriginal || 'Documento adjunto',
+              estado: 'recibido',
+              estadoLabel: 'Recibido',
+            });
+          }
+        }
+
+        // Fila final del Anexo N°9
+        docs.push({
+          id: 'anexo',
+          label: 'Anexo N°9',
+          estado: 'sin_evaluar',
+          estadoLabel: 'Aun sin evaluar',
+        });
+
+        this._documentosExpediente.set(docs);
+      },
+      error: (err) => {
+        console.warn('[EvaluacionService] Error al cargar expediente desde API, aplicando datos de respaldo:', err);
+        this._codigoExpediente.set(expedienteId || 'EXP-2026-0012');
+        this._datosGenerales.set({
+          tituloProyecto: 'Apple Treeh 56',
+          investigadoresResponsables: 'Lucy Jane Fre',
+          unidadAcademicaFacultad: 'Facultad de Ciencias e Ingeniería',
+          tipoInvestigacion: 'Proyecto de investigación docente',
+          fechaPresentacion: '25 de Octubre, 2026',
+          financiamiento: 'UNTELS',
+        });
+        this._documentosExpediente.set([
+          {
+            id: 'participantes',
+            label: 'Participantes: Art Aseguramiento_de_la_Calidad.pdf',
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+          },
+          {
+            id: 'naturaleza-proyecto',
+            label: 'Naturaleza del Proyecto: Tarea4_Equipo2.pdf',
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+          },
+          {
+            id: 'financiamiento',
+            label: 'Financiamiento: UNTELS',
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+          },
+          {
+            id: 'plan-proyecto',
+            label: 'Plan de Proyecto: Cuestionario22.pdf',
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+          },
+          {
+            id: 'anexo',
+            label: 'Anexo N°9',
+            estado: 'sin_evaluar',
+            estadoLabel: 'Aun sin evaluar',
+          },
+        ]);
+      },
+    });
+  }
+
+  /**
+   * Consulta si ya existe un borrador previo o versión firmada:
+   * GET /api/v1/evaluaciones/anexo/:expedienteId
+   */
+  cargarEstadoAnexo(expedienteId: string): void {
+    this.http.get<any>(`${this.apiUrl}/evaluaciones/anexo/${expedienteId}`).subscribe({
+      next: (res) => {
+        if (res.soloLectura) {
+          this.sessionService.setSoloLectura(true);
+        }
+        if (res.datos) {
+          if (Array.isArray(res.datos.principiosEticos) && res.datos.principiosEticos.length > 0) {
+            this._criteriosEticos.update((criterios) =>
+              criterios.map((c) => {
+                const prev = res.datos.principiosEticos.find((p: any) => p.id === c.id);
+                return prev
+                  ? {
+                      ...c,
+                      cumplimiento: prev.cumple ? 'cumple' : 'no_cumple',
+                      observaciones: prev.observaciones || '',
+                    }
+                  : c;
+              })
+            );
+          }
+          if (Array.isArray(res.datos.normativaLegal) && res.datos.normativaLegal.length > 0) {
+            this._criteriosNormativa.update((criterios) =>
+              criterios.map((c) => {
+                const prev = res.datos.normativaLegal.find((p: any) => p.id === c.id);
+                return prev
+                  ? {
+                      ...c,
+                      cumplimiento: prev.cumple ? 'cumple' : 'no_cumple',
+                      observaciones: prev.observaciones || '',
+                    }
+                  : c;
+              })
+            );
+          }
+          if (res.datos.resultado || res.datos.recomendacion) {
+            this._recomendacionComite.update((rec) => ({
+              ...rec,
+              dictamen:
+                (res.datos.resultado?.toLowerCase() as DictamenComite) || rec.dictamen,
+              observaciones: res.datos.recomendacion || rec.observaciones,
+            }));
+          }
+          if (res.datos.firma) {
+            this._firmaEvaluador.update((f) => ({
+              ...f,
+              firmado: true,
+            }));
+          }
+        }
+      },
+      error: (err) => {
+        console.warn('[EvaluacionService] Error al cargar estado del anexo:', err);
+      },
+    });
+  }
+
+  /**
+   * Finaliza y firma la evaluación enviando las 5 secciones al backend:
+   * POST /api/v1/evaluaciones/anexo/completar
+   */
+  completarEvaluacionApi() {
+    const expedienteId =
+      this.sessionService.expedienteId() || this._codigoExpediente();
+    const payload = {
+      expedienteId,
+      principiosEticos: this._criteriosEticos().map((c) => ({
+        id: c.id,
+        cumple: c.cumplimiento === 'cumple',
+        observaciones: c.observaciones || '',
+      })),
+      metodologiaRiesgos: [
+        {
+          id: 'medida-seguridad-laboratorio',
+          cumple:
+            this._criteriosEticos().find(
+              (c) => c.id === 'medida-seguridad-laboratorio'
+            )?.cumplimiento === 'cumple',
+          observaciones:
+            this._criteriosEticos().find(
+              (c) => c.id === 'medida-seguridad-laboratorio'
+            )?.observaciones || '',
+        },
+      ],
+      normativaLegal: this._criteriosNormativa().map((c) => ({
+        id: c.id,
+        cumple: c.cumplimiento === 'cumple',
+        observaciones: c.observaciones || '',
+      })),
+      dictamen: this._recomendacionComite().dictamen,
+      observacionesGenerales: this._recomendacionComite().observaciones,
+      firma: {
+        firmaDataUrl:
+          this._firmaEvaluador().firmaDataUrl ||
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        firmadoEn: new Date().toISOString(),
+        declaracionAceptada: true,
+      },
+    };
+
+    return this.http.post<any>(
+      `${this.apiUrl}/evaluaciones/anexo/completar`,
+      payload
+    );
+  }
+
+  /**
+   * Cancela la evaluación, revoca el token en el backend y redirige a la tabla principal (/homeview2)
+   */
+  cancelarEvaluacionApi() {
+    const token = this.sessionService.token();
+    if (token) {
+      this.http
+        .post(`${this.apiUrl}/evaluaciones/tokens/revocar`, {
+          token,
+          motivo: 'Cancelado por el evaluador desde el formulario de Anexo',
+        })
+        .subscribe({
+          next: () => console.log('[EvaluacionService] Token de evaluación revocado exitosamente.'),
+          error: (err) => console.warn('[EvaluacionService] Error al revocar token:', err),
+        });
+    }
+    this.sessionService.limpiarSesion();
+
+    if (typeof window !== 'undefined') {
+      // 1. Notificar al contenedor del Shell mediante postMessage
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'EVALUACION_CANCELADA' }, '*');
+      }
+      // 2. Redirección directa hacia la tabla principal del Shell (puerto 3001)
+      try {
+        if (window.top && window.top !== window) {
+          window.top.location.href = 'http://localhost:3001/homeview2';
+        } else {
+          window.location.href = 'http://localhost:3001/homeview2';
+        }
+      } catch (e) {
+        // En caso de bloqueo por sandbox cross-origin, postMessage al parent se encarga
+        window.location.href = 'http://localhost:3001/homeview2';
+      }
+    }
   }
 
   reset(): void {

@@ -302,3 +302,741 @@ flowchart TD
     A["1. design-tokens/ (Variables CSS: --ui-*)"] --> B["2. designofuiparts/ (header.css, sidebar.css, footer.css)"]
     B --> C["3. componentforlayout/ (Header.tsx, Sidebar.tsx, Footer.tsx)"]
     C --> D["4. inicio/page.tsx (Pantalla final ensamblada)"]
+
+
+
+evlauracion basckend:
+# Plan de Implementación: Administrador de Votaciones y Motor de Reglas (CEI)
+
+Este documento contiene la arquitectura, el diseño de persistencia en un solo JSON mediante **Prisma (PostgreSQL)**, el motor de reglas puro en **TypeScript**, el Gateway de tiempo real con **WebSockets (Socket.IO)** bajo política de voto ciego, los contratos de endpoints REST en **NestJS** y las pruebas unitarias con **Vitest**.
+
+---
+
+## 1. Verificación de la Base de Datos Existente (Tabla de Eventos)
+
+En el backend NestJS con Prisma [`schema.prisma`](file:///c:/Users/itano/Desktop/estanciaperu/apps/backend/prisma/schema.prisma), **ya existen tablas de eventos y auditoría preparadas**:
+
+1. **Tabla `historial` (Auditoría legal y trazabilidad de eventos):**
+   ```prisma
+   model Historial {
+     id           String   @id @default(cuid())
+     entidad      String   // "SesionVotacion"
+     entidadId    String   // ID de la sesión
+     evento       String   // "VOTO_REGISTRADO", "SESION_CERRADA", "DICTAMEN_PRESIDENTE_EMITIDO"
+     descripcion  String?
+     usuarioId    String?  // Quién emitió la acción
+     solicitudId  String?
+     expedienteId String?
+     metadata     Json?    // Snapshot del estado inmutable
+     creadoEn     DateTime @default(now())
+
+     @@map("historial")
+   }
+   ```
+2. **Tabla `tickets` con soporte JSON nativo:**
+   Cuenta con `resultadoEvaluacionExterna String?`, `calificacionExternaJson Json?` y `fechaRecepcionEvaluacion DateTime?`.
+3. **Nueva tabla o modelo en Prisma para la Sesión de Votación (`SesionVotacion`):**
+   Para garantizar atomicidad e índices de concurrencia, se define la tabla `sesiones_votacion` con un solo campo `documento Json`.
+
+---
+
+## 2. Árbol de Carpetación Mantenible en NestJS (`.ts`)
+
+Ubicado dentro del backend en `apps/backend/src/votaciones/`:
+
+```text
+apps/backend/src/votaciones/
+├── domain/
+│   ├── enums/
+│   │   ├── veredicto-evaluador.enum.ts      # Aprobado, AprobadoConObservaciones, NoAprobado
+│   │   ├── dictamen-final.enum.ts           # EnEvaluacion, Aprobado, AprobadoConObservaciones, NoAprobado, EmpateRequierePresidente
+│   │   └── estado-sesion.enum.ts            # EnProgreso, CerradaAnticipada, CerradaCompleta
+│   ├── models/
+│   │   ├── sesion-votacion.model.ts         # Tipado del documento JSON raíz
+│   │   ├── anexo-evaluacion.model.ts        # Criterios éticos y normativa legal
+│   │   ├── voto-evaluador.model.ts          # EvaluadorId, Veredicto, ObsDocumentales, Fecha
+│   │   └── dictamen-presidente.model.ts     # PresidenteId, Resultado, FechaEmision
+│   └── rules/
+│       ├── reglas-votacion.ts               # Motor de reglas puro (función matemática)
+│       └── reglas-votacion.spec.ts          # Pruebas unitarias con Vitest
+│
+├── dto/
+│   ├── emitir-voto.dto.ts                   # Validaciones con class-validator
+│   ├── dictamen-presidente.dto.ts
+│   ├── progreso-votacion.dto.ts             # DTO para voto ciego (solo conteo 3/5)
+│   └── resultado-votacion.dto.ts            # DTO consolidado tras el cierre
+│
+├── gateways/
+│   └── votaciones.gateway.ts                # WebSocketGateway (Socket.IO + AuthGuard + Voto Ciego)
+│
+├── controllers/
+│   └── votaciones.controller.ts             # Endpoints REST (iniciar, consultar, emitir)
+│
+├── services/
+│   └── votaciones.service.ts                # Lógica transaccional con Prisma y auditoría
+│
+├── votaciones.module.ts                     # Módulo NestJS registrado en app.module.ts
+└── index.ts
+```
+
+---
+
+## 3. Modelado de Datos: Estructura del JSON Único en TypeScript
+
+El documento JSON almacena el estado completo de la evaluación del Anexo N° 9 y los 5 votos. Los dictámenes están claramente diferenciados: uno global y uno para el Presidente del CEI (con los campos requeridos: `presidenteId`, `resultado` y `fechaEmision`).
+
+### Tipado en TypeScript (`domain/models/sesion-votacion.model.ts`)
+
+```typescript
+export type VeredictoEvaluador = 'Aprobado' | 'AprobadoConObservaciones' | 'NoAprobado';
+export type DictamenFinal = 
+  | 'EnEvaluacion' 
+  | 'Aprobado' 
+  | 'AprobadoConObservaciones' 
+  | 'NoAprobado' 
+  | 'EmpateRequierePresidente';
+export type EstadoSesionVotacion = 'EnProgreso' | 'CerradaAnticipada' | 'CerradaCompleta';
+
+export interface CriterioEvaluado {
+  id: string;
+  cumple: boolean;
+  observaciones: string;
+}
+
+export interface CriteriosAnexoData {
+  principiosEticos: CriterioEvaluado[];
+  normativaLegal: CriterioEvaluado[];
+}
+
+export interface VotoEvaluadorData {
+  evaluadorId: string;
+  veredicto: VeredictoEvaluador;
+  tieneObservacionesDocumentales: boolean;
+  observaciones: string;
+  fechaVoto: string; // ISO 8601
+}
+
+export interface DictamenPresidenteCeiData {
+  presidenteId: string;
+  resultado: VeredictoEvaluador | null;
+  fechaEmision: string | null; // ISO 8601
+}
+
+export interface DictamenGlobalData {
+  resultado: DictamenFinal;
+  reglaAplicada: string | null;
+  totalAprobado: number;
+  totalAprobadoConObs: number;
+  totalNoAprobado: number;
+  fechaCalculo: string | null;
+}
+
+export interface SesionVotacionJson {
+  anexoId: string;
+  expedienteId: string;
+  version: number;
+  evaluadoresAsignados: string[];
+  presidenteCeiId: string;
+  criteriosAnexo: CriteriosAnexoData;
+  votos: VotoEvaluadorData[];
+  progreso: {
+    totalEsperados: number;
+    totalRecibidos: number;
+    cierreAnticipadoDisponible: boolean;
+  };
+  dictamenGlobal: DictamenGlobalData;
+  dictamenPresidenteCei: DictamenPresidenteCeiData;
+  estado: EstadoSesionVotacion;
+  fechaCierre: string | null;
+}
+```
+
+### Ejemplo del Documento JSON Almacenado
+
+```json
+{
+  "anexoId": "anexo-09-exp-2026-0042",
+  "expedienteId": "exp_cly789abc",
+  "version": 1,
+  "evaluadoresAsignados": [
+    "usr_eval_01", "usr_eval_02", "usr_eval_03", "usr_eval_04", "usr_eval_05"
+  ],
+  "presidenteCeiId": "usr_eval_01",
+  "criteriosAnexo": {
+    "principiosEticos": [
+      { "id": "consentimiento-informado", "cumple": true, "observaciones": "" },
+      { "id": "beneficencia-muestreo", "cumple": true, "observaciones": "" },
+      { "id": "conducta-responsable", "cumple": true, "observaciones": "" },
+      { "id": "integridad-academica", "cumple": true, "observaciones": "" },
+      { "id": "medida-seguridad-laboratorio", "cumple": true, "observaciones": "" }
+    ],
+    "normativaLegal": [
+      { "id": "ley-universitaria", "cumple": true, "observaciones": "" },
+      { "id": "ley-datos-personales", "cumple": true, "observaciones": "" },
+      { "id": "ley-salud", "cumple": true, "observaciones": "" },
+      { "id": "reglamento-ensayos-clinicos", "cumple": true, "observaciones": "" }
+    ]
+  },
+  "votos": [
+    {
+      "evaluadorId": "usr_eval_01",
+      "veredicto": "Aprobado",
+      "tieneObservacionesDocumentales": false,
+      "observaciones": "Cumple los criterios éticos.",
+      "fechaVoto": "2026-10-25T14:10:00.000Z"
+    }
+  ],
+  "progreso": {
+    "totalEsperados": 5,
+    "totalRecibidos": 1,
+    "cierreAnticipadoDisponible": false
+  },
+  "dictamenGlobal": {
+    "resultado": "EnEvaluacion",
+    "reglaAplicada": null,
+    "totalAprobado": 0,
+    "totalAprobadoConObs": 0,
+    "totalNoAprobado": 0,
+    "fechaCalculo": null
+  },
+  "dictamenPresidenteCei": {
+    "presidenteId": "usr_eval_01",
+    "resultado": null,
+    "fechaEmision": null
+  },
+  "estado": "EnProgreso",
+  "fechaCierre": null
+}
+```
+
+---
+
+## 4. Motor de Reglas en TypeScript (`domain/rules/reglas-votacion.ts`)
+
+### Reglas de Mayoría y Cierre Anticipado
+1. **Seguridad contra el cierre prematuro:** Con 3 votos favorables tempranos **no se cierra**, pues si los otros 2 votan con observaciones documentales, el resultado colectivo final debe ser `"AprobadoConObservaciones"`.
+2. **Cierre Anticipado (Short-Circuit):** Procede **únicamente con 3 o más votos "NoAprobado"**, ya que matemáticamente el rechazo es irreversible.
+3. **Función pura:** Sin dependencias externas, ideal para pruebas unitarias instantáneas con Vitest.
+
+```typescript
+import { 
+  VeredictoEvaluador, 
+  DictamenFinal 
+} from '../models/sesion-votacion.model';
+
+export interface VotoCalculo {
+  evaluadorId: string;
+  veredicto: VeredictoEvaluador;
+  tieneObservacionesDocumentales: boolean;
+}
+
+export interface ResultadoCalculoVotacion {
+  dictamen: DictamenFinal;
+  puedeCerrarAnticipadamente: boolean;
+  motivoRegla: string;
+  totalAprobados: number;
+  totalAprobadosConObs: number;
+  totalNoAprobados: number;
+}
+
+export const TOTAL_EVALUADORES = 5;
+export const UMBRAL_MAYORIA = 3;
+
+export function calcularReglasVotacion(
+  votos: VotoCalculo[],
+  votoPresidenteDirimente?: VeredictoEvaluador
+): ResultadoCalculoVotacion {
+  const totalVotos = votos.length;
+  const noAprobados = votos.filter(v => v.veredicto === 'NoAprobado').length;
+  const aprobadosPuros = votos.filter(
+    v => v.veredicto === 'Aprobado' && !v.tieneObservacionesDocumentales
+  ).length;
+  const aprobadosConObs = votos.filter(
+    v => v.veredicto === 'AprobadoConObservaciones' || 
+         (v.veredicto === 'Aprobado' && v.tieneObservacionesDocumentales)
+  ).length;
+  const totalFavorables = aprobadosPuros + aprobadosConObs;
+
+  // 1. REGLA DE CIERRE ANTICIPADO: 3 o más votos No Aprobado
+  if (noAprobados >= UMBRAL_MAYORIA) {
+    return {
+      dictamen: 'NoAprobado',
+      puedeCerrarAnticipadamente: true,
+      motivoRegla: 'Mayoría desfavorable alcanzada (>= 3 votos No Aprobado).',
+      totalAprobados: aprobadosPuros,
+      totalAprobadosConObs: aprobadosConObs,
+      totalNoAprobados: noAprobados,
+    };
+  }
+
+  // 2. Si aún no se completan los 5 votos y no hay rechazo definitivo, esperar
+  if (totalVotos < TOTAL_EVALUADORES) {
+    return {
+      dictamen: 'EnEvaluacion',
+      puedeCerrarAnticipadamente: false,
+      motivoRegla: `Votación en curso (${totalVotos}/${TOTAL_EVALUADORES}). Esperando votos restantes.`,
+      totalAprobados: aprobadosPuros,
+      totalAprobadosConObs: aprobadosConObs,
+      totalNoAprobados: noAprobados,
+    };
+  }
+
+  // 3. CON LOS 5 VOTOS EMITIDOS:
+  // 3.1. Tres o más evaluaciones desfavorables
+  if (noAprobados >= UMBRAL_MAYORIA) {
+    return {
+      dictamen: 'NoAprobado',
+      puedeCerrarAnticipadamente: false,
+      motivoRegla: 'Mayoría desfavorable (>= 3 votos No Aprobado).',
+      totalAprobados: aprobadosPuros,
+      totalAprobadosConObs: aprobadosConObs,
+      totalNoAprobados: noAprobados,
+    };
+  }
+
+  // 3.2. Tres o más evaluaciones favorables
+  if (totalFavorables >= UMBRAL_MAYORIA) {
+    // Sin observaciones pendientes
+    if (aprobadosConObs === 0) {
+      return {
+        dictamen: 'Aprobado',
+        puedeCerrarAnticipadamente: false,
+        motivoRegla: 'Mayoría favorable sin observaciones pendientes.',
+        totalAprobados: aprobadosPuros,
+        totalAprobadosConObs: aprobadosConObs,
+        totalNoAprobados: noAprobados,
+      };
+    }
+
+    // Con observaciones documentales o menores
+    return {
+      dictamen: 'AprobadoConObservaciones',
+      puedeCerrarAnticipadamente: false,
+      motivoRegla: 'Mayoría favorable alcanzada con observaciones documentales o menores.',
+      totalAprobados: aprobadosPuros,
+      totalAprobadosConObs: aprobadosConObs,
+      totalNoAprobados: noAprobados,
+    };
+  }
+
+  // 3.3. Dispersión sin mayoría clara (ejemplo 2-2-1): voto del Presidente
+  if (votoPresidenteDirimente) {
+    const dictamenDirimido: DictamenFinal = 
+      votoPresidenteDirimente === 'Aprobado' 
+        ? 'Aprobado' 
+        : votoPresidenteDirimente === 'AprobadoConObservaciones'
+        ? 'AprobadoConObservaciones'
+        : 'NoAprobado';
+
+    return {
+      dictamen: dictamenDirimido,
+      puedeCerrarAnticipadamente: false,
+      motivoRegla: 'Dictamen resuelto por voto dirimente del Presidente del CEI.',
+      totalAprobados: aprobadosPuros,
+      totalAprobadosConObs: aprobadosConObs,
+      totalNoAprobados: noAprobados,
+    };
+  }
+
+  return {
+    dictamen: 'EmpateRequierePresidente',
+    puedeCerrarAnticipadamente: false,
+    motivoRegla: 'Dispersión de votos sin mayoría; requiere intervención del Presidente del CEI.',
+    totalAprobados: aprobadosPuros,
+    totalAprobadosConObs: aprobadosConObs,
+    totalNoAprobados: noAprobados,
+  };
+}
+```
+
+---
+
+## 5. Persistencia con Prisma en PostgreSQL
+
+### Modelo en `schema.prisma`
+
+```prisma
+model SesionVotacion {
+  id                 String   @id @default(cuid())
+  expedienteId       String   @unique
+  estado             String   @default("EnProgreso") // EnProgreso, CerradaAnticipada, CerradaCompleta
+  dictamenGlobal     String   @default("EnEvaluacion")
+  dictamenPresidente String?
+  documentoJson      Json     // Almacena todo el objeto SesionVotacionJson
+  version            Int      @default(1)
+  creadoEn           DateTime @default(now())
+  actualizadoEn      DateTime @updatedAt
+
+  @@index([expedienteId])
+  @@index([estado])
+  @@map("sesiones_votacion")
+}
+```
+
+---
+
+## 6. Servicio de Votación (`services/votaciones.service.ts`)
+
+Asegura:
+1. Pertenencia a los 5 evaluadores.
+2. 1 voto por evaluador.
+3. Transacción atómica `$transaction` con Prisma.
+4. Registro de auditoría en la tabla existente `historial`.
+
+```typescript
+import { 
+  Injectable, 
+  NotFoundException, 
+  ForbiddenException, 
+  ConflictException, 
+  BadRequestException 
+} from '@nestjs/common';
+import { PrismaService } from '../database/prisma.service';
+import { 
+  SesionVotacionJson, 
+  VotoEvaluadorData 
+} from '../domain/models/sesion-votacion.model';
+import { 
+  calcularReglasVotacion, 
+  TOTAL_EVALUADORES 
+} from '../domain/rules/reglas-votacion';
+import { EmitirVotoDto } from '../dto/emitir-voto.dto';
+
+@Injectable()
+export class VotacionesService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async registrarVoto(sesionId: string, usuarioId: string, dto: EmitirVotoDto) {
+    return this.prisma.$transaction(async (tx) => {
+      const sesion = await tx.sesionVotacion.findUnique({
+        where: { id: sesionId },
+      });
+
+      if (!sesion) throw new NotFoundException('Sesión de votación no encontrada.');
+      if (sesion.estado !== 'EnProgreso') {
+        throw new BadRequestException('La sesión de votación ya está cerrada.');
+      }
+
+      const doc = sesion.documentoJson as unknown as SesionVotacionJson;
+
+      // 1. Validar que el usuario sea uno de los 5 asignados
+      if (!doc.evaluadoresAsignados.includes(usuarioId)) {
+        throw new ForbiddenException('El usuario no está asignado como evaluador.');
+      }
+
+      // 2. Validar que no haya votado previamente
+      const yaVoto = doc.votos.some((v) => v.evaluadorId === usuarioId);
+      if (yaVoto) {
+        throw new ConflictException('El evaluador ya registró su voto previamente.');
+      }
+
+      // 3. Registrar el voto en el documento
+      const nuevoVoto: VotoEvaluadorData = {
+        evaluadorId: usuarioId,
+        veredicto: dto.veredicto,
+        tieneObservacionesDocumentales: dto.tieneObservacionesDocumentales,
+        observaciones: dto.observaciones ?? '',
+        fechaVoto: new Date().toISOString(),
+      };
+      doc.votos.push(nuevoVoto);
+      doc.progreso.totalRecibidos = doc.votos.length;
+
+      // 4. Ejecutar Motor de Reglas
+      const calculo = calcularReglasVotacion(
+        doc.votos.map((v) => ({
+          evaluadorId: v.evaluadorId,
+          veredicto: v.veredicto,
+          tieneObservacionesDocumentales: v.tieneObservacionesDocumentales,
+        }))
+      );
+
+      doc.dictamenGlobal.totalAprobado = calculo.totalAprobados;
+      doc.dictamenGlobal.totalAprobadoConObs = calculo.totalAprobadosConObs;
+      doc.dictamenGlobal.totalNoAprobado = calculo.totalNoAprobados;
+      doc.dictamenGlobal.reglaAplicada = calculo.motivoRegla;
+
+      let sesionCerrada = false;
+      let nuevoEstado = sesion.estado;
+
+      if (calculo.puedeCerrarAnticipadamente) {
+        nuevoEstado = 'CerradaAnticipada';
+        doc.estado = 'CerradaAnticipada';
+        doc.dictamenGlobal.resultado = calculo.dictamen;
+        doc.fechaCierre = new Date().toISOString();
+        sesionCerrada = true;
+      } else if (doc.votos.length === TOTAL_EVALUADORES) {
+        nuevoEstado = 'CerradaCompleta';
+        doc.estado = 'CerradaCompleta';
+        doc.dictamenGlobal.resultado = calculo.dictamen;
+        doc.fechaCierre = new Date().toISOString();
+        sesionCerrada = true;
+      }
+
+      // 5. Persistir en la tabla de sesiones
+      await tx.sesionVotacion.update({
+        where: { id: sesionId },
+        data: {
+          estado: nuevoEstado,
+          dictamenGlobal: doc.dictamenGlobal.resultado,
+          documentoJson: doc as any,
+          version: { increment: 1 },
+        },
+      });
+
+      // 6. Auditoría inmutable en la tabla historial existente
+      await tx.historial.create({
+        data: {
+          entidad: 'SesionVotacion',
+          entidadId: sesion.id,
+          evento: 'VOTO_REGISTRADO',
+          descripcion: `Voto emitido por evaluador ${usuarioId}`,
+          usuarioId: usuarioId,
+          expedienteId: sesion.expedienteId,
+          metadata: {
+            totalEmitidos: doc.votos.length,
+            cierreAnticipado: calculo.puedeCerrarAnticipadamente,
+          },
+        },
+      });
+
+      return {
+        sesionCerrada,
+        totalVotosActuales: doc.votos.length,
+        documentoConsolidado: sesionCerrada ? doc : null,
+      };
+    });
+  }
+
+  async registrarDictamenPresidente(
+    sesionId: string, 
+    presidenteId: string, 
+    resultado: 'Aprobado' | 'AprobadoConObservaciones' | 'NoAprobado'
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      const sesion = await tx.sesionVotacion.findUnique({ where: { id: sesionId } });
+      if (!sesion) throw new NotFoundException('Sesión no encontrada.');
+
+      const doc = sesion.documentoJson as unknown as SesionVotacionJson;
+      if (doc.presidenteCeiId !== presidenteId) {
+        throw new ForbiddenException('Solo el Presidente del CEI puede emitir este dictamen.');
+      }
+
+      doc.dictamenPresidenteCei = {
+        presidenteId,
+        resultado,
+        fechaEmision: new Date().toISOString(),
+      };
+
+      await tx.sesionVotacion.update({
+        where: { id: sesionId },
+        data: {
+          dictamenPresidente: resultado,
+          documentoJson: doc as any,
+        },
+      });
+
+      await tx.historial.create({
+        data: {
+          entidad: 'SesionVotacion',
+          entidadId: sesion.id,
+          evento: 'DICTAMEN_PRESIDENTE_EMITIDO',
+          descripcion: `Presidente CEI emitió dictamen: ${resultado}`,
+          usuarioId: presidenteId,
+          expedienteId: sesion.expedienteId,
+          metadata: { resultado, fechaEmision: doc.dictamenPresidenteCei.fechaEmision },
+        },
+      });
+
+      return doc.dictamenPresidenteCei;
+    });
+  }
+}
+```
+
+---
+
+## 7. Gateway WebSocket en NestJS con Voto Ciego (`gateways/votaciones.gateway.ts`)
+
+- **Voto Ciego en tiempo real:** Durante la sesión, a través del evento `progresoActualizado` **únicamente** se difunde el conteo numérico (`totalRecibidos: 3, totalEsperados: 5`). No se filtra qué eligió cada uno.
+- **Revelación al cierre:** Solo cuando `sesionCerrada === true`, se emite `sesionFinalizada` enviando el documento completo con autorías y firmas.
+
+```typescript
+import {
+  WebSocketGateway,
+  WebSocketServer,
+  SubscribeMessage,
+  ConnectedSocket,
+  MessageBody,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { UseGuards } from '@nestjs/common';
+import { VotacionesService } from '../services/votaciones.service';
+import { EmitirVotoDto } from '../dto/emitir-voto.dto';
+
+@WebSocketGateway({ cors: { origin: '*' }, namespace: '/votaciones' })
+export class VotacionesGateway {
+  @WebSocketServer()
+  server: Server;
+
+  constructor(private readonly votacionesService: VotacionesService) {}
+
+  @SubscribeMessage('unirseASesion')
+  handleUnirse(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { sesionId: string; usuarioId: string }
+  ) {
+    const room = `sesion_${payload.sesionId}`;
+    client.join(room);
+  }
+
+  @SubscribeMessage('emitirVoto')
+  async handleEmitirVoto(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { sesionId: string; usuarioId: string; voto: EmitirVotoDto }
+  ) {
+    const res = await this.votacionesService.registrarVoto(
+      payload.sesionId,
+      payload.usuarioId,
+      payload.voto
+    );
+
+    const room = `sesion_${payload.sesionId}`;
+
+    if (res.sesionCerrada) {
+      // Cierre alcanzado: se revelan los resultados consolidados a todos
+      this.server.to(room).emit('sesionFinalizada', res.documentoConsolidado);
+    } else {
+      // VOTO CIEGO: solo emite el incremento numérico anónimo
+      this.server.to(room).emit('progresoActualizado', {
+        totalRecibidos: res.totalVotosActuales,
+        totalEsperados: 5,
+      });
+    }
+  }
+}
+```
+
+---
+
+## 8. DTOs y Endpoints REST en NestJS
+
+### DTOs de Entrada (`dto/emitir-voto.dto.ts`)
+
+```typescript
+import { IsEnum, IsBoolean, IsString, IsOptional } from 'class-validator';
+import { VeredictoEvaluador } from '../domain/models/sesion-votacion.model';
+
+export class EmitirVotoDto {
+  @IsEnum(['Aprobado', 'AprobadoConObservaciones', 'NoAprobado'])
+  veredicto: VeredictoEvaluador;
+
+  @IsBoolean()
+  tieneObservacionesDocumentales: boolean;
+
+  @IsString()
+  @IsOptional()
+  observaciones?: string;
+}
+
+export class EmitirDictamenPresidenteDto {
+  @IsEnum(['Aprobado', 'AprobadoConObservaciones', 'NoAprobado'])
+  resultado: VeredictoEvaluador;
+}
+```
+
+### Endpoints REST
+
+| Método | Endpoint | Roles | Descripción |
+|---|---|---|---|
+| `POST` | `/api/votaciones/sesiones` | `ADMIN`, `PRESIDENTE_CEI` | Inicia una sesión de votación para un anexo y 5 evaluadores. |
+| `GET` | `/api/votaciones/sesiones/:id/progreso` | `EVALUADOR`, `PRESIDENTE_CEI` | Obtiene el conteo de votos en tránsito (voto ciego). |
+| `POST` | `/api/votaciones/sesiones/:id/voto` | `EVALUADOR` | Emite el voto individual y observaciones. |
+| `POST` | `/api/votaciones/sesiones/:id/dictamen-presidente` | `PRESIDENTE_CEI` | Emite el veredicto del Presidente con `fechaEmision`. |
+| `GET` | `/api/votaciones/sesiones/:id/resultado` | `EVALUADOR`, `PRESIDENTE_CEI` | Retorna el JSON consolidado completo tras el cierre. |
+| `GET` | `/api/votaciones/sesiones/:id/eventos` | `AUDITOR`, `PRESIDENTE_CEI` | Consulta los eventos inmutables de la tabla `historial`. |
+
+---
+
+## 9. Pruebas Unitarias del Motor con Vitest (`reglas-votacion.spec.ts`)
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { 
+  calcularReglasVotacion, 
+  VotoCalculo 
+} from './reglas-votacion';
+
+describe('Motor de Reglas de Votación (CEI)', () => {
+  it('Caso 3-0-2: Tres Aprobados puros y dos No Aprobados -> Debe ser Aprobado', () => {
+    const votos: VotoCalculo[] = [
+      { evaluadorId: '1', veredicto: 'Aprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '2', veredicto: 'Aprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '3', veredicto: 'Aprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '4', veredicto: 'NoAprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '5', veredicto: 'NoAprobado', tieneObservacionesDocumentales: false },
+    ];
+
+    const resultado = calcularReglasVotacion(votos);
+
+    expect(resultado.dictamen).toBe('Aprobado');
+    expect(resultado.puedeCerrarAnticipadamente).toBe(false);
+    expect(resultado.totalAprobados).toBe(3);
+  });
+
+  it('Caso con Observaciones: Tres Aprobados pero con observaciones documentales -> AprobadoConObservaciones', () => {
+    const votos: VotoCalculo[] = [
+      { evaluadorId: '1', veredicto: 'Aprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '2', veredicto: 'Aprobado', tieneObservacionesDocumentales: true }, // Obs documental
+      { evaluadorId: '3', veredicto: 'Aprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '4', veredicto: 'NoAprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '5', veredicto: 'Aprobado', tieneObservacionesDocumentales: false },
+    ];
+
+    const resultado = calcularReglasVotacion(votos);
+
+    expect(resultado.dictamen).toBe('AprobadoConObservaciones');
+  });
+
+  it('Caso 0-0-3 Temprano: Tres No Aprobados inmediatos -> Cierre Anticipado NoAprobado', () => {
+    const votos: VotoCalculo[] = [
+      { evaluadorId: '1', veredicto: 'NoAprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '2', veredicto: 'NoAprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '3', veredicto: 'NoAprobado', tieneObservacionesDocumentales: false },
+    ];
+
+    const resultado = calcularReglasVotacion(votos);
+
+    expect(resultado.dictamen).toBe('NoAprobado');
+    expect(resultado.puedeCerrarAnticipadamente).toBe(true);
+  });
+
+  it('Caso Tres Aprobados Tempranos: NO debe cerrar anticipado, debe esperar los 5 votos', () => {
+    const votos: VotoCalculo[] = [
+      { evaluadorId: '1', veredicto: 'Aprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '2', veredicto: 'Aprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '3', veredicto: 'Aprobado', tieneObservacionesDocumentales: false },
+    ];
+
+    const resultado = calcularReglasVotacion(votos);
+
+    expect(resultado.dictamen).toBe('EnEvaluacion');
+    expect(resultado.puedeCerrarAnticipadamente).toBe(false);
+  });
+
+  it('Caso 2-2-1 con Desempate: Presidente CEI dirime resultado', () => {
+    const votos: VotoCalculo[] = [
+      { evaluadorId: '1', veredicto: 'Aprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '2', veredicto: 'Aprobado', tieneObservacionesDocumentales: false },
+      { evaluadorId: '3', veredicto: 'AprobadoConObservaciones', tieneObservacionesDocumentales: true },
+      { evaluadorId: '4', veredicto: 'AprobadoConObservaciones', tieneObservacionesDocumentales: true },
+      { evaluadorId: '5', veredicto: 'NoAprobado', tieneObservacionesDocumentales: false },
+    ];
+
+    const sinPresidente = calcularReglasVotacion(votos);
+    expect(sinPresidente.dictamen).toBe('EmpateRequierePresidente');
+
+    const conPresidente = calcularReglasVotacion(votos, 'AprobadoConObservaciones');
+    expect(conPresidente.dictamen).toBe('AprobadoConObservaciones');
+  });
+});
+```

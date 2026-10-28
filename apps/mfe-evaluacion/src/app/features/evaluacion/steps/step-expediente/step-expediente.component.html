@@ -31,4 +31,22 @@
   <div class="expediente-codigo-footer">
     <span>Codigo: {{ codigoExpediente }}</span>
   </div>
+
+  <!-- Botonera Inferior: Cancelar (Salir a homeview2) y Continuar -->
+  <footer class="eval-actions-footer" style="margin-top: 2rem;">
+    <button
+      type="button"
+      class="eval-btn-pill"
+      (click)="onCancelar()"
+    >
+      Cancelar
+    </button>
+    <button
+      type="button"
+      class="eval-btn-pill eval-btn-pill--primary"
+      (click)="onContinuar()"
+    >
+      Continuar
+    </button>
+  </footer>
 </div>

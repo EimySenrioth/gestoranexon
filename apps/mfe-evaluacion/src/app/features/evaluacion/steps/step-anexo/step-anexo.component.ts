@@ -80,7 +80,7 @@ export class StepAnexoComponent {
 
   // --- Botones de Cancelar y Continuar entre sub-etapas ---
   onCancelar(): void {
-    this.evaluacionService.retrocederSubEtapaAnexo();
+    this.evaluacionService.cancelarEvaluacionApi();
   }
 
   onContinuar(): void {

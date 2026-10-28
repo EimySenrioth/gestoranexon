@@ -65,9 +65,19 @@ export function AzureTable({
     initialSolicitudes,
     initialPage,
     limit,
-    onEvaluarSuccess: (item) => {
+    onEvaluarSuccess: (item, token) => {
       onEvaluar?.(item);
-      router.push("/homeview2/evaluacion");
+      if (token) {
+        router.push(
+          `/homeview2/evaluacion?token=${encodeURIComponent(token)}&id=${encodeURIComponent(item.id)}`
+        );
+      } else {
+        router.push(
+          item?.id
+            ? `/homeview2/evaluacion?id=${encodeURIComponent(item.id)}`
+            : "/homeview2/evaluacion"
+        );
+      }
     },
   });
 

@@ -59,7 +59,7 @@ export class EvaluacionComponent {
   }
 
   onCancelar(): void {
-    this.evaluacionService.prevStep();
+    this.evaluacionService.cancelarEvaluacionApi();
   }
 
   onContinuar(): void {
@@ -72,7 +72,24 @@ export class EvaluacionComponent {
   }
 
   onCompletarEvaluacion(): void {
-    // Finalización formal de la evaluación
-    alert('¡Evaluación completada con éxito!');
+    // Finalización formal de la evaluación con envío al backend
+    this.evaluacionService.completarEvaluacionApi().subscribe({
+      next: (res) => {
+        alert('¡Evaluación completada con éxito!');
+        if (typeof window !== 'undefined' && window.parent) {
+          window.parent.postMessage(
+            { type: 'EVALUACION_FINALIZADA', evaluacionId: res.evaluacionId },
+            '*'
+          );
+        }
+      },
+      error: (err) => {
+        console.error('Error al completar evaluación:', err);
+        alert(
+          'Error al registrar la evaluación: ' +
+            (err.error?.message || 'Error de conexión con el servidor')
+        );
+      },
+    });
   }
 }

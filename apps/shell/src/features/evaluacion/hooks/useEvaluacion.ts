@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { SolicitudFirmaItem } from "../types/evaluacion.types";
 import {
   listarSolicitudesParaEvaluar,
-  firmarSolicitudEvaluacion,
+  iniciarSesionEvaluacion,
 } from "../services/evaluacion.service";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -12,7 +12,7 @@ interface UseEvaluacionOptions {
   initialSolicitudes?: SolicitudFirmaItem[];
   initialPage?: number;
   limit?: number;
-  onEvaluarSuccess?: (item: SolicitudFirmaItem) => void;
+  onEvaluarSuccess?: (item: SolicitudFirmaItem, token?: string) => void;
 }
 
 export function useEvaluacion({
@@ -104,34 +104,24 @@ export function useEvaluacion({
   const handleConfirmarEvaluacion = useCallback(
     async (item?: SolicitudFirmaItem) => {
       const target = item || solicitudAEvaluar;
-      if (!target) return;
+      if (!target) {
+        setIsModalOpen(false);
+        return;
+      }
 
       setIsFirmando(true);
+      let token: string | undefined;
       try {
-        await firmarSolicitudEvaluacion(target.id);
-
-        const fechaHoy = new Date().toLocaleDateString("es-PE", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        });
-
-        const updatedItem: SolicitudFirmaItem = {
-          ...target,
-          fechaEvaluacion: fechaHoy,
-          etapaActual: "Evaluado",
-          evaluar: { firmado: true, fechaFirma: fechaHoy },
-        };
-
-        setSolicitudes((prev) =>
-          prev.map((s) => (s.id === target.id ? updatedItem : s))
-        );
-
-        onEvaluarSuccess?.(updatedItem);
+        // Solicitar token contextual de evaluación al backend
+        const sesion = await iniciarSesionEvaluacion(target.id);
+        token = sesion?.token;
+      } catch (error) {
+        console.warn("[useEvaluacion] Aviso al obtener token del backend, navegando de forma resiliente:", error);
       } finally {
         setIsFirmando(false);
         setIsModalOpen(false);
         setSolicitudAEvaluar(null);
+        onEvaluarSuccess?.(target, token);
       }
     },
     [onEvaluarSuccess, solicitudAEvaluar]

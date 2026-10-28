@@ -284,8 +284,41 @@ export class ExpedientesService {
    * Obtiene el detalle de un expediente por su ID.
    */
   async obtenerPorId(id: string) {
-    const ticket = await this.prisma.ticket.findUnique({
-      where: { id },
+    // 1. Buscar primero en Expediente (por id o codigo)
+    const expediente = await this.prisma.expediente.findFirst({
+      where: {
+        OR: [{ id }, { codigo: id }],
+      },
+      include: {
+        ticket: {
+          include: {
+            solicitante: true,
+            asignadoA: true,
+          },
+        },
+        documentos: true,
+        historial: {
+          orderBy: { creadoEn: 'asc' },
+        },
+      },
+    });
+
+    if (expediente) {
+      return {
+        id: expediente.id,
+        codigo: expediente.codigo,
+        estado: expediente.estado,
+        ticket: expediente.ticket,
+        documentos: expediente.documentos,
+        historial: expediente.historial,
+      };
+    }
+
+    // 2. Si no fue por expediente, buscar en Ticket (por id o codigo)
+    const ticket = await this.prisma.ticket.findFirst({
+      where: {
+        OR: [{ id }, { codigo: id }],
+      },
       include: {
         expediente: true,
         documentos: true,
@@ -299,7 +332,14 @@ export class ExpedientesService {
       throw new ExpedienteNoEncontradoException(id);
     }
 
-    return ticket;
+    return {
+      id: ticket.expediente?.id || ticket.id,
+      codigo: ticket.expediente?.codigo || ticket.codigo,
+      estado: ticket.expediente?.estado || ticket.estado,
+      ticket,
+      documentos: ticket.documentos,
+      historial: ticket.historial,
+    };
   }
 
   /**

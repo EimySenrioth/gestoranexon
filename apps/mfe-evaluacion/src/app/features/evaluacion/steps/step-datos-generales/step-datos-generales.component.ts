@@ -17,6 +17,8 @@ interface CampoItem {
 export class StepDatosGeneralesComponent {
   @Input() datos: DatosGeneralesProyecto = { ...DEFAULT_DATOS_GENERALES };
   @Output() datosChange = new EventEmitter<DatosGeneralesProyecto>();
+  @Output() cancelar = new EventEmitter<void>();
+  @Output() continuar = new EventEmitter<void>();
 
   readonly campos: CampoItem[] = [
     { id: 'tituloProyecto', label: 'Título del Proyecto' },
@@ -26,4 +28,12 @@ export class StepDatosGeneralesComponent {
     { id: 'fechaPresentacion', label: 'Fecha de Presentación' },
     { id: 'financiamiento', label: 'Financiamiento' },
   ];
+
+  onCancelar(): void {
+    this.cancelar.emit();
+  }
+
+  onContinuar(): void {
+    this.continuar.emit();
+  }
 }

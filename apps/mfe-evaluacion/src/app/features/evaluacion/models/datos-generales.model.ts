@@ -11,20 +11,14 @@ export interface DatosGeneralesProyecto {
 }
 
 /**
- * Datos mock de evaluación para estandarizar el tamaño de las cápsulas
- */
-export const MOCK_DATOS_GENERALES: DatosGeneralesProyecto = {
-  tituloProyecto: 'Plataforma Telemedicina IA',
-  investigadoresResponsables: 'Dr. Carlos Mendoza V.',
-  unidadAcademicaFacultad: 'Facultad de Ingeniería',
-  tipoInvestigacion: 'Investigación Aplicada',
-  fechaPresentacion: '14 de Octubre, 2026',
-  financiamiento: 'Subvención UNTELS',
-};
-
-/**
- * Valores iniciales por defecto
+ * Valores iniciales limpios (se pueblan dinámicamente desde el endpoint del backend)
  */
 export const DEFAULT_DATOS_GENERALES: DatosGeneralesProyecto = {
-  ...MOCK_DATOS_GENERALES,
+  tituloProyecto: 'Cargando datos del proyecto...',
+  investigadoresResponsables: 'Cargando...',
+  unidadAcademicaFacultad: 'Cargando...',
+  tipoInvestigacion: 'Cargando...',
+  fechaPresentacion: 'Cargando...',
+  financiamiento: 'Cargando...',
 };
+

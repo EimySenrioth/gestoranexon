@@ -73,6 +73,47 @@ export async function listarSolicitudesParaEvaluar(
   }
 }
 
+export interface IniciarEvaluacionResponse {
+  token: string;
+  expiresIn: number;
+  expedienteId: string;
+  codigoExpediente: string;
+  tieneBorrador: boolean;
+  estaFirmado: boolean;
+  soloLectura: boolean;
+}
+
+/**
+ * Solicita al backend la emisión de un token contextual de evaluación
+ * tras pulsar 'Continuar' en el modal de advertencia normativa.
+ */
+export async function iniciarSesionEvaluacion(
+  expedienteId: string
+): Promise<IniciarEvaluacionResponse> {
+  return await apiClient.post<IniciarEvaluacionResponse>(
+    "/api/v1/evaluaciones/tokens",
+    { expedienteId }
+  );
+}
+
+/**
+ * Revoca el token de evaluación si el usuario pulsa Cancelar / Salir.
+ */
+export async function revocarTokenEvaluacion(
+  token?: string,
+  motivo?: string
+): Promise<{ ok: boolean }> {
+  try {
+    return await apiClient.post<{ ok: boolean }>(
+      "/api/v1/evaluaciones/tokens/revocar",
+      { token, motivo }
+    );
+  } catch (error) {
+    console.warn("[evaluacion.service] Error al revocar token:", error);
+    return { ok: false };
+  }
+}
+
 /**
  * Registra la evaluación / firma en el backend cuando se active dicho flujo en el futuro.
  */

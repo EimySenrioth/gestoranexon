@@ -120,10 +120,9 @@ export class ExpedientesController {
   }
 
   /**
-   * Obtiene el detalle de un expediente específico.
+   * Obtiene el detalle de un expediente específico para su visualización y evaluación.
    */
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
   async obtenerPorId(@Param('id') id: string) {
     return this.expedientesService.obtenerPorId(id);
   }

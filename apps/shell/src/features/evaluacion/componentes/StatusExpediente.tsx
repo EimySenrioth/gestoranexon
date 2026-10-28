@@ -32,7 +32,7 @@ const DOCUMENTOS_DEFAULT: DocumentoItem[] = [
 ];
 
 export function StatusExpediente({
-  codigoExpediente = "CEI-2026-0163",
+  codigoExpediente = "",
   fechaSolicitud = "9/26/2026",
   tituloProyecto = "Nombre",
   fechaAsignacion = "12/09/2026",

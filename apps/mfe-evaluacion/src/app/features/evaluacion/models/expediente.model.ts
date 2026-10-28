@@ -46,6 +46,6 @@ export const MOCK_DOCUMENTOS_EXPEDIENTE: DocumentoExpedienteItem[] = [
 ];
 
 export const DEFAULT_EXPEDIENTE_PROYECTO: ExpedienteProyecto = {
-  codigoExpediente: 'CEI-2026-0163',
-  documentos: MOCK_DOCUMENTOS_EXPEDIENTE,
+  codigoExpediente: '',
+  documentos: [],
 };

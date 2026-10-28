@@ -151,20 +151,22 @@ enum ResultadoEvaluacion {
 }
 
 model Evaluacion {
-  id               String               @id @default(cuid())
-  expedienteId     String
-  evaluadorId      String
-  principiosEticos String?
-  normativaLegal   String?
-  resultado        ResultadoEvaluacion?
-  recomendacion    String?
-  creadoEn         DateTime             @default(now())
-  actualizadoEn    DateTime             @updatedAt
+  id                 String               @id @default(cuid())
+  expedienteId       String
+  evaluadorId        String
+  principiosEticos   String?
+  metodologiaRiesgos String?
+  normativaLegal     String?
+  resultado          ResultadoEvaluacion?
+  recomendacion      String?
+  creadoEn           DateTime             @default(now())
+  actualizadoEn      DateTime             @updatedAt
 
   expediente Expediente @relation(fields: [expedienteId], references: [id])
   evaluador  Usuario    @relation(fields: [evaluadorId], references: [id])
   firmas     Firma[]
 
+  @@unique([expedienteId, evaluadorId])
   @@map("evaluaciones")
 }
 
@@ -427,4 +429,24 @@ model TicketHistorial {
 
   @@index([ticketId])
   @@map("ticket_historial")
+}
+
+// ============================================================================
+// DOMINIO DE EVALUACIÓN Y COMITÉ DE ÉTICA: SESIONES DE VOTACIÓN
+// ============================================================================
+
+model SesionVotacion {
+  id                 String   @id @default(cuid())
+  expedienteId       String   @unique
+  estado             String   @default("EnProgreso") // EnProgreso | CerradaAnticipada | CerradaCompleta
+  dictamenGlobal     String   @default("EnEvaluacion")
+  dictamenPresidente String?
+  documentoJson      Json
+  version            Int      @default(1)
+  creadoEn           DateTime @default(now())
+  actualizadoEn      DateTime @updatedAt
+
+  @@index([expedienteId])
+  @@index([estado])
+  @@map("sesiones_votacion")
 }

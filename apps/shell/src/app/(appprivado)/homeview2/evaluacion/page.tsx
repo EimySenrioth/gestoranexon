@@ -7,7 +7,26 @@ export const metadata: Metadata = {
   description: "Microfrontend Angular de evaluación ética de proyectos",
 };
 
-export default function EvaluacionPage() {
+interface EvaluacionPageProps {
+  searchParams: Promise<{ token?: string; id?: string }>;
+}
+
+import { EvaluacionIframeContainer } from "@/features/evaluacion/componentes/EvaluacionIframeContainer";
+
+export default async function EvaluacionPage({ searchParams }: EvaluacionPageProps) {
+  const params = await searchParams;
+  const token = params?.token || "";
+  const id = params?.id || "";
+
+  const queryParams = new URLSearchParams();
+  if (token) queryParams.set("token", token);
+  if (id) queryParams.set("expedienteId", id);
+
+  const queryString = queryParams.toString();
+  const iframeSrc = queryString
+    ? `http://localhost:4202?${queryString}`
+    : "http://localhost:4202";
+
   return (
     <div className="layout-shell mall">
       {/* 1. Header oficial con logo UNTELS */}
@@ -24,13 +43,8 @@ export default function EvaluacionPage() {
 
         <main className="layout-content w-full !items-stretch !justify-start !p-0 !overflow-hidden">
           <div className="w-full h-full flex-1 flex flex-col items-stretch overflow-hidden">
-            {/* Contenedor Microfrontend Angular (puerto 4202 o MFE montado) */}
-            <iframe
-              src="http://localhost:4202"
-              title="Microfrontend de Evaluación Angular"
-              className="w-full h-full flex-1 border-none bg-transparent"
-              style={{ width: "100%", height: "100%", minHeight: "100%", display: "block", border: "none" }}
-            />
+            {/* Contenedor Microfrontend Angular con escucha de eventos de cancelación */}
+            <EvaluacionIframeContainer iframeSrc={iframeSrc} />
           </div>
         </main>
       </div>

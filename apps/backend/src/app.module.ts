@@ -7,7 +7,8 @@ import { UserManagementModule } from './usermanagement/usermanagement.module.js'
 import { TicketManagerModule } from './ticketmanager/ticketmanager.module.js';
 import { DocumentManagementModule } from './documentmanagement/documentmanagement.module.js';
 import { ExpedientesModule } from './expedientes/expedientes.module.js';
-
+import { VotacionesModule } from './votaciones/votaciones.module.js';
+import { EvaluacionesModule } from './evaluaciones/evaluaciones.module.js';
 
 @Module({
   imports: [
@@ -17,6 +18,8 @@ import { ExpedientesModule } from './expedientes/expedientes.module.js';
     TicketManagerModule,
     DocumentManagementModule,
     ExpedientesModule,
+    VotacionesModule,
+    EvaluacionesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
