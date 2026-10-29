@@ -44,7 +44,11 @@ export class EvaluationTokenGuard implements CanActivate {
       request.params?.id ||
       request.body?.expedienteId;
 
-    if (expedienteIdTarget && evalPayload.expedienteId !== expedienteIdTarget) {
+    if (
+      expedienteIdTarget &&
+      evalPayload.expedienteId !== expedienteIdTarget &&
+      evalPayload.codigoExpediente !== expedienteIdTarget
+    ) {
       throw new ForbiddenException(
         'El token de evaluación presentado no corresponde al expediente solicitado.',
       );

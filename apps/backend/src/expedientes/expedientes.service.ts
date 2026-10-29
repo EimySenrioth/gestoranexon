@@ -294,6 +294,7 @@ export class ExpedientesService {
           include: {
             solicitante: true,
             asignadoA: true,
+            documentos: true,
           },
         },
         documentos: true,
@@ -304,12 +305,17 @@ export class ExpedientesService {
     });
 
     if (expediente) {
+      const docsCombinados =
+        expediente.documentos && expediente.documentos.length > 0
+          ? expediente.documentos
+          : expediente.ticket?.documentos || [];
+
       return {
         id: expediente.id,
         codigo: expediente.codigo,
         estado: expediente.estado,
         ticket: expediente.ticket,
-        documentos: expediente.documentos,
+        documentos: docsCombinados,
         historial: expediente.historial,
       };
     }

@@ -2,10 +2,16 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from '../database/prisma.module.js';
 import { UserManagementModule } from '../usermanagement/usermanagement.module.js';
-import { EvaluationTokenService } from './services/evaluation-token.service.js';
-import { AnexoEvaluacionService } from './services/anexo-evaluacion.service.js';
-import { EvaluationTokenController } from './controllers/evaluation-token.controller.js';
-import { AnexoEvaluacionController } from './controllers/anexo-evaluacion.controller.js';
+import {
+  EvaluationTokenService,
+  AnexoEvaluacionService,
+  FirmaService,
+} from './services/index.js';
+import {
+  EvaluationTokenController,
+  AnexoEvaluacionController,
+  FirmaController,
+} from './controllers/index.js';
 import { EvaluationTokenGuard } from './guards/evaluation-token.guard.js';
 
 @Module({
@@ -20,15 +26,21 @@ import { EvaluationTokenGuard } from './guards/evaluation-token.guard.js';
       signOptions: { expiresIn: '2h' },
     }),
   ],
-  controllers: [EvaluationTokenController, AnexoEvaluacionController],
+  controllers: [
+    EvaluationTokenController,
+    AnexoEvaluacionController,
+    FirmaController,
+  ],
   providers: [
     EvaluationTokenService,
     AnexoEvaluacionService,
+    FirmaService,
     EvaluationTokenGuard,
   ],
   exports: [
     EvaluationTokenService,
     AnexoEvaluacionService,
+    FirmaService,
     EvaluationTokenGuard,
   ],
 })

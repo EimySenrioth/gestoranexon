@@ -8,6 +8,7 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { RegistrarFirmaDto } from './registrar-firma.dto.js';
 
 export class CriterioItemDto {
   @IsString()
@@ -20,20 +21,6 @@ export class CriterioItemDto {
   @IsString()
   @IsOptional()
   observaciones?: string;
-}
-
-export class FirmaEvaluadorDto {
-  @IsString()
-  @IsNotEmpty()
-  firmaDataUrl!: string;
-
-  @IsString()
-  @IsOptional()
-  firmadoEn?: string;
-
-  @IsBoolean()
-  @IsOptional()
-  declaracionAceptada?: boolean;
 }
 
 export class CompletarAnexo9Dto {
@@ -65,6 +52,6 @@ export class CompletarAnexo9Dto {
   observacionesGenerales?: string;
 
   @ValidateNested()
-  @Type(() => FirmaEvaluadorDto)
-  firma!: FirmaEvaluadorDto;
+  @Type(() => RegistrarFirmaDto)
+  firma!: RegistrarFirmaDto;
 }

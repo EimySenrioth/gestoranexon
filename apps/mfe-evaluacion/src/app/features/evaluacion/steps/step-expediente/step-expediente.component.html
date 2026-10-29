@@ -1,7 +1,7 @@
 <div class="expediente-container">
   <!-- Filas de documentos del expediente -->
   <div *ngFor="let doc of documentos" class="dato-row-card">
-    <span class="dato-label">{{ doc.label }}</span>
+    <span class="dato-label" [title]="doc.label">{{ doc.label }}</span>
 
     <button
       type="button"

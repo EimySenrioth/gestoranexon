@@ -5,10 +5,12 @@ import { Injectable, signal } from '@angular/core';
 })
 export class EvaluationSessionService {
   private readonly _token = signal<string | null>(null);
+  private readonly _accessToken = signal<string | null>(null);
   private readonly _expedienteId = signal<string | null>(null);
   private readonly _soloLectura = signal<boolean>(false);
 
   readonly token = this._token.asReadonly();
+  readonly accessToken = this._accessToken.asReadonly();
   readonly expedienteId = this._expedienteId.asReadonly();
   readonly soloLectura = this._soloLectura.asReadonly();
 
@@ -21,6 +23,7 @@ export class EvaluationSessionService {
 
     const urlParams = new URLSearchParams(window.location.search);
     const tokenParam = urlParams.get('token');
+    const accessTokenParam = urlParams.get('accessToken');
     const expedienteIdParam = urlParams.get('expedienteId') || urlParams.get('id');
 
     if (tokenParam) {
@@ -29,6 +32,14 @@ export class EvaluationSessionService {
     } else {
       const stored = sessionStorage.getItem('evaluation_token');
       if (stored) this._token.set(stored);
+    }
+
+    if (accessTokenParam) {
+      this._accessToken.set(accessTokenParam);
+      sessionStorage.setItem('evaluation_access_token', accessTokenParam);
+    } else {
+      const storedAccess = sessionStorage.getItem('evaluation_access_token');
+      if (storedAccess) this._accessToken.set(storedAccess);
     }
 
     if (expedienteIdParam) {
@@ -65,6 +76,13 @@ export class EvaluationSessionService {
     }
   }
 
+  setAccessToken(accessToken: string): void {
+    this._accessToken.set(accessToken);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('evaluation_access_token', accessToken);
+    }
+  }
+
   setExpedienteId(id: string): void {
     this._expedienteId.set(id);
     if (typeof window !== 'undefined') {
@@ -78,10 +96,12 @@ export class EvaluationSessionService {
 
   limpiarSesion(): void {
     this._token.set(null);
+    this._accessToken.set(null);
     this._expedienteId.set(null);
     this._soloLectura.set(false);
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('evaluation_token');
+      sessionStorage.removeItem('evaluation_access_token');
       sessionStorage.removeItem('evaluation_expediente_id');
     }
   }

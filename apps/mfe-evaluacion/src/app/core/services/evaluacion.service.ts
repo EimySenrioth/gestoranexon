@@ -1,5 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { switchMap, tap, catchError } from 'rxjs/operators';
 import { EvaluationSessionService } from './evaluation-session.service';
 import {
   StepEvaluacionId,
@@ -272,6 +274,16 @@ export class EvaluacionService {
         if (data.codigo || ticket.codigo) {
           this._codigoExpediente.set(data.codigo || ticket.codigo);
         }
+        const tipoInvestigacionTexto =
+          ticket.tipoInvestigacion && ticket.tipoInvestigacionOtro
+            ? `${ticket.tipoInvestigacion}: ${ticket.tipoInvestigacionOtro}`
+            : ticket.tipoInvestigacion || 'Investigación Aplicada';
+
+        const financiamientoTexto =
+          ticket.financiamiento && ticket.financiamientoDetalle
+            ? `${ticket.financiamiento}: ${ticket.financiamientoDetalle}`
+            : ticket.financiamiento || 'Recursos Propios';
+
         this._datosGenerales.set({
           tituloProyecto: ticket.titulo || '',
           investigadoresResponsables:
@@ -279,7 +291,7 @@ export class EvaluacionService {
               ? ticket.investigadores.join(', ')
               : 'No asignado',
           unidadAcademicaFacultad: ticket.unidadAcademica || 'Facultad no especificada',
-          tipoInvestigacion: ticket.tipoInvestigacion || 'Investigación Aplicada',
+          tipoInvestigacion: tipoInvestigacionTexto,
           fechaPresentacion: ticket.fechaPresentacion
             ? new Date(ticket.fechaPresentacion).toLocaleDateString('es-PE', {
                 day: 'numeric',
@@ -287,7 +299,7 @@ export class EvaluacionService {
                 year: 'numeric',
               })
             : 'Pendiente',
-          financiamiento: ticket.financiamiento || 'Recursos Propios',
+          financiamiento: financiamientoTexto,
         });
 
         // Construir la lista de documentos reales a partir de los archivos del ticket
@@ -317,7 +329,16 @@ export class EvaluacionService {
         if (ticket.financiamiento) {
           docs.push({
             id: 'financiamiento',
-            label: `Financiamiento: ${ticket.financiamiento}`,
+            label: `Financiamiento: ${financiamientoTexto}`,
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+          });
+        }
+
+        if (ticket.modalidad) {
+          docs.push({
+            id: 'modalidad',
+            label: `Modalidad: ${ticket.modalidad}`,
             estado: 'recibido',
             estadoLabel: 'Recibido',
           });
@@ -332,11 +353,25 @@ export class EvaluacionService {
           });
         }
 
-        if (Array.isArray(data.documentos) && data.documentos.length > 0) {
-          for (const d of data.documentos) {
+        const documentosAdjuntos =
+          Array.isArray(data.documentos) && data.documentos.length > 0
+            ? data.documentos
+            : Array.isArray(ticket.documentos)
+              ? ticket.documentos
+              : [];
+
+        if (documentosAdjuntos.length > 0) {
+          for (const d of documentosAdjuntos) {
+            const nombreDoc = d.nombre || d.nombreOriginal || 'Documento adjunto';
+            const prefijoTipo =
+              d.tipoDocumental === 'AUDIO_ASUNTO'
+                ? 'Audio de Asunto: '
+                : d.tipoDocumental?.startsWith('ANEXO_ASUNTO')
+                  ? 'Anexo de Asunto: '
+                  : '';
             docs.push({
               id: d.id,
-              label: d.nombre || d.nombreOriginal || 'Documento adjunto',
+              label: `${prefijoTipo}${nombreDoc}`,
               estado: 'recibido',
               estadoLabel: 'Recibido',
             });
@@ -384,8 +419,26 @@ export class EvaluacionService {
             estadoLabel: 'Recibido',
           },
           {
+            id: 'modalidad',
+            label: 'Modalidad: Cuestionario1-1&Digrama.pdf',
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+          },
+          {
             id: 'plan-proyecto',
             label: 'Plan de Proyecto: Cuestionario22.pdf',
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+          },
+          {
+            id: 'cmvn3p8rs000eecs4tkmnmrd9',
+            label: 'Anexo de Asunto: lagu-sans (1).zip',
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+          },
+          {
+            id: 'cmvn3p8r4000decs4a4odwwpu',
+            label: 'Audio de Asunto: 2hollis, Shawn Wasabi - Crush x BURNT RICE (Slowed + Reverb) Mashup, Remix [BEST VERSION].mp3',
             estado: 'recibido',
             estadoLabel: 'Recibido',
           },
@@ -462,6 +515,35 @@ export class EvaluacionService {
   }
 
   /**
+   * Asegura que exista un token de evaluación contextual antes de enviar.
+   * Si falta el token en sesión pero hay JWT de usuario, lo solicita automáticamente.
+   */
+  private asegurarTokenEvaluacion(expedienteId: string): Observable<string | null> {
+    const tokenActual = this.sessionService.token();
+    if (tokenActual) {
+      return of(tokenActual);
+    }
+
+    return this.http
+      .post<any>(`${this.apiUrl}/evaluaciones/tokens`, { expedienteId })
+      .pipe(
+        tap((res) => {
+          if (res?.token) {
+            this.sessionService.setToken(res.token);
+          }
+          if (res?.expedienteId) {
+            this.sessionService.setExpedienteId(res.expedienteId);
+          }
+        }),
+        switchMap((res) => of(res?.token || null)),
+        catchError((err) => {
+          console.warn('[EvaluacionService] No se pudo generar token contextual automático:', err);
+          return of(null);
+        })
+      );
+  }
+
+  /**
    * Finaliza y firma la evaluación enviando las 5 secciones al backend:
    * POST /api/v1/evaluaciones/anexo/completar
    */
@@ -504,9 +586,13 @@ export class EvaluacionService {
       },
     };
 
-    return this.http.post<any>(
-      `${this.apiUrl}/evaluaciones/anexo/completar`,
-      payload
+    return this.asegurarTokenEvaluacion(expedienteId).pipe(
+      switchMap(() =>
+        this.http.post<any>(
+          `${this.apiUrl}/evaluaciones/anexo/completar`,
+          payload
+        )
+      )
     );
   }
 
@@ -526,6 +612,7 @@ export class EvaluacionService {
           error: (err) => console.warn('[EvaluacionService] Error al revocar token:', err),
         });
     }
+    this.reset();
     this.sessionService.limpiarSesion();
 
     if (typeof window !== 'undefined') {

@@ -91,6 +91,7 @@ export class EvaluationTokenService {
       jti,
       sub: evaluadorId,
       expedienteId: expediente.id,
+      codigoExpediente: expediente.codigo,
       ticketId: expediente.ticket?.id,
       tipoAnexo: 'ANEXO_9',
     };

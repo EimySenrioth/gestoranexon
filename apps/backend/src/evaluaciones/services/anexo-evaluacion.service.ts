@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service.js';
 import { EvaluationTokenService } from './evaluation-token.service.js';
+import { FirmaService, type MetadatosAuditoriaFirma } from './firma.service.js';
 import { CompletarAnexo9Dto, GuardarBorradorAnexoDto } from '../dto/index.js';
 import { ResultadoEvaluacion } from '@prisma/client';
 
@@ -16,15 +17,33 @@ export class AnexoEvaluacionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokenService: EvaluationTokenService,
+    private readonly firmaService: FirmaService,
   ) {}
+
+  /**
+   * Resuelve el CUID real del expediente a partir de su ID o de su código (ej. EXP-2026-0013).
+   */
+  private async resolverExpedienteId(idOCodigo: string): Promise<string> {
+    const exp = await this.prisma.expediente.findFirst({
+      where: {
+        OR: [{ id: idOCodigo }, { codigo: idOCodigo }],
+      },
+      select: { id: true },
+    });
+    if (!exp) {
+      throw new NotFoundException(`El expediente ${idOCodigo} no existe.`);
+    }
+    return exp.id;
+  }
 
   /**
    * Obtiene el estado actual del Anexo N°9 (Borrador previo o versión firmada).
    */
   async obtenerEstadoAnexo(expedienteId: string, evaluadorId: string) {
+    const realExpedienteId = await this.resolverExpedienteId(expedienteId);
     const evaluacion = await this.prisma.evaluacion.findFirst({
       where: {
-        expedienteId,
+        expedienteId: realExpedienteId,
         evaluadorId,
       },
       include: {
@@ -77,7 +96,10 @@ export class AnexoEvaluacionService {
         ultimaActualizacion: evaluacion.actualizadoEn,
         firma: estaFirmado
           ? {
+              id: evaluacion.firmas[0].id,
               firmadoPor: evaluacion.firmas[0].firmadoPor,
+              firmaDataUrl: evaluacion.firmas[0].firma,
+              hashSha256: evaluacion.firmas[0].hashSha256,
               creadoEn: evaluacion.firmas[0].creadoEn,
             }
           : null,
@@ -89,14 +111,15 @@ export class AnexoEvaluacionService {
    * Guarda un borrador parcial sin emitir la firma final.
    */
   async guardarBorrador(evaluadorId: string, dto: GuardarBorradorAnexoDto) {
-    this.logger.log(`Guardando borrador de Anexo N°9 para expediente ${dto.expedienteId}`);
+    const realExpedienteId = await this.resolverExpedienteId(dto.expedienteId);
+    this.logger.log(`Guardando borrador de Anexo N°9 para expediente ${realExpedienteId}`);
 
     const dictamenEnum = dto.dictamen ? this.mapearResultado(dto.dictamen) : undefined;
 
     const evaluacion = await this.prisma.evaluacion.upsert({
       where: {
         expedienteId_evaluadorId: {
-          expedienteId: dto.expedienteId,
+          expedienteId: realExpedienteId,
           evaluadorId,
         },
       },
@@ -111,7 +134,7 @@ export class AnexoEvaluacionService {
         actualizadoEn: new Date(),
       },
       create: {
-        expedienteId: dto.expedienteId,
+        expedienteId: realExpedienteId,
         evaluadorId,
         principiosEticos: dto.principiosEticos ? JSON.stringify(dto.principiosEticos) : undefined,
         metodologiaRiesgos: dto.metodologiaRiesgos
@@ -131,7 +154,7 @@ export class AnexoEvaluacionService {
         evento: 'EVALUACION_BORRADOR_GUARDADO',
         descripcion: `Avance parcial del Anexo N°9 guardado por evaluador ${evaluadorId}`,
         usuarioId: evaluadorId,
-        expedienteId: dto.expedienteId,
+        expedienteId: realExpedienteId,
       },
     });
 
@@ -149,9 +172,11 @@ export class AnexoEvaluacionService {
     evaluadorId: string,
     tokenJti: string,
     dto: CompletarAnexo9Dto,
+    auditoria?: MetadatosAuditoriaFirma,
   ) {
+    const realExpedienteId = await this.resolverExpedienteId(dto.expedienteId);
     this.logger.log(
-      `Completando formalmente evaluación de Anexo N°9 para expediente ${dto.expedienteId}`,
+      `Completando formalmente evaluación de Anexo N°9 para expediente ${realExpedienteId} (${dto.expedienteId})`,
     );
 
     const resultadoEnum = this.mapearResultado(dto.dictamen);
@@ -161,7 +186,7 @@ export class AnexoEvaluacionService {
       const evaluacion = await tx.evaluacion.upsert({
         where: {
           expedienteId_evaluadorId: {
-            expedienteId: dto.expedienteId,
+            expedienteId: realExpedienteId,
             evaluadorId,
           },
         },
@@ -174,7 +199,7 @@ export class AnexoEvaluacionService {
           actualizadoEn: new Date(),
         },
         create: {
-          expedienteId: dto.expedienteId,
+          expedienteId: realExpedienteId,
           evaluadorId,
           principiosEticos: JSON.stringify(dto.principiosEticos),
           metodologiaRiesgos: JSON.stringify(dto.metodologiaRiesgos),
@@ -184,14 +209,14 @@ export class AnexoEvaluacionService {
         },
       });
 
-      // 2. Registrar la Firma Digital
-      await tx.firma.create({
-        data: {
-          evaluacionId: evaluacion.id,
-          firmadoPor: evaluadorId,
-          firma: dto.firma.firmaDataUrl,
-        },
-      });
+      // 2. Registrar la Firma Digital a través de FirmaService (con hash SHA-256 y metadatos)
+      const firmaRegistrada = await this.firmaService.registrarFirma(
+        evaluacion.id,
+        evaluadorId,
+        dto.firma,
+        auditoria,
+        tx,
+      );
 
       // 3. Registrar auditoría legal en 'historial'
       await tx.historial.create({
@@ -201,10 +226,12 @@ export class AnexoEvaluacionService {
           evento: 'EVALUACION_COMPLETADA',
           descripcion: `Evaluación de Anexo N°9 completada con dictamen: ${dto.dictamen}`,
           usuarioId: evaluadorId,
-          expedienteId: dto.expedienteId,
+          expedienteId: realExpedienteId,
           metadata: {
             secciones: ['2.1', '2.2', '2.3', 'RECOMENDACIONES', 'FIRMAS'],
             dictamen: dto.dictamen,
+            firmaId: firmaRegistrada.id,
+            hashSha256: firmaRegistrada.hashSha256,
             firmadoEn: dto.firma.firmadoEn || new Date().toISOString(),
           },
         },
@@ -212,7 +239,7 @@ export class AnexoEvaluacionService {
 
       // 4. Sincronizar en 'sesiones_votacion' si existe una sesión abierta
       const sesion = await tx.sesionVotacion.findUnique({
-        where: { expedienteId: dto.expedienteId },
+        where: { expedienteId: realExpedienteId },
       });
 
       if (sesion && sesion.documentoJson) {
@@ -242,7 +269,7 @@ export class AnexoEvaluacionService {
         }
 
         await tx.sesionVotacion.update({
-          where: { expedienteId: dto.expedienteId },
+          where: { expedienteId: realExpedienteId },
           data: {
             documentoJson: docJson,
             actualizadoEn: new Date(),

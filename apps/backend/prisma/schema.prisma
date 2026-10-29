@@ -175,6 +175,9 @@ model Firma {
   evaluacionId String
   firmadoPor   String
   firma        String
+  hashSha256   String?
+  ipAddress    String?
+  userAgent    String?
   creadoEn     DateTime @default(now())
 
   evaluacion Evaluacion @relation(fields: [evaluacionId], references: [id])

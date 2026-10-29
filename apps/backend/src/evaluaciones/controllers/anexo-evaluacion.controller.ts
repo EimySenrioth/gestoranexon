@@ -57,6 +57,16 @@ export class AnexoEvaluacionController {
     @Req() req: any,
   ) {
     const tokenJti = req.evaluationContext?.jti || 'unknown';
-    return this.anexoService.completarAnexo(userId, tokenJti, dto);
+    const ipAddress =
+      (req.headers?.['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      req.ip ||
+      req.socket?.remoteAddress ||
+      undefined;
+    const userAgent = req.headers?.['user-agent'] || undefined;
+
+    return this.anexoService.completarAnexo(userId, tokenJti, dto, {
+      ipAddress,
+      userAgent,
+    });
   }
 }

@@ -150,6 +150,10 @@ export class StepFirmarComponent implements AfterViewInit {
   }
 
   onCancelar(): void {
+    this.borrarFirma();
+    this.password = '';
+    this.mensajeExito = false;
+    this.firmaState.firmado = false;
     this.cancelar.emit();
   }
 

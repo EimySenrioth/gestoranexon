@@ -18,15 +18,6 @@ export default async function EvaluacionPage({ searchParams }: EvaluacionPagePro
   const token = params?.token || "";
   const id = params?.id || "";
 
-  const queryParams = new URLSearchParams();
-  if (token) queryParams.set("token", token);
-  if (id) queryParams.set("expedienteId", id);
-
-  const queryString = queryParams.toString();
-  const iframeSrc = queryString
-    ? `http://localhost:4202?${queryString}`
-    : "http://localhost:4202";
-
   return (
     <div className="layout-shell mall">
       {/* 1. Header oficial con logo UNTELS */}
@@ -43,8 +34,8 @@ export default async function EvaluacionPage({ searchParams }: EvaluacionPagePro
 
         <main className="layout-content w-full !items-stretch !justify-start !p-0 !overflow-hidden">
           <div className="w-full h-full flex-1 flex flex-col items-stretch overflow-hidden">
-            {/* Contenedor Microfrontend Angular con escucha de eventos de cancelación */}
-            <EvaluacionIframeContainer iframeSrc={iframeSrc} />
+            {/* Contenedor Microfrontend Angular con gestión de token y eventos */}
+            <EvaluacionIframeContainer initialToken={token} expedienteId={id} />
           </div>
         </main>
       </div>
