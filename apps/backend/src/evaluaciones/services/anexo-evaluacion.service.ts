@@ -277,7 +277,19 @@ export class AnexoEvaluacionService {
         });
       }
 
-      // 5. Consumir el token de evaluación para prevenir doble votación
+      // 5. Actualizar estado del expediente a EN_EVALUACION si aún figuraba en INICIADO
+      await tx.expediente.updateMany({
+        where: {
+          id: realExpedienteId,
+          estado: 'INICIADO',
+        },
+        data: {
+          estado: 'EN_EVALUACION',
+          actualizadoEn: new Date(),
+        },
+      });
+
+      // 6. Consumir el token de evaluación para prevenir doble votación
       this.tokenService.marcarComoConsumido(tokenJti);
 
       return {
@@ -285,6 +297,7 @@ export class AnexoEvaluacionService {
         mensaje: 'Evaluación y firma registradas exitosamente.',
         evaluacionId: evaluacion.id,
         dictamen: dto.dictamen,
+        firmadoEn: dto.firma.firmadoEn || new Date().toISOString(),
       };
     });
   }

@@ -1598,3 +1598,353 @@ app-step-firmar .eval-form-main-title {
   padding: 8px 30px !important;
 }
 
+/* ==========================================================================
+   7. VISTAS DE FINALIZACIÓN (ANEXO FINALIZADO Y EVALUACIÓN FINALIZADA)
+   ========================================================================== */
+app-step-anexo-finalizado,
+app-step-evaluacion-finalizada {
+  width: 100% !important;
+  display: block !important;
+}
+
+.eval-completion-fade-in {
+  animation: evalSmoothFadeScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes evalSmoothFadeScale {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.eval-finalizado-resumen-wrapper {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 1rem 0 2rem 0 !important;
+}
+
+.eval-finalizado-card {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  border-radius: 20px !important;
+  padding: 2.25rem 2rem !important;
+  max-width: 480px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  gap: 1.15rem !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  box-sizing: border-box !important;
+}
+
+.eval-finalizado-card--wide {
+  max-width: 560px !important;
+  padding: 2.75rem 2.5rem !important;
+}
+
+.eval-check-circle-green {
+  width: 84px !important;
+  height: 84px !important;
+  border-radius: 50% !important;
+  background: #ecfdf5 !important;
+  border: 2px solid #10b981 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.14) !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.eval-check-circle-green--lg {
+  width: 96px !important;
+  height: 96px !important;
+}
+
+.eval-check-svg-animated {
+  animation: evalPopCheck 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+.eval-check-path {
+  stroke-dasharray: 48 !important;
+  stroke-dashoffset: 48 !important;
+  animation: evalCheckStroke 0.45s 0.15s ease-out forwards !important;
+}
+
+@keyframes evalPopCheck {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes evalCheckStroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.eval-finalizado-heading {
+  font-family: inherit !important;
+  font-size: 1.4rem !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+}
+
+.eval-finalizado-text {
+  font-family: inherit !important;
+  font-size: 0.98rem !important;
+  font-weight: 500 !important;
+  color: #4b5563 !important;
+  line-height: 1.55 !important;
+  margin: 0 !important;
+  max-width: 420px !important;
+}
+
+.eval-finalizado-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  background: #ecfdf5 !important;
+  border: 1.5px solid #10b981 !important;
+  color: #065f46 !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  padding: 0.35rem 1rem !important;
+  border-radius: 9999px !important;
+}
+
+.eval-finalizado-badge-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: #10b981 !important;
+}
+
+/* Barra y contador regresivo de 5 segundos */
+.eval-countdown-box {
+  width: 100% !important;
+  max-width: 380px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.55rem !important;
+  margin-top: 0.35rem !important;
+}
+
+.eval-countdown-bar-track {
+  width: 100% !important;
+  height: 8px !important;
+  background: #e5e7eb !important;
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.eval-countdown-bar-fill {
+  height: 100% !important;
+  width: 100% !important;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%) !important;
+  border-radius: 9999px !important;
+  transform-origin: left center !important;
+  animation: evalCountdownShrink 5s linear forwards !important;
+}
+
+@keyframes evalCountdownShrink {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.eval-countdown-label {
+  font-size: 0.88rem !important;
+  color: #374151 !important;
+  font-weight: 500 !important;
+}
+
+
+/* ==========================================================================
+   7. VISTAS DE FINALIZACIÓN (ANEXO FINALIZADO Y EVALUACIÓN FINALIZADA 5s)
+   ========================================================================== */
+app-step-anexo-finalizado,
+app-step-evaluacion-finalizada {
+  display: block !important;
+  width: 100% !important;
+}
+
+.eval-finalizado-panel,
+.eval-finalizado-resumen-wrapper {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  animation: evalSmoothFadeScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.eval-finalizado-card {
+  background: #ffffff !important;
+  border: 2px solid #1a1a1a !important;
+  border-radius: 22px !important;
+  padding: 2.5rem 2.25rem !important;
+  max-width: 480px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  gap: 1.5rem !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+}
+
+.eval-finalizado-card--wide {
+  max-width: 540px !important;
+  padding: 3rem 2.5rem !important;
+}
+
+.eval-check-circle-green {
+  width: 96px !important;
+  height: 96px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border: 3px solid #047857 !important;
+  box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.18), 0 8px 20px rgba(5, 150, 105, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  animation: evalPopCheckCircle 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+.eval-check-circle-green--lg {
+  width: 110px !important;
+  height: 110px !important;
+}
+
+.eval-check-svg-animated path {
+  stroke-dasharray: 60 !important;
+  stroke-dashoffset: 60 !important;
+  animation: evalCheckStroke 0.45s 0.15s cubic-bezier(0.65, 0, 0.45, 1) forwards !important;
+}
+
+.eval-finalizado-text-group {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  width: 100% !important;
+}
+
+.eval-finalizado-subtitle {
+  font-family: inherit !important;
+  font-size: 1.45rem !important;
+  font-weight: 800 !important;
+  color: #065f46 !important;
+  margin: 0 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.eval-finalizado-description {
+  font-family: inherit !important;
+  font-size: 0.98rem !important;
+  font-weight: 500 !important;
+  color: #374151 !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+  max-width: 420px !important;
+}
+
+.eval-finalizado-countdown-text {
+  font-family: inherit !important;
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+  color: #047857 !important;
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+  border-radius: 9999px !important;
+  padding: 0.35rem 1rem !important;
+  margin: 0.35rem 0 0 0 !important;
+}
+
+.eval-countdown-track {
+  width: 100% !important;
+  max-width: 360px !important;
+  height: 8px !important;
+  background: #e5e7eb !important;
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+}
+
+.eval-countdown-bar {
+  height: 100% !important;
+  width: 100% !important;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%) !important;
+  border-radius: 9999px !important;
+  transform-origin: left center !important;
+  animation: evalCountdownShrink 5s linear forwards !important;
+}
+
+.eval-finalizado-actions {
+  display: flex !important;
+  justify-content: center !important;
+  margin-top: 0.5rem !important;
+  width: 100% !important;
+}
+
+@keyframes evalSmoothFadeScale {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes evalPopCheckCircle {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes evalCheckStroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes evalCountdownShrink {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+

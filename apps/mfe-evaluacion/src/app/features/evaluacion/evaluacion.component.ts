@@ -38,6 +38,9 @@ export class EvaluacionComponent {
   readonly codigoExpediente = this.evaluacionService.codigoExpediente;
   readonly criteriosEticos = this.evaluacionService.criteriosEticos;
   readonly etapasProgresoVertical = this.evaluacionService.etapasProgresoVertical;
+  readonly evaluacionEnviada = this.evaluacionService.evaluacionEnviada;
+
+  private ultimoEvaluacionId?: string;
 
   onStepChange(stepId: StepEvaluacionId): void {
     this.evaluacionService.setStep(stepId);
@@ -75,13 +78,8 @@ export class EvaluacionComponent {
     // Finalización formal de la evaluación con envío al backend
     this.evaluacionService.completarEvaluacionApi().subscribe({
       next: (res) => {
-        alert('¡Evaluación completada con éxito!');
-        if (typeof window !== 'undefined' && window.parent) {
-          window.parent.postMessage(
-            { type: 'EVALUACION_FINALIZADA', evaluacionId: res.evaluacionId },
-            '*'
-          );
-        }
+        this.ultimoEvaluacionId = res?.evaluacionId;
+        this.evaluacionService.marcarEvaluacionEnviada(true);
       },
       error: (err) => {
         console.error('Error al completar evaluación:', err);
@@ -91,5 +89,9 @@ export class EvaluacionComponent {
         );
       },
     });
+  }
+
+  onRedireccionarHome(): void {
+    this.evaluacionService.redirigirAHomeView2(this.ultimoEvaluacionId);
   }
 }

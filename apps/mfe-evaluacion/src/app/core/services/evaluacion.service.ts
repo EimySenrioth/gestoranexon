@@ -77,6 +77,9 @@ export class EvaluacionService {
     ...ETAPAS_PROGRESO_VERTICAL,
   ]);
 
+  // 5. Estado de Evaluación Finalizada en Resumen (Vista de 5 segundos)
+  private readonly _evaluacionEnviada = signal<boolean>(false);
+
   // Signals públicas de solo lectura
   readonly steps = this._steps.asReadonly();
   readonly currentStep = this._currentStep.asReadonly();
@@ -89,6 +92,9 @@ export class EvaluacionService {
   readonly recomendacionComite = this._recomendacionComite.asReadonly();
   readonly firmaEvaluador = this._firmaEvaluador.asReadonly();
   readonly etapasProgresoVertical = this._etapasProgresoVertical.asReadonly();
+  readonly evaluacionEnviada = this._evaluacionEnviada.asReadonly();
+
+  readonly anexoFirmado = computed(() => !!this._firmaEvaluador().firmado);
 
   readonly activeStepItem = computed(() =>
     this._steps().find((s) => s.id === this._currentStep())
@@ -134,6 +140,12 @@ export class EvaluacionService {
         active: step.id === stepId,
       }))
     );
+    // Si vuelve a la pestaña Anexo y ya estaba firmado, mantener todos los hitos completados
+    if (stepId === 'anexo' && this.anexoFirmado()) {
+      this._etapasProgresoVertical.update((etapas) =>
+        etapas.map((etapa) => ({ ...etapa, estado: 'completado' }))
+      );
+    }
   }
 
   nextStep(): void {
@@ -183,8 +195,12 @@ export class EvaluacionService {
   }
 
   private sincronizarStepperVertical(subEtapaActiva: SubEtapaAnexoId): void {
+    const yaFirmado = !!this._firmaEvaluador().firmado;
     this._etapasProgresoVertical.update((etapas) =>
       etapas.map((etapa) => {
+        if (yaFirmado) {
+          return { ...etapa, estado: 'completado' };
+        }
         if (etapa.id === 'eval-anexo-9') {
           return { ...etapa, estado: 'completado' };
         }
@@ -240,11 +256,45 @@ export class EvaluacionService {
   updateFirmaEvaluador(data: Partial<FirmaEvaluadorState>): void {
     this._firmaEvaluador.update((current) => {
       const updated = { ...current, ...data };
-      if (data.firmado !== undefined && this._subEtapaAnexo() === 'firmar') {
-        this.sincronizarStepperVertical('firmar');
-      }
       return updated;
     });
+    if (data.firmado !== undefined) {
+      this.sincronizarStepperVertical(this._subEtapaAnexo());
+      if (data.firmado) {
+        this._documentosExpediente.update((docs) =>
+          docs.map((d) =>
+            d.id === 'anexo'
+              ? { ...d, estado: 'recibido', estadoLabel: 'Firmado' }
+              : d
+          )
+        );
+      }
+    }
+  }
+
+  marcarEvaluacionEnviada(valor: boolean): void {
+    this._evaluacionEnviada.set(valor);
+  }
+
+  redirigirAHomeView2(evaluacionId?: string): void {
+    this.sessionService.limpiarSesion();
+    if (typeof window !== 'undefined') {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage(
+          { type: 'EVALUACION_FINALIZADA', evaluacionId },
+          '*'
+        );
+      }
+      try {
+        if (window.top && window.top !== window) {
+          window.top.location.href = 'http://localhost:3001/homeview2';
+        } else {
+          window.location.href = 'http://localhost:3001/homeview2';
+        }
+      } catch {
+        window.location.href = 'http://localhost:3001/homeview2';
+      }
+    }
   }
 
   constructor() {
@@ -504,7 +554,9 @@ export class EvaluacionService {
             this._firmaEvaluador.update((f) => ({
               ...f,
               firmado: true,
+              firmaDataUrl: res.datos.firma.firmaDataUrl || f.firmaDataUrl,
             }));
+            this.sincronizarStepperVertical(this._subEtapaAnexo());
           }
         }
       },
@@ -645,5 +697,6 @@ export class EvaluacionService {
     this._firmaEvaluador.set({ ...DEFAULT_FIRMA_EVALUADOR });
     this._steps.set(EVALUACION_STEPS);
     this._etapasProgresoVertical.set([...ETAPAS_PROGRESO_VERTICAL]);
+    this._evaluacionEnviada.set(false);
   }
 }

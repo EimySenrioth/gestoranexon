@@ -160,6 +160,10 @@ export class StepFirmarComponent implements AfterViewInit {
   onFirmar(): void {
     this.guardarFirmaEnState();
     this.firmaState.firmado = true;
+    this.firmaState.fechaFirma = new Date().toLocaleTimeString('es-PE', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
     this.mensajeExito = true;
     this.firmar.emit(this.firmaState);
   }

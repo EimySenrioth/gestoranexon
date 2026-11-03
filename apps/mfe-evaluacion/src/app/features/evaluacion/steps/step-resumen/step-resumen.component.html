@@ -2,8 +2,15 @@
   <!-- Título principal -->
   <h1 class="eval-resumen-title">Resumen</h1>
 
+  <!-- VISTA DE EVALUACIÓN FINALIZADA (Muestra confirmación durante 5s y redirige a homeview2) -->
+  <app-step-evaluacion-finalizada
+    *ngIf="evaluacionEnviada"
+    [codigoExpediente]="codigoExpediente()"
+    (tiempoAgotado)="onRedireccionarHome()"
+  />
+
   <!-- Contenedor de 2 columnas: Selector Izquierdo y Tarjeta Derecha -->
-  <div class="eval-resumen-body">
+  <div *ngIf="!evaluacionEnviada" class="eval-resumen-body">
     <!-- COLUMNA IZQUIERDA: Píldoras de Selección de Expediente y Anexo -->
     <aside class="eval-resumen-sidebar" aria-label="Navegación de Resumen">
       <!-- 1. Bloque Expediente -->

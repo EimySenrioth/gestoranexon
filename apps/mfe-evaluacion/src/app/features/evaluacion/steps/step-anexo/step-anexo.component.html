@@ -7,7 +7,7 @@
         class="eval-stepper-v-item"
         [class.active]="etapa.estado === 'activo'"
         [class.completed]="etapa.estado === 'completado'"
-        [style.cursor]="etapa.subEtapaId ? 'pointer' : 'default'"
+        [style.cursor]="etapa.subEtapaId && !anexoFirmado() ? 'pointer' : 'default'"
         (click)="etapa.subEtapaId && onSelectEtapa(etapa.subEtapaId)"
       >
         <!-- Línea conectora entre hitos -->
@@ -86,125 +86,135 @@
 
   <!-- 2. Panel Central Dinámico según la Sub-Etapa seleccionada (Ancho idéntico unificado) -->
   <div class="eval-substep-content-wrapper">
-    <!-- SUB-ETAPA 1: Cumplimiento de Principios Éticos -->
-    <main *ngIf="subEtapa() === 'principios-eticos'" class="eval-form-panel">
-      <h1 class="eval-form-main-title">Cumplimiento de Principios Éticos</h1>
+    <!-- VISTA DE ANEXO FINALIZADO (Persistente una vez firmado, aunque cambie de pestañas) -->
+    <app-step-anexo-finalizado
+      *ngIf="anexoFirmado()"
+      [firmaState]="firmaEvaluador()"
+      (continuarAResumen)="onIrAResumen()"
+    />
 
-      <!-- Lista de 5 Criterios Éticos -->
-      <section
-        *ngFor="let criterio of criteriosEticos()"
-        class="criterio-card-block"
-        [attr.aria-label]="criterio.titulo"
-      >
-        <!-- Cabecera de cada criterio: Título, (?) y Toggle [ Cúmple | No Cúmple ] -->
-        <div class="criterio-header-row">
-          <div class="criterio-title-wrapper">
-            <span class="criterio-title-text">{{ criterio.titulo }}</span>
-          </div>
+    <!-- SUB-ETAPAS DE EDICIÓN (Solo visibles mientras no se haya firmado el Anexo) -->
+    <ng-container *ngIf="!anexoFirmado()">
+      <!-- SUB-ETAPA 1: Cumplimiento de Principios Éticos -->
+      <main *ngIf="subEtapa() === 'principios-eticos'" class="eval-form-panel">
+        <h1 class="eval-form-main-title">Cumplimiento de Principios Éticos</h1>
 
-          <div class="criterio-right-group">
-            <!-- Contenedor con tooltip que aparece al acercar el ratón (hover) -->
-            <div
-              class="criterio-help-wrapper"
-              (mouseenter)="criterio.mostrarAyuda = true"
-              (mouseleave)="criterio.mostrarAyuda = false"
-            >
-              <button
-                type="button"
-                class="criterio-help-circle"
-                [class.cumple]="criterio.cumplimiento === 'cumple'"
-                [class.no-cumple]="criterio.cumplimiento === 'no_cumple'"
-                (focus)="criterio.mostrarAyuda = true"
-                (blur)="criterio.mostrarAyuda = false"
-                [attr.aria-label]="'Ayuda informativa para ' + criterio.titulo"
-              >
-                ?
-              </button>
+        <!-- Lista de 5 Criterios Éticos -->
+        <section
+          *ngFor="let criterio of criteriosEticos()"
+          class="criterio-card-block"
+          [attr.aria-label]="criterio.titulo"
+        >
+          <!-- Cabecera de cada criterio: Título, (?) y Toggle [ Cúmple | No Cúmple ] -->
+          <div class="criterio-header-row">
+            <div class="criterio-title-wrapper">
+              <span class="criterio-title-text">{{ criterio.titulo }}</span>
+            </div>
 
-              <!-- Tooltip pequeño flotante que aparece al acercar el ratón -->
+            <div class="criterio-right-group">
+              <!-- Contenedor con tooltip que aparece al acercar el ratón (hover) -->
               <div
-                *ngIf="criterio.mostrarAyuda && criterio.descripcionAyuda"
-                class="criterio-tooltip-bubble"
-                role="tooltip"
+                class="criterio-help-wrapper"
+                (mouseenter)="criterio.mostrarAyuda = true"
+                (mouseleave)="criterio.mostrarAyuda = false"
               >
-                {{ criterio.descripcionAyuda }}
+                <button
+                  type="button"
+                  class="criterio-help-circle"
+                  [class.cumple]="criterio.cumplimiento === 'cumple'"
+                  [class.no-cumple]="criterio.cumplimiento === 'no_cumple'"
+                  (focus)="criterio.mostrarAyuda = true"
+                  (blur)="criterio.mostrarAyuda = false"
+                  [attr.aria-label]="'Ayuda informativa para ' + criterio.titulo"
+                >
+                  ?
+                </button>
+
+                <!-- Tooltip pequeño flotante que aparece al acercar el ratón -->
+                <div
+                  *ngIf="criterio.mostrarAyuda && criterio.descripcionAyuda"
+                  class="criterio-tooltip-bubble"
+                  role="tooltip"
+                >
+                  {{ criterio.descripcionAyuda }}
+                </div>
+              </div>
+
+              <!-- Segmented control cápsula [ Cúmple | No Cúmple ] -->
+              <div class="criterio-toggle-capsule" role="radiogroup">
+                <button
+                  type="button"
+                  class="criterio-toggle-option criterio-toggle-option--cumple"
+                  [class.selected]="criterio.cumplimiento === 'cumple'"
+                  (click)="toggleCumplimientoEtico(criterio, 'cumple')"
+                >
+                  Cúmple
+                </button>
+                <div class="eval-pill-divider"></div>
+                <button
+                  type="button"
+                  class="criterio-toggle-option criterio-toggle-option--nocumple"
+                  [class.selected]="criterio.cumplimiento === 'no_cumple'"
+                  (click)="toggleCumplimientoEtico(criterio, 'no_cumple')"
+                >
+                  No Cúmple
+                </button>
               </div>
             </div>
-
-            <!-- Segmented control cápsula [ Cúmple | No Cúmple ] -->
-            <div class="criterio-toggle-capsule" role="radiogroup">
-              <button
-                type="button"
-                class="criterio-toggle-option criterio-toggle-option--cumple"
-                [class.selected]="criterio.cumplimiento === 'cumple'"
-                (click)="toggleCumplimientoEtico(criterio, 'cumple')"
-              >
-                Cúmple
-              </button>
-              <div class="eval-pill-divider"></div>
-              <button
-                type="button"
-                class="criterio-toggle-option criterio-toggle-option--nocumple"
-                [class.selected]="criterio.cumplimiento === 'no_cumple'"
-                (click)="toggleCumplimientoEtico(criterio, 'no_cumple')"
-              >
-                No Cúmple
-              </button>
-            </div>
           </div>
-        </div>
 
-        <!-- Campo de Observaciones -->
-        <div class="criterio-obs-container">
-          <input
-            [id]="'obs-' + criterio.id"
-            type="text"
-            class="criterio-obs-input"
-            placeholder="Observaciones...."
-            [attr.aria-label]="'Observaciones para ' + criterio.titulo"
-            [ngModel]="criterio.observaciones"
-            (ngModelChange)="onObservacionesEticasChange(criterio, $event)"
-          />
-        </div>
-      </section>
+          <!-- Campo de Observaciones -->
+          <div class="criterio-obs-container">
+            <input
+              [id]="'obs-' + criterio.id"
+              type="text"
+              class="criterio-obs-input"
+              placeholder="Observaciones...."
+              [attr.aria-label]="'Observaciones para ' + criterio.titulo"
+              [ngModel]="criterio.observaciones"
+              (ngModelChange)="onObservacionesEticasChange(criterio, $event)"
+            />
+          </div>
+        </section>
 
-      <!-- Botonera Inferior [ Cancelar ] [ Continuar ] -->
-      <footer class="eval-actions-footer">
-        <button
-          type="button"
-          class="eval-btn-pill"
-          (click)="onCancelar()"
-        >
-          Cancelar
-        </button>
-        <button
-          type="button"
-          class="eval-btn-pill eval-btn-pill--primary"
-          (click)="onContinuar()"
-        >
-          Continuar
-        </button>
-      </footer>
-    </main>
+        <!-- Botonera Inferior [ Cancelar ] [ Continuar ] -->
+        <footer class="eval-actions-footer">
+          <button
+            type="button"
+            class="eval-btn-pill"
+            (click)="onCancelar()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="eval-btn-pill eval-btn-pill--primary"
+            (click)="onContinuar()"
+          >
+            Continuar
+          </button>
+        </footer>
+      </main>
 
-    <!-- SUB-ETAPA 2: Cumplimiento de Normativa Legal y Recomendaciones del Comité -->
-    <app-step-normativa-legal
-      *ngIf="subEtapa() === 'normativa-legal'"
-      [criterios]="criteriosNormativa()"
-      [recomendacion]="recomendacionComite()"
-      (criteriosChange)="onCriteriosNormativaChange($event)"
-      (recomendacionChange)="onRecomendacionChange($event)"
-      (cancelar)="onCancelar()"
-      (continuar)="onContinuar()"
-    />
+      <!-- SUB-ETAPA 2: Cumplimiento de Normativa Legal y Recomendaciones del Comité -->
+      <app-step-normativa-legal
+        *ngIf="subEtapa() === 'normativa-legal'"
+        [criterios]="criteriosNormativa()"
+        [recomendacion]="recomendacionComite()"
+        (criteriosChange)="onCriteriosNormativaChange($event)"
+        (recomendacionChange)="onRecomendacionChange($event)"
+        (cancelar)="onCancelar()"
+        (continuar)="onContinuar()"
+      />
 
-    <!-- SUB-ETAPA 3: Firmar -->
-    <app-step-firmar
-      *ngIf="subEtapa() === 'firmar'"
-      [firmaState]="firmaEvaluador()"
-      (firmaChange)="onFirmaChange($event)"
-      (cancelar)="onCancelar()"
-      (firmar)="onFinalizarFirma($event)"
-    />
+      <!-- SUB-ETAPA 3: Firmar -->
+      <app-step-firmar
+        *ngIf="subEtapa() === 'firmar'"
+        [firmaState]="firmaEvaluador()"
+        (firmaChange)="onFirmaChange($event)"
+        (cancelar)="onCancelar()"
+        (firmar)="onFinalizarFirma($event)"
+      />
+    </ng-container>
   </div>
 </div>

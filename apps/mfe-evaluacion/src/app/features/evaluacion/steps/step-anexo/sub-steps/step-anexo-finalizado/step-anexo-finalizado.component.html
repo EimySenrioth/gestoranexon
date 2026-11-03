@@ -1,0 +1,56 @@
+<div class="eval-form-panel eval-completion-fade-in">
+  <!-- Título principal con contorno anime/moderno -->
+  <h1 class="eval-form-main-title">Anexo Finalizado</h1>
+
+  <!-- Franja superior de metadatos -->
+  <div class="eval-firmar-meta-bar">
+    <span class="eval-firmar-meta-title">{{ firmaState.comiteNombre || 'COMITÉ DE ÉTICA' }}</span>
+    <span class="eval-firmar-meta-time">
+      {{ firmaState.fechaFirma ? ('Firmado · ' + firmaState.fechaFirma) : 'Documento Firmado' }}
+    </span>
+  </div>
+
+  <!-- Tarjeta central de confirmación con ícono circular verde de palomita y texto debajo -->
+  <div class="eval-finalizado-card">
+    <div class="eval-check-circle-green" aria-hidden="true">
+      <svg
+        viewBox="0 0 52 52"
+        width="56"
+        height="56"
+        fill="none"
+        class="eval-check-svg-animated"
+      >
+        <circle cx="26" cy="26" r="24" fill="#10B981" stroke="#047857" stroke-width="2.5" />
+        <path
+          d="M15 26.5L22.5 34L37.5 19"
+          stroke="#FFFFFF"
+          stroke-width="4.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="eval-check-path"
+        />
+      </svg>
+    </div>
+
+    <h2 class="eval-finalizado-heading">¡Anexo N°9 firmado correctamente!</h2>
+
+    <p class="eval-finalizado-text">
+      La evaluación ética y normativa legal del Anexo N°9 ha sido firmada y registrada. Puedes revisar los demás pasos o continuar hacia la pestaña de <strong>Resumen</strong> para completar el envío final.
+    </p>
+
+    <div class="eval-finalizado-badge">
+      <span class="eval-finalizado-badge-dot"></span>
+      <span>Firma digital validada</span>
+    </div>
+
+    <div class="eval-firma-actions">
+      <button
+        type="button"
+        class="eval-firma-btn eval-firma-btn--primary"
+        (click)="onContinuar()"
+      >
+        Ir a Resumen
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,54 @@
+<div class="eval-finalizado-resumen-wrapper eval-completion-fade-in">
+  <div class="eval-finalizado-card eval-finalizado-card--wide">
+    <!-- Ícono circular grande verde con palomita animada -->
+    <div class="eval-check-circle-green eval-check-circle-green--lg" aria-hidden="true">
+      <svg
+        viewBox="0 0 52 52"
+        width="68"
+        height="68"
+        fill="none"
+        class="eval-check-svg-animated"
+      >
+        <circle cx="26" cy="26" r="24" fill="#10B981" stroke="#047857" stroke-width="2.5" />
+        <path
+          d="M15 26.5L22.5 34L37.5 19"
+          stroke="#FFFFFF"
+          stroke-width="4.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="eval-check-path"
+        />
+      </svg>
+    </div>
+
+    <!-- Texto principal e informativo debajo del ícono -->
+    <h2 class="eval-finalizado-heading">¡Evaluación Finalizada con Éxito!</h2>
+
+    <p class="eval-finalizado-text">
+      El dictamen y la firma digital del expediente
+      <strong>{{ codigoExpediente || 'seleccionado' }}</strong>
+      han sido registrados formalmente en el sistema del Comité de Ética.
+    </p>
+
+    <!-- Barra de progreso y contador de 5 segundos hacia /homeview2 -->
+    <div class="eval-countdown-box">
+      <div class="eval-countdown-bar-track">
+        <div class="eval-countdown-bar-fill"></div>
+      </div>
+      <span class="eval-countdown-label">
+        Redirigiendo a la tabla principal en <strong>{{ segundosRestantes() }}</strong>
+        {{ segundosRestantes() === 1 ? 'segundo' : 'segundos' }}...
+      </span>
+    </div>
+
+    <div class="eval-firma-actions">
+      <button
+        type="button"
+        class="eval-firma-btn eval-firma-btn--primary"
+        (click)="irAhora()"
+      >
+        Ir a la bandeja ahora
+      </button>
+    </div>
+  </div>
+</div>

@@ -93,6 +93,7 @@ export function EvaluacionIframeContainer({
           "[EvaluacionIframeContainer] Evento EVALUACION_FINALIZADA recibido. Redirigiendo a la tabla principal..."
         );
         router.push("/homeview2");
+        router.refresh();
         if (typeof window !== "undefined") {
           window.location.href = "/homeview2";
         }

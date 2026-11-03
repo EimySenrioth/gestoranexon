@@ -12,6 +12,7 @@ import {
 import { EvaluacionService } from '../../../../core/services';
 import { StepNormativaLegalComponent } from './sub-steps/step-normativa-legal/step-normativa-legal.component';
 import { StepFirmarComponent } from './sub-steps/step-firmar/step-firmar.component';
+import { StepAnexoFinalizadoComponent } from './sub-steps/step-anexo-finalizado/step-anexo-finalizado.component';
 
 @Component({
   selector: 'app-step-anexo',
@@ -21,6 +22,7 @@ import { StepFirmarComponent } from './sub-steps/step-firmar/step-firmar.compone
     FormsModule,
     StepNormativaLegalComponent,
     StepFirmarComponent,
+    StepAnexoFinalizadoComponent,
   ],
   templateUrl: './step-anexo.component.html',
 })
@@ -33,9 +35,13 @@ export class StepAnexoComponent {
   readonly criteriosNormativa = this.evaluacionService.criteriosNormativa;
   readonly recomendacionComite = this.evaluacionService.recomendacionComite;
   readonly firmaEvaluador = this.evaluacionService.firmaEvaluador;
+  readonly anexoFirmado = this.evaluacionService.anexoFirmado;
 
   // --- Navegación Stepper Vertical ---
   onSelectEtapa(subEtapaId?: SubEtapaAnexoId): void {
+    if (this.anexoFirmado()) {
+      return;
+    }
     if (subEtapaId) {
       this.evaluacionService.setSubEtapaAnexo(subEtapaId);
     }
@@ -76,6 +82,10 @@ export class StepAnexoComponent {
 
   onFinalizarFirma(firma: FirmaEvaluadorState): void {
     this.evaluacionService.updateFirmaEvaluador({ ...firma, firmado: true });
+  }
+
+  onIrAResumen(): void {
+    this.evaluacionService.setStep('resumen');
   }
 
   // --- Botones de Cancelar y Continuar entre sub-etapas ---

@@ -20,3 +20,9 @@ export interface FilaResumenEtica {
   noCumple: 'Si' | 'No' | '';
   observaciones: string;
 }
+
+export interface EvaluacionFinalizadaState {
+  evaluacionId?: string;
+  dictamen?: string;
+  firmadoEn?: string;
+}

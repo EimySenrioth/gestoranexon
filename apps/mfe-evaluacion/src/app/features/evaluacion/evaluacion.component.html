@@ -36,8 +36,10 @@
       <!-- Paso 4: RESUMEN (DOCUMENTOS DEL EXPEDIENTE Y FORMATO ANEXO N°9) -->
       <app-step-resumen
         *ngSwitchCase="'resumen'"
+        [evaluacionEnviada]="evaluacionEnviada()"
         (anterior)="onAnteriorResumen()"
         (completar)="onCompletarEvaluacion()"
+        (redireccionarHome)="onRedireccionarHome()"
       />
     </ng-container>
   </main>

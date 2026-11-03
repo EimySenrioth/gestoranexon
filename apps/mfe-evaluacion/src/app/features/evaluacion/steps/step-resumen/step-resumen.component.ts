@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  Input,
   Output,
   inject,
   signal,
@@ -15,18 +16,21 @@ import {
   DOCUMENTOS_RESUMEN_INICIALES,
   FilaResumenEtica,
 } from '../../models';
+import { StepEvaluacionFinalizadaComponent } from './sub-steps/step-evaluacion-finalizada/step-evaluacion-finalizada.component';
 
 @Component({
   selector: 'app-step-resumen',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, StepEvaluacionFinalizadaComponent],
   templateUrl: './step-resumen.component.html',
 })
 export class StepResumenComponent {
   readonly evaluacionService = inject(EvaluacionService);
 
+  @Input() evaluacionEnviada = false;
   @Output() anterior = new EventEmitter<void>();
   @Output() completar = new EventEmitter<void>();
+  @Output() redireccionarHome = new EventEmitter<void>();
 
   @HostListener('document:click')
   onDocumentClick(): void {
@@ -98,5 +102,9 @@ export class StepResumenComponent {
 
   onCompletar(): void {
     this.completar.emit();
+  }
+
+  onRedireccionarHome(): void {
+    this.redireccionarHome.emit();
   }
 }

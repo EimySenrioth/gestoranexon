@@ -196,6 +196,7 @@ export interface FirmaEvaluadorState {
   comiteNombre: string;
   horaRecibido: string;
   firmado: boolean;
+  fechaFirma?: string;
 }
 
 export const DEFAULT_FIRMA_EVALUADOR: FirmaEvaluadorState = {
@@ -204,4 +205,5 @@ export const DEFAULT_FIRMA_EVALUADOR: FirmaEvaluadorState = {
   comiteNombre: 'COMITÉ DE ÉTICA',
   horaRecibido: 'Recibido · 10:35 a.m.',
   firmado: false,
+  fechaFirma: '',
 };
