@@ -18,6 +18,9 @@ export interface SolicitudFirmaItem {
   };
   aprobar?: {
     aprobado: boolean;
+    habilitado?: boolean;
+    evaluacionesCompletadas?: number;
+    totalEvaluadores?: number;
     fechaAprobacion?: string;
   };
 }
@@ -37,6 +40,7 @@ export interface QueryAsignadosParams {
 
 export interface BackendEvaluacionItem {
   id: string;
+  evaluadorId?: string;
   resultado?: "APROBADO" | "APROBADO_CON_OBSERVACIONES" | "NO_APROBADO" | null;
   actualizadoEn?: string | null;
   creadoEn?: string | null;
@@ -55,6 +59,9 @@ export interface BackendExpedienteAsignadoItem {
     codigo: string;
     estado: string;
     evaluaciones?: BackendEvaluacionItem[];
+    todasEvaluaciones?: BackendEvaluacionItem[];
+    evaluacionesCompletadas?: number;
+    totalEvaluadores?: number;
   } | null;
   solicitante?: {
     id: string;

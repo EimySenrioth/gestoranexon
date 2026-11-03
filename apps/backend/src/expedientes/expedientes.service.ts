@@ -543,9 +543,9 @@ export class ExpedientesService {
           expediente: {
             include: {
               evaluaciones: {
-                where: { evaluadorId: miembroCeiId },
                 select: {
                   id: true,
+                  evaluadorId: true,
                   resultado: true,
                   actualizadoEn: true,
                   creadoEn: true,
@@ -569,8 +569,33 @@ export class ExpedientesService {
       }),
     ]);
 
+    const items = rows.map((row) => {
+      const todasEvaluaciones = row.expediente?.evaluaciones ?? [];
+      const evaluacionesCompletadas = todasEvaluaciones.filter(
+        (ev) => ev.resultado !== null && ev.resultado !== undefined,
+      ).length;
+      const totalEvaluadores =
+        todasEvaluaciones.length > 0 ? todasEvaluaciones.length : 5;
+      const evaluacionesMiembro = todasEvaluaciones.filter(
+        (ev) => ev.evaluadorId === miembroCeiId,
+      );
+
+      return {
+        ...row,
+        expediente: row.expediente
+          ? {
+              ...row.expediente,
+              evaluaciones: evaluacionesMiembro,
+              todasEvaluaciones,
+              evaluacionesCompletadas,
+              totalEvaluadores,
+            }
+          : null,
+      };
+    });
+
     return {
-      items: rows,
+      items,
       total,
       page,
       limit,

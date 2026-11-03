@@ -220,6 +220,18 @@
   transform: translateY(0);
 }
 
+.azure-action-aprobar-btn:disabled,
+.azure-action-aprobar-btn:disabled:hover,
+.azure-action-aprobar-btn:disabled:active {
+  background-color: #f3f2f1;
+  color: #a19f9d;
+  border-color: #c8c6c4;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.85;
+}
+
 .azure-text-aprobado {
   display: inline-flex;
   align-items: center;

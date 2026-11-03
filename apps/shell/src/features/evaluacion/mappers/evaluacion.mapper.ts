@@ -75,6 +75,19 @@ export function mapBackendToSolicitudFirma(
     etapaActual = "En evaluación";
   }
 
+  // Conteo de evaluaciones completadas de los 5 miembros del CEI
+  const todasEvaluaciones =
+    item.expediente?.todasEvaluaciones ?? item.expediente?.evaluaciones ?? [];
+  const evaluacionesCompletadas =
+    item.expediente?.evaluacionesCompletadas ??
+    todasEvaluaciones.filter((ev) => Boolean(ev.resultado)).length;
+  const totalEvaluadores =
+    item.expediente?.totalEvaluadores ??
+    (todasEvaluaciones.length > 0 ? todasEvaluaciones.length : 5);
+  const habilitadoParaAprobar = evaluacionesCompletadas >= totalEvaluadores;
+  const yaAprobado =
+    estadoExpediente === "APROBADO" || estadoTicket === "APROBADA";
+
   return {
     id: codigoVisible,
     ticketId: item.id,
@@ -85,6 +98,12 @@ export function mapBackendToSolicitudFirma(
     evaluar: {
       firmado: isEvaluado,
       fechaFirma: isEvaluado ? fechaEvaluacion : undefined,
+    },
+    aprobar: {
+      aprobado: yaAprobado,
+      habilitado: habilitadoParaAprobar,
+      evaluacionesCompletadas,
+      totalEvaluadores,
     },
   };
 }

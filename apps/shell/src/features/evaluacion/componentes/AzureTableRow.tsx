@@ -171,8 +171,17 @@ export function AzureTableRow({
             <button
               type="button"
               className="azure-action-aprobar-btn"
-              onClick={() => onAprobar?.(item)}
-              title="Aprobar y dictaminar formalmente el expediente"
+              disabled={!item.aprobar?.habilitado}
+              onClick={() => {
+                if (item.aprobar?.habilitado) {
+                  onAprobar?.(item);
+                }
+              }}
+              title={
+                item.aprobar?.habilitado
+                  ? `Aprobar y dictaminar formalmente el expediente (${item.aprobar?.evaluacionesCompletadas ?? 5}/${item.aprobar?.totalEvaluadores ?? 5} evaluaciones listas)`
+                  : `Pendiente de evaluaciones del comité (${item.aprobar?.evaluacionesCompletadas ?? 0}/${item.aprobar?.totalEvaluadores ?? 5})`
+              }
             >
               <svg
                 width="16"
