@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 
@@ -17,26 +19,51 @@ interface SidebarItemProps {
 }
 
 export function SidebarItem({ item, isCollapsed, onClick }: SidebarItemProps) {
-  const content = isCollapsed ? (
-    <button
-      type="button"
-      className={`layout-sidebar-dock-btn ${item.isActive ? "active" : ""}`}
-      onClick={onClick}
-      title={item.label}
-      aria-label={item.label}
-    >
-      {item.icon}
-      {item.badge && (
-        <span className="layout-sidebar-dock-badge">
-          {typeof item.badge === "boolean" ? "!" : item.badge}
-        </span>
-      )}
-    </button>
-  ) : (
-    <li className="layout-sidebar-item">
-      {item.href ? (
+  const isNavigable = !!item.href && item.href !== "#" && !item.href.startsWith("#");
+
+  if (isCollapsed) {
+    if (isNavigable) {
+      return (
         <Link
-          href={item.href}
+          href={item.href!}
+          className={`layout-sidebar-dock-btn ${item.isActive ? "active" : ""}`}
+          onClick={onClick}
+          title={item.label}
+          aria-label={item.label}
+        >
+          {item.icon}
+          {item.badge && (
+            <span className="layout-sidebar-dock-badge">
+              {typeof item.badge === "boolean" ? "!" : item.badge}
+            </span>
+          )}
+        </Link>
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        className={`layout-sidebar-dock-btn ${item.isActive ? "active" : ""}`}
+        onClick={onClick}
+        title={item.label}
+        aria-label={item.label}
+      >
+        {item.icon}
+        {item.badge && (
+          <span className="layout-sidebar-dock-badge">
+            {typeof item.badge === "boolean" ? "!" : item.badge}
+          </span>
+        )}
+      </button>
+    );
+  }
+
+  return (
+    <li className="layout-sidebar-item">
+      {isNavigable ? (
+        <Link
+          href={item.href!}
           className={`layout-sidebar-link ${item.isActive ? "active" : ""}`}
           onClick={onClick}
         >
@@ -78,6 +105,4 @@ export function SidebarItem({ item, isCollapsed, onClick }: SidebarItemProps) {
       )}
     </li>
   );
-
-  return content;
 }

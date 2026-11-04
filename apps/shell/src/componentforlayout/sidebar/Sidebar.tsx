@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { SidebarItem, SidebarItemData } from "./SidebarItem";
 import { useSession } from "@/navigation/session/useSession";
 
@@ -36,11 +36,21 @@ export function Sidebar({
   onItemSelect,
 }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   // Colapsa por defecto si no estamos en /inicio y no se pasó una prop explícita
   const isNotHome = pathname !== "/inicio";
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed ?? isNotHome);
   const [internalActiveId, setInternalActiveId] = useState<string>("nueva-solicitud");
   const { logout } = useSession();
+
+  // Sincronizar automáticamente el ítem activo según la ruta actual
+  useEffect(() => {
+    if (pathname === "/inicio") {
+      setInternalActiveId("nueva-solicitud");
+    } else if (pathname === "/tablesolicitud" || pathname === "/solicitudes") {
+      setInternalActiveId("mis-solicitudes");
+    }
+  }, [pathname]);
 
   // Efecto para contraer automáticamente cuando cambiamos de ruta y salimos de home
   useEffect(() => {
@@ -128,9 +138,12 @@ export function Sidebar({
 
   const menuItems = items || defaultItems;
 
-  const handleSelect = (id: string) => {
+  const handleSelect = (id: string, href?: string) => {
     setInternalActiveId(id);
     onItemSelect?.(id);
+    if (href && href !== "#" && !href.startsWith("#") && pathname !== href) {
+      router.push(href);
+    }
   };
 
   const toggleCollapsed = () => {
@@ -164,7 +177,7 @@ export function Sidebar({
                   isActive: item.id === currentActiveId,
                 }}
                 isCollapsed={true}
-                onClick={() => handleSelect(item.id)}
+                onClick={() => handleSelect(item.id, item.href)}
               />
             ))}
 
@@ -245,7 +258,7 @@ export function Sidebar({
                   isActive: item.id === currentActiveId,
                 }}
                 isCollapsed={false}
-                onClick={() => handleSelect(item.id)}
+                onClick={() => handleSelect(item.id, item.href)}
               />
             ))}
           </ul>

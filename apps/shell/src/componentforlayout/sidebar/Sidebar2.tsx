@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { SidebarItem, SidebarItemData } from "./SidebarItem";
 import { GripDots } from "./Sidebar";
 import { useSession } from "@/navigation/session/useSession";
@@ -24,10 +24,17 @@ export function Sidebar2({
   onItemSelect,
 }: Sidebar2Props) {
   const pathname = usePathname();
+  const router = useRouter();
   const isNotHome2 = pathname !== "/homeview2";
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed ?? isNotHome2);
   const [internalActiveId, setInternalActiveId] = useState<string>("evaluacion-proyectos");
   const { logout } = useSession();
+
+  useEffect(() => {
+    if (pathname.startsWith("/homeview2")) {
+      setInternalActiveId("evaluacion-proyectos");
+    }
+  }, [pathname]);
 
   useEffect(() => {
     if (pathname !== "/homeview2") {
@@ -65,9 +72,12 @@ export function Sidebar2({
 
   const menuItems = items || defaultItems;
 
-  const handleSelect = (id: string) => {
+  const handleSelect = (id: string, href?: string) => {
     setInternalActiveId(id);
     onItemSelect?.(id);
+    if (href && href !== "#" && !href.startsWith("#") && pathname !== href) {
+      router.push(href);
+    }
   };
 
   const toggleCollapsed = () => {
@@ -97,7 +107,7 @@ export function Sidebar2({
                   isActive: item.id === currentActiveId,
                 }}
                 isCollapsed={true}
-                onClick={() => handleSelect(item.id)}
+                onClick={() => handleSelect(item.id, item.href)}
               />
             ))}
 
@@ -171,7 +181,7 @@ export function Sidebar2({
                   isActive: item.id === currentActiveId,
                 }}
                 isCollapsed={false}
-                onClick={() => handleSelect(item.id)}
+                onClick={() => handleSelect(item.id, item.href)}
               />
             ))}
           </ul>

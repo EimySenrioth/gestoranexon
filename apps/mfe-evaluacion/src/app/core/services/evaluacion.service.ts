@@ -649,7 +649,8 @@ export class EvaluacionService {
   }
 
   /**
-   * Cancela la evaluación, revoca el token en el backend y redirige a la tabla principal (/homeview2)
+   * Cancela la evaluación, revoca el token en el backend y redirige de inmediato a la tabla principal (/homeview2)
+   * Sin mutar el stepper interno a 'datos-generales' para evitar que la UI retroceda visualmente antes de salir.
    */
   cancelarEvaluacionApi() {
     const token = this.sessionService.token();
@@ -664,11 +665,11 @@ export class EvaluacionService {
           error: (err) => console.warn('[EvaluacionService] Error al revocar token:', err),
         });
     }
-    this.reset();
+
     this.sessionService.limpiarSesion();
 
     if (typeof window !== 'undefined') {
-      // 1. Notificar al contenedor del Shell mediante postMessage
+      // 1. Notificar al contenedor del Shell mediante postMessage de forma inmediata
       if (window.parent && window.parent !== window) {
         window.parent.postMessage({ type: 'EVALUACION_CANCELADA' }, '*');
       }

@@ -11,6 +11,7 @@ export interface BannerModalProps {
   showCloseButton?: boolean;
   closeLabel?: string;
   children: React.ReactNode;
+  footerLeft?: React.ReactNode;
   footerActions?: React.ReactNode;
   className?: string;
   closeOnOverlayClick?: boolean;
@@ -30,6 +31,7 @@ export function BannerModal({
   showCloseButton = true,
   closeLabel = "Cerrar modal",
   children,
+  footerLeft,
   footerActions,
   className = "",
   closeOnOverlayClick = true,
@@ -118,8 +120,21 @@ export function BannerModal({
         <section className="banner-modal-body">{children}</section>
 
         {/* 3. Pie Inferior Oscuro */}
-        {footerActions && (
-          <footer className="banner-modal-footer">{footerActions}</footer>
+        {(footerActions || footerLeft) && (
+          <footer
+            className={`banner-modal-footer ${
+              footerLeft ? "banner-modal-footer--split" : ""
+            }`}
+          >
+            {footerLeft && (
+              <div className="banner-modal-footer-left">{footerLeft}</div>
+            )}
+            {footerLeft ? (
+              <div className="banner-modal-footer-actions">{footerActions}</div>
+            ) : (
+              footerActions
+            )}
+          </footer>
         )}
       </div>
     </div>

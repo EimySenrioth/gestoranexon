@@ -240,6 +240,7 @@
   height: 42px;
   border-radius: 50%;
   color: #7a7e85;
+  text-decoration: none;
   transition: all var(--ui-duration-fast) var(--ui-ease-snappy);
 }
 
