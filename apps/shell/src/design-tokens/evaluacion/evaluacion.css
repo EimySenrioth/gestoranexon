@@ -1598,6 +1598,174 @@ app-step-firmar .eval-form-main-title {
   padding: 8px 30px !important;
 }
 
+/* 6.6 Componentes y Tokens de Diseño NTE (Neverness to Everness) */
+.nte-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #8a8d96;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  transition: background .15s, border-color .15s;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.nte-checkbox:checked {
+  background: #ff3d8b !important;
+  border-color: #ff3d8b !important;
+}
+
+.nte-checkbox:checked::after {
+  content: "";
+  width: 6px;
+  height: 11px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.nte-radio {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #8a8d96;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.nte-radio:checked {
+  border-color: #ff3d8b !important;
+  box-shadow: inset 0 0 0 4px #23262d, inset 0 0 0 10px #ff3d8b !important;
+}
+
+.nte-btn {
+  width: 209px;
+  height: 35px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter .15s, opacity .15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.nte-btn.cancel  { background: #3b3e46; color: #e6e7ea; }
+.nte-btn.confirm { background: #ececf2; color: #1b1d22; border: 2px solid #fff; }
+.nte-btn:hover:not(:disabled)   { filter: brightness(1.1); }
+.nte-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+.nte-actions {
+  display: flex;
+  gap: 13px;
+  justify-content: center;
+  width: 100%;
+  margin-top: 1.5rem;
+  box-sizing: border-box;
+}
+
+/* Tarjeta y contenedor de la Declaración Ética NTE */
+.nte-resumen-card {
+  background: #23262d !important;
+  border: 1px solid #363943 !important;
+  border-radius: 14px !important;
+  color: #e6e7ea !important;
+  padding: 1.75rem !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28) !important;
+}
+
+.nte-resumen-header {
+  margin-bottom: 1.25rem;
+}
+
+.nte-resumen-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.35rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.nte-resumen-subtitle {
+  font-size: 0.88rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.nte-declaration-card {
+  background: #1b1d22;
+  border: 1px solid #3b3e46;
+  border-radius: 10px;
+  padding: 1.25rem 1.4rem;
+  margin-top: 0.5rem;
+  box-sizing: border-box;
+}
+
+.eval-resumen-doc-item--nte-anexo {
+  list-style: none !important;
+  display: block !important;
+  width: 100% !important;
+  padding: 0.5rem 0 0 0 !important;
+  margin-top: 0.75rem !important;
+  border-top: 1.5px dashed #d1d5db !important;
+}
+
+.nte-declaration-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.nte-declaration-header-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.nte-declaration-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.nte-declaration-text {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: #d8dae0;
+  text-align: justify;
+}
+
+.nte-declaration-badge {
+  display: inline-block;
+  background: rgba(255, 61, 139, 0.15);
+  color: #ff3d8b;
+  border: 1px solid rgba(255, 61, 139, 0.4);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-left: 0.5rem;
+}
+
 /* ==========================================================================
    7. VISTAS DE FINALIZACIÓN (ANEXO FINALIZADO Y EVALUACIÓN FINALIZADA)
    ========================================================================== */

@@ -196,6 +196,7 @@ export class AnexoEvaluacionService {
           normativaLegal: JSON.stringify(dto.normativaLegal),
           resultado: resultadoEnum,
           recomendacion: dto.observacionesGenerales || null,
+          declaracionNoIa: dto.declaracionNoIa ?? false,
           actualizadoEn: new Date(),
         },
         create: {
@@ -206,6 +207,7 @@ export class AnexoEvaluacionService {
           normativaLegal: JSON.stringify(dto.normativaLegal),
           resultado: resultadoEnum,
           recomendacion: dto.observacionesGenerales || null,
+          declaracionNoIa: dto.declaracionNoIa ?? false,
         },
       });
 
@@ -228,8 +230,9 @@ export class AnexoEvaluacionService {
           usuarioId: evaluadorId,
           expedienteId: realExpedienteId,
           metadata: {
-            secciones: ['2.1', '2.2', '2.3', 'RECOMENDACIONES', 'FIRMAS'],
+            secciones: ['2.1', '2.2', '2.3', 'RECOMENDACIONES', 'FIRMAS', 'DECLARACION_NO_IA'],
             dictamen: dto.dictamen,
+            declaracionNoIa: dto.declaracionNoIa ?? false,
             firmaId: firmaRegistrada.id,
             hashSha256: firmaRegistrada.hashSha256,
             firmadoEn: dto.firma.firmadoEn || new Date().toISOString(),

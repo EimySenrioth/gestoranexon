@@ -97,6 +97,29 @@ export function EvaluacionIframeContainer({
         if (typeof window !== "undefined") {
           window.location.href = "/homeview2";
         }
+      } else if (data.type === "SOLICITAR_TOKENS") {
+        const expId = data.expedienteId || expedienteId;
+        if (expId) {
+          iniciarSesionEvaluacion(expId)
+            .then((sesionEval) => {
+              const session = loadStoredSession();
+              (event.source as WindowProxy)?.postMessage(
+                {
+                  type: "TOKENS_ACTUALIZADOS",
+                  token: sesionEval?.token,
+                  accessToken: session?.token,
+                  expedienteId: expId,
+                },
+                "*"
+              );
+            })
+            .catch((err) => {
+              console.warn(
+                "[EvaluacionIframeContainer] Error respondiendo a SOLICITAR_TOKENS:",
+                err
+              );
+            });
+        }
       }
     };
 
@@ -104,7 +127,7 @@ export function EvaluacionIframeContainer({
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, [router]);
+  }, [router, expedienteId]);
 
   if (!resolvedUrl) {
     return (

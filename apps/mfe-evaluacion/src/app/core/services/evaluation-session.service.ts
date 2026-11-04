@@ -16,6 +16,31 @@ export class EvaluationSessionService {
 
   constructor() {
     this.inicializarDesdeUrlOSession();
+    this.escucharMensajesPadre();
+  }
+
+  private escucharMensajesPadre(): void {
+    if (typeof window === 'undefined') return;
+
+    window.addEventListener('message', (event: MessageEvent) => {
+      const data = event.data;
+      if (data && typeof data === 'object' && data.type === 'TOKENS_ACTUALIZADOS') {
+        if (data.token) {
+          this.setToken(data.token);
+        }
+        if (data.accessToken) {
+          this.setAccessToken(data.accessToken);
+        }
+        if (data.expedienteId) {
+          this.setExpedienteId(data.expedienteId);
+        }
+      }
+    });
+
+    // Solicitar tokens frescos al Shell padre al inicializar
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'SOLICITAR_TOKENS' }, '*');
+    }
   }
 
   private inicializarDesdeUrlOSession(): void {

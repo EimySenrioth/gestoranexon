@@ -15,6 +15,7 @@ import {
   DocumentoResumenItem,
   DOCUMENTOS_RESUMEN_INICIALES,
   FilaResumenEtica,
+  TEXTO_DECLARACION_NO_IA,
 } from '../../models';
 import { StepEvaluacionFinalizadaComponent } from './sub-steps/step-evaluacion-finalizada/step-evaluacion-finalizada.component';
 
@@ -47,6 +48,10 @@ export class StepResumenComponent {
 
   // Código de expediente
   readonly codigoExpediente = this.evaluacionService.codigoExpediente;
+
+  // Declaración de autoría y no uso de IA generativa
+  readonly declaracionNoIa = this.evaluacionService.declaracionNoIa;
+  readonly textoDeclaracion = TEXTO_DECLARACION_NO_IA;
 
   // Lista de documentos del expediente
   readonly documentos = signal<DocumentoResumenItem[]>([...DOCUMENTOS_RESUMEN_INICIALES]);
@@ -96,11 +101,19 @@ export class StepResumenComponent {
     this.menuAbiertoDocId.set(null);
   }
 
+  onToggleDeclaracion(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.evaluacionService.setDeclaracionNoIa(input.checked);
+  }
+
   onAnterior(): void {
     this.anterior.emit();
   }
 
   onCompletar(): void {
+    if (!this.declaracionNoIa()) {
+      return;
+    }
     this.completar.emit();
   }
 

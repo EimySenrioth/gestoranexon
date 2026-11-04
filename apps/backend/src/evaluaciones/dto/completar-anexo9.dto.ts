@@ -51,6 +51,10 @@ export class CompletarAnexo9Dto {
   @IsOptional()
   observacionesGenerales?: string;
 
+  @IsBoolean()
+  @IsOptional()
+  declaracionNoIa?: boolean;
+
   @ValidateNested()
   @Type(() => RegistrarFirmaDto)
   firma!: RegistrarFirmaDto;

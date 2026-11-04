@@ -86,141 +86,149 @@
 
         <!-- Lista de documentos con menú desplegable en Editar -->
         <ul class="eval-resumen-doc-list">
-          <li *ngFor="let doc of documentos()" class="eval-resumen-doc-item">
-            <span class="eval-resumen-doc-name">{{ doc.nombre }}</span>
+          <!-- 1 a 4: Documentos regulares del expediente -->
+          <ng-container *ngFor="let doc of documentos()">
+            <li *ngIf="doc.id !== 'anexo'" class="eval-resumen-doc-item">
+              <span class="eval-resumen-doc-name">{{ doc.nombre }}</span>
 
-            <!-- Botón Editar con menú desplegable -->
-            <div class="eval-resumen-doc-action-wrapper">
-              <button
-                type="button"
-                class="eval-resumen-doc-action"
-                (click)="toggleMenuDoc(doc.id, $event)"
-                [attr.aria-expanded]="menuAbiertoDocId() === doc.id"
-              >
-                <span>Editar</span>
-                <svg
-                  viewBox="0 0 20 20"
-                  width="13"
-                  height="13"
-                  fill="currentColor"
-                  class="eval-resumen-chevron-icon"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </button>
-
-              <!-- Menú desplegable emergente con Ver y Actualizar -->
-              <div
-                *ngIf="menuAbiertoDocId() === doc.id"
-                class="eval-resumen-dropdown-menu"
-                (click)="$event.stopPropagation()"
-              >
+              <!-- Botón Editar con menú desplegable -->
+              <div class="eval-resumen-doc-action-wrapper">
                 <button
                   type="button"
-                  class="eval-resumen-dropdown-item"
-                  (click)="onVerDoc(doc, $event)"
+                  class="eval-resumen-doc-action"
+                  (click)="toggleMenuDoc(doc.id, $event)"
+                  [attr.aria-expanded]="menuAbiertoDocId() === doc.id"
                 >
+                  <span>Editar</span>
                   <svg
-                    viewBox="0 0 24 24"
-                    width="15"
-                    height="15"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
+                    viewBox="0 0 20 20"
+                    width="13"
+                    height="13"
+                    fill="currentColor"
+                    class="eval-resumen-chevron-icon"
                   >
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                      clip-rule="evenodd"
+                    />
                   </svg>
-                  <span>Ver</span>
                 </button>
-                <button
-                  type="button"
-                  class="eval-resumen-dropdown-item"
-                  (click)="onActualizarDoc(doc, $event)"
+
+                <!-- Menú desplegable emergente con Ver y Actualizar -->
+                <div
+                  *ngIf="menuAbiertoDocId() === doc.id"
+                  class="eval-resumen-dropdown-menu"
+                  (click)="$event.stopPropagation()"
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="15"
-                    height="15"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
+                  <button
+                    type="button"
+                    class="eval-resumen-dropdown-item"
+                    (click)="onVerDoc(doc, $event)"
                   >
-                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-                  </svg>
-                  <span>Actualizar</span>
-                </button>
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="15"
+                      height="15"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <span>Ver</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="eval-resumen-dropdown-item"
+                    (click)="onActualizarDoc(doc, $event)"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="15"
+                      height="15"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                    </svg>
+                    <span>Actualizar</span>
+                  </button>
+                </div>
               </div>
+            </li>
+          </ng-container>
+
+          <!-- 5. Reemplazo del Anexo por el Checkbox NTE y Declaración Jurada -->
+          <li class="eval-resumen-doc-item--nte-anexo">
+            <div class="nte-declaration-card">
+              <div class="nte-declaration-card-header">
+                <span class="nte-declaration-header-title">Anexo N°9 — Declaración Jurada</span>
+                <span class="nte-declaration-badge">Requerido</span>
+              </div>
+              <label class="nte-declaration-row">
+                <input
+                  type="checkbox"
+                  class="nte-checkbox"
+                  [checked]="declaracionNoIa()"
+                  (change)="onToggleDeclaracion($event)"
+                />
+                <span class="nte-declaration-text">
+                  {{ textoDeclaracion }}
+                </span>
+              </label>
             </div>
           </li>
         </ul>
       </section>
 
-      <!-- TARJETA 2: Formato de Revisión Anexo N°9 (Vista activa: anexo) -->
-      <section *ngIf="subVista() === 'anexo'" class="eval-resumen-card">
-        <!-- Cabecera de Anexo con ícono PDF y Título -->
-        <div class="eval-resumen-pdf-header">
-          <div class="eval-resumen-pdf-badge">
-            <span class="eval-resumen-pdf-tag">PDF</span>
-          </div>
-          <h2 class="eval-resumen-pdf-title">
-            FORMATO DE REVISIÓN DEL COMITÉ DE ÉTICA PARA LA INVESTIGACIÓN
+      <!-- TARJETA 2: Declaración Jurada y Ética (Vista activa: anexo en resumen) -->
+      <section *ngIf="subVista() === 'anexo'" class="eval-resumen-card nte-resumen-card">
+        <div class="nte-resumen-header">
+          <h2 class="nte-resumen-title">
+            <span>Declaración Jurada y Ética del Evaluador</span>
+            <span class="nte-declaration-badge">Requerido</span>
           </h2>
+          <p class="nte-resumen-subtitle">
+            Por favor, confirme la declaración de originalidad y autoría intelectual antes de finalizar el expediente.
+          </p>
         </div>
 
-        <!-- Subtítulo con ícono (?) informativo -->
-        <div class="eval-resumen-subhelp-row">
-          <span class="eval-resumen-help-icon">?</span>
-          <span class="eval-resumen-subhelp-text">
-            Porfavor, revisar el archivo final de la revisión
-          </span>
-        </div>
+        <div class="eval-resumen-card-divider" style="border-color: #3b3e46;"></div>
 
-        <!-- Línea divisoria -->
-        <div class="eval-resumen-card-divider"></div>
-
-        <!-- Tabla estructurada con los principios revisados -->
-        <div class="eval-resumen-table-container">
-          <table class="eval-resumen-table">
-            <thead>
-              <tr>
-                <th class="eval-th-principio">Principio</th>
-                <th class="eval-th-check">Cumple</th>
-                <th class="eval-th-check">No Cumple</th>
-                <th class="eval-th-obs">Observaciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let fila of filasTablaAnexo()">
-                <td class="eval-td-principio">{{ fila.principio }}</td>
-                <td class="eval-td-check">{{ fila.cumple }}</td>
-                <td class="eval-td-check">{{ fila.noCumple }}</td>
-                <td class="eval-td-obs">{{ fila.observaciones }}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="nte-declaration-card">
+          <label class="nte-declaration-row">
+            <input
+              type="checkbox"
+              class="nte-checkbox"
+              [checked]="declaracionNoIa()"
+              (change)="onToggleDeclaracion($event)"
+            />
+            <span class="nte-declaration-text">
+              {{ textoDeclaracion }}
+            </span>
+          </label>
         </div>
       </section>
 
-      <!-- Botonera Inferior: [ Anterior ] y [ Completar ] -->
-      <footer class="eval-resumen-actions">
+      <!-- Botonera Inferior con botones y acciones NTE -->
+      <footer class="nte-actions">
         <button
           type="button"
-          class="eval-btn-pill"
+          class="nte-btn cancel"
           (click)="onAnterior()"
         >
           Anterior
         </button>
         <button
           type="button"
-          class="eval-btn-pill eval-btn-pill--primary"
+          class="nte-btn confirm"
+          [disabled]="!declaracionNoIa()"
           (click)="onCompletar()"
         >
-          Completar
+          Confirmar
         </button>
       </footer>
     </main>

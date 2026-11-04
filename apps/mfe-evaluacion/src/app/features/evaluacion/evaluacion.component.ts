@@ -83,10 +83,13 @@ export class EvaluacionComponent {
       },
       error: (err) => {
         console.error('Error al completar evaluación:', err);
-        alert(
-          'Error al registrar la evaluación: ' +
-            (err.error?.message || 'Error de conexión con el servidor')
-        );
+        const detalle =
+          (Array.isArray(err.error?.message)
+            ? err.error.message.join(', ')
+            : err.error?.message) ||
+          err.message ||
+          'Error de conexión con el servidor';
+        alert('Error al registrar la evaluación: ' + detalle);
       },
     });
   }

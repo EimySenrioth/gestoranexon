@@ -1,15 +1,23 @@
 /**
  * Cliente HTTP Global (Shell BFF / Backend API)
- * Centraliza headers institucionales, manejo de cookies/tokens y parseo de errores.
+ * Centraliza headers institucionales, manejo de cookies/tokens, renovación automática silenciosa y parseo de errores.
  */
 
-import { loadStoredSession, clearStoredSession } from "@/navigation/session/session.store";
+import {
+  loadStoredSession,
+  saveStoredSession,
+  clearStoredSession,
+  type SessionState,
+} from "@/navigation/session/session.store";
+import type { Role } from "@/navigation/registry/types";
+import type { LoginResponse } from "@/features/auth/services/auth.service";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
 
 export interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
+  _isRetry?: boolean;
 }
 
 export class ApiError extends Error {
@@ -23,11 +31,69 @@ export class ApiError extends Error {
   }
 }
 
+// Mutex de refresco en vuelo para evitar llamadas concurrentes duplicadas
+let refreshPromise: Promise<string | null> | null = null;
+
+async function refreshAccessTokenSilently(): Promise<string | null> {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch("/api/auth/refresh", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "EstanciaPeru",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        clearStoredSession();
+        return null;
+      }
+
+      const data: LoginResponse = await response.json();
+      if (!data?.accessToken) {
+        clearStoredSession();
+        return null;
+      }
+
+      const currentSession = loadStoredSession();
+
+      const updatedSession: SessionState = {
+        user: {
+          id: data.user.id,
+          email: data.user.email,
+          nombre: data.user.nombre ?? currentSession.user?.nombre ?? "",
+          roles: (data.user.roles || currentSession.roles) as Role[],
+        },
+        roles: (data.user.roles || currentSession.roles) as Role[],
+        token: data.accessToken,
+        homeView: data.homeView || currentSession.homeView,
+      };
+
+      saveStoredSession(updatedSession);
+      return data.accessToken;
+    } catch (err) {
+      console.warn("[api.client] Falló la renovación automática de sesión:", err);
+      clearStoredSession();
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 export async function apiRequest<T = unknown>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const { params, headers, ...restOptions } = options;
+  const { params, headers, _isRetry, ...restOptions } = options;
 
   let url = endpoint.startsWith("http") ? endpoint : `${API_BASE_URL}${endpoint}`;
 
@@ -73,6 +139,27 @@ export async function apiRequest<T = unknown>(
   });
 
   if (!response.ok) {
+    // Si recibimos 401 (token expirado) y no es un reintento ni un endpoint de auth
+    const isAuthEndpoint =
+      endpoint.includes("/auth/login") ||
+      endpoint.includes("/auth/refresh") ||
+      endpoint.includes("/auth/logout");
+
+    if (response.status === 401 && !_isRetry && !isAuthEndpoint && typeof window !== "undefined") {
+      const newToken = await refreshAccessTokenSilently();
+      if (newToken) {
+        // Reintentamos la petición original con el nuevo token
+        return apiRequest<T>(endpoint, {
+          ...options,
+          _isRetry: true,
+          headers: {
+            ...headers,
+            Authorization: `Bearer ${newToken}`,
+          },
+        });
+      }
+    }
+
     let errorMsg = `Error en la solicitud: ${response.status} ${response.statusText}`;
     let errorData: any = null;
 

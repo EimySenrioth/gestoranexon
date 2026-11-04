@@ -159,6 +159,7 @@ model Evaluacion {
   normativaLegal     String?
   resultado          ResultadoEvaluacion?
   recomendacion      String?
+  declaracionNoIa    Boolean              @default(false) @map("declaracion_no_ia")
   creadoEn           DateTime             @default(now())
   actualizadoEn      DateTime             @updatedAt
 

@@ -80,6 +80,9 @@ export class EvaluacionService {
   // 5. Estado de Evaluación Finalizada en Resumen (Vista de 5 segundos)
   private readonly _evaluacionEnviada = signal<boolean>(false);
 
+  // 6. Declaración jurada de autoría y no uso de IA generativa (Paso 4: Resumen)
+  private readonly _declaracionNoIa = signal<boolean>(false);
+
   // Signals públicas de solo lectura
   readonly steps = this._steps.asReadonly();
   readonly currentStep = this._currentStep.asReadonly();
@@ -93,6 +96,7 @@ export class EvaluacionService {
   readonly firmaEvaluador = this._firmaEvaluador.asReadonly();
   readonly etapasProgresoVertical = this._etapasProgresoVertical.asReadonly();
   readonly evaluacionEnviada = this._evaluacionEnviada.asReadonly();
+  readonly declaracionNoIa = this._declaracionNoIa.asReadonly();
 
   readonly anexoFirmado = computed(() => !!this._firmaEvaluador().firmado);
 
@@ -274,6 +278,10 @@ export class EvaluacionService {
 
   marcarEvaluacionEnviada(valor: boolean): void {
     this._evaluacionEnviada.set(valor);
+  }
+
+  setDeclaracionNoIa(valor: boolean): void {
+    this._declaracionNoIa.set(valor);
   }
 
   redirigirAHomeView2(evaluacionId?: string): void {
@@ -629,6 +637,7 @@ export class EvaluacionService {
       })),
       dictamen: this._recomendacionComite().dictamen,
       observacionesGenerales: this._recomendacionComite().observaciones,
+      declaracionNoIa: this._declaracionNoIa(),
       firma: {
         firmaDataUrl:
           this._firmaEvaluador().firmaDataUrl ||
@@ -639,12 +648,18 @@ export class EvaluacionService {
     };
 
     return this.asegurarTokenEvaluacion(expedienteId).pipe(
-      switchMap(() =>
-        this.http.post<any>(
+      switchMap((token) => {
+        const tokenFinal = token || this.sessionService.token();
+        if (!tokenFinal) {
+          throw new Error(
+            'Token de evaluación contextual ausente. Por favor, refresque la página para sincronizar la sesión.'
+          );
+        }
+        return this.http.post<any>(
           `${this.apiUrl}/evaluaciones/anexo/completar`,
           payload
-        )
-      )
+        );
+      })
     );
   }
 
@@ -699,5 +714,6 @@ export class EvaluacionService {
     this._steps.set(EVALUACION_STEPS);
     this._etapasProgresoVertical.set([...ETAPAS_PROGRESO_VERTICAL]);
     this._evaluacionEnviada.set(false);
+    this._declaracionNoIa.set(false);
   }
 }
