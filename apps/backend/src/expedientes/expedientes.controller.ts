@@ -50,6 +50,20 @@ export class ExpedientesController {
   }
 
   /**
+   * Endpoint para consultar el progreso detallado de la evaluación de una solicitud/expediente
+   * para el rol Solicitante. Devuelve los slots 01 al 05 ordenados dinámicamente por fecha de llegada.
+   */
+  @Get(':id/progreso-solicitante')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SOLICITANTE')
+  async obtenerProgresoEvaluacionSolicitante(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.expedientesService.obtenerProgresoEvaluacionSolicitante(id, userId);
+  }
+
+  /**
    * Bandeja de entrada para miembros del Comité de Ética (CEI):
    * Lista los expedientes asignados al miembro autenticado (Presidente, Vicepresidente,
    * Secretaría Técnica, Secretaría Administrativa o Vocal).

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateTicketDto } from '../ticketmanager/dto/index.js';
 import {
@@ -644,5 +644,245 @@ export class ExpedientesService {
       roles: u.roles.map((r) => r.rol.codigo),
       cargaExpedientesActivos: u.ticketsAsignados.length,
     }));
+  }
+
+  /**
+   * Obtiene el progreso detallado de la evaluación para el Solicitante:
+   * Retorna las 5 evaluaciones ordenadas dinámicamente por orden de llegada (finalización de evaluación),
+   * junto con el desglose de hitos de cada una y el cálculo proporcional (0/5 a 5/5).
+   */
+  async obtenerProgresoEvaluacionSolicitante(expedienteIdOIdentificador: string, solicitanteId: string) {
+    // 1. Buscar el expediente (por id, codigo o ticketId)
+    const expediente = await this.prisma.expediente.findFirst({
+      where: {
+        OR: [
+          { id: expedienteIdOIdentificador },
+          { codigo: expedienteIdOIdentificador },
+          { ticket: { id: expedienteIdOIdentificador } },
+          { ticket: { codigo: expedienteIdOIdentificador } },
+        ],
+        // Verificamos propiedad para seguridad del solicitante
+        ticket: {
+          solicitanteId,
+        },
+      },
+      include: {
+        ticket: true,
+        evaluaciones: {
+          include: {
+            firmas: {
+              orderBy: { creadoEn: 'desc' },
+              take: 1,
+            },
+            evaluador: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                roles: {
+                  include: { rol: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!expediente) {
+      throw new NotFoundException(
+        `Expediente no encontrado o no pertenece al solicitante autenticado.`,
+      );
+    }
+
+    const totalEvaluadores = 5;
+    const evals = expediente.evaluaciones || [];
+
+    // Helper para formatear fecha a D/M/YYYY
+    const formatearFecha = (d: Date | null | undefined): string => {
+      if (!d) return '—';
+      const dia = d.getDate();
+      const mes = d.getMonth() + 1;
+      const anio = d.getFullYear();
+      return `${mes}/${dia}/${anio}`;
+    };
+
+    // 2. Separar completadas y pendientes
+    // Una evaluación se considera completada si tiene resultado y firma
+    const completadas = evals
+      .filter((e) => e.resultado !== null && e.firmas.length > 0)
+      .sort((a, b) => {
+        const fechaA = a.firmas[0]?.creadoEn || a.actualizadoEn;
+        const fechaB = b.firmas[0]?.creadoEn || b.actualizadoEn;
+        return new Date(fechaA).getTime() - new Date(fechaB).getTime();
+      });
+
+    const pendientes = evals.filter(
+      (e) => e.resultado === null || e.firmas.length === 0,
+    );
+
+    const todasOrdenadas = [...completadas, ...pendientes];
+
+    // 3. Mapear dinámicamente a los slots 01 al 05
+    const evaluacionesSlots = [];
+
+    for (let i = 0; i < totalEvaluadores; i++) {
+      const numSlot = String(i + 1).padStart(2, '0');
+      const evaluacion = todasOrdenadas[i];
+
+      if (evaluacion && evaluacion.resultado !== null && evaluacion.firmas.length > 0) {
+        const fechaFirma = evaluacion.firmas[0]?.creadoEn || evaluacion.actualizadoEn;
+        const fechaStr = formatearFecha(new Date(fechaFirma));
+        const rolEvaluador =
+          evaluacion.evaluador.roles[0]?.rol?.nombre ||
+          evaluacion.evaluador.roles[0]?.rol?.codigo ||
+          'Miembro del CEI';
+        const nombreEvaluador = `${evaluacion.evaluador.nombre || ''} ${evaluacion.evaluador.apellido || ''}`.trim();
+
+        const mapResultadoTexto = (res: string | null) => {
+          if (res === 'APROBADO') return 'Aprobado';
+          if (res === 'APROBADO_CON_OBSERVACIONES') return 'Aprobado con observaciones';
+          if (res === 'NO_APROBADO') return 'No aprobado';
+          return 'Pendiente';
+        };
+
+        const evaluarConformidadSeccion = (jsonStr: string | null): string => {
+          if (!jsonStr) return 'Pendiente';
+          try {
+            const items = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+            if (Array.isArray(items) && items.length > 0) {
+              const totalItems = items.length;
+              const totalCumplen = items.filter((i: any) => i.cumple === true).length;
+
+              if (totalCumplen === totalItems) {
+                return 'Conforme';
+              } else if (totalCumplen === 0) {
+                return 'No cumple';
+              } else {
+                return 'Cumple parcialmente';
+              }
+            }
+          } catch {
+            // Si no se puede parsear, fallback
+          }
+          return 'Conforme';
+        };
+
+        const estadoRecomendaciones = mapResultadoTexto(evaluacion.resultado);
+        const tieneFirma = evaluacion.firmas && evaluacion.firmas.length > 0;
+
+        const hitos = [
+          {
+            id: 'principios',
+            titulo: 'Revisión de Principios Éticos',
+            fecha: fechaStr,
+            estado: evaluarConformidadSeccion(evaluacion.principiosEticos),
+          },
+          {
+            id: 'metodologia',
+            titulo: 'Evaluación Metodológica y de Riesgos',
+            fecha: fechaStr,
+            estado: evaluarConformidadSeccion(evaluacion.metodologiaRiesgos),
+          },
+          {
+            id: 'normativa',
+            titulo: 'Verificación Normativa y Legal',
+            fecha: fechaStr,
+            estado: evaluarConformidadSeccion(evaluacion.normativaLegal),
+          },
+          {
+            id: 'dictamen',
+            titulo: 'Dictamen de la Evaluación',
+            fecha: fechaStr,
+            estado: estadoRecomendaciones,
+          },
+          {
+            id: 'firma',
+            titulo: 'Firma y Emisión del Evaluador',
+            fecha: fechaStr,
+            estado: tieneFirma ? 'Firmado' : 'Pendiente',
+          },
+          {
+            id: 'envio',
+            titulo: 'Envío del expediente solicitante',
+            fecha: expediente.estado === 'APROBADO' || expediente.estado === 'RECHAZADO' || expediente.estado === 'CERRADO' ? fechaStr : '—',
+            estado: expediente.estado === 'APROBADO' || expediente.estado === 'RECHAZADO' || expediente.estado === 'CERRADO' ? 'Aprobado' : 'Pendiente',
+          },
+        ];
+
+        evaluacionesSlots.push({
+          numero: numSlot,
+          evaluadorRol: rolEvaluador,
+          evaluadorNombre: nombreEvaluador,
+          completado: true,
+          resultado: evaluacion.resultado,
+          fechaEvaluacion: fechaStr,
+          hitos,
+        });
+      } else {
+        // Slot pendiente / en espera de evaluación
+        evaluacionesSlots.push({
+          numero: numSlot,
+          evaluadorRol: null,
+          evaluadorNombre: null,
+          completado: false,
+          resultado: null,
+          fechaEvaluacion: null,
+          hitos: [
+            {
+              id: 'principios',
+              titulo: 'Revisión de Principios Éticos',
+              fecha: '—',
+              estado: 'Pendiente',
+            },
+            {
+              id: 'metodologia',
+              titulo: 'Evaluación Metodológica y de Riesgos',
+              fecha: '—',
+              estado: 'Pendiente',
+            },
+            {
+              id: 'normativa',
+              titulo: 'Verificación Normativa y Legal',
+              fecha: '—',
+              estado: 'Pendiente',
+            },
+            {
+              id: 'dictamen',
+              titulo: 'Dictamen de la Evaluación',
+              fecha: '—',
+              estado: 'Pendiente',
+            },
+            {
+              id: 'firma',
+              titulo: 'Firma y Emisión del Evaluador',
+              fecha: '—',
+              estado: 'Pendiente',
+            },
+            {
+              id: 'envio',
+              titulo: 'Envío del expediente solicitante',
+              fecha: '—',
+              estado: 'Pendiente',
+            },
+          ],
+        });
+      }
+    }
+
+    const evaluacionesCompletadas = completadas.length;
+    const porcentajeProgreso = Math.round(
+      (evaluacionesCompletadas / totalEvaluadores) * 100,
+    );
+
+    return {
+      expedienteId: expediente.id,
+      codigoExpediente: expediente.codigo,
+      ticketCodigo: expediente.ticket?.codigo,
+      evaluacionesCompletadas,
+      totalEvaluadores,
+      porcentajeProgreso,
+      evaluaciones: evaluacionesSlots,
+    };
   }
 }

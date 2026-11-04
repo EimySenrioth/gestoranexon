@@ -111,3 +111,41 @@ export async function obtenerExpediente(id: string): Promise<any> {
   return await apiClient.get(`/api/v1/expedientes/${id}`);
 }
 
+export interface HitoEvaluacionDto {
+  id: string;
+  titulo: string;
+  fecha: string;
+  estado: "Aprobado" | "Aprobado con observaciones" | "No aprobado" | "Pendiente" | "Observado" | string;
+}
+
+export interface EvaluacionSlotDto {
+  numero: string;
+  evaluadorRol: string | null;
+  evaluadorNombre: string | null;
+  completado: boolean;
+  resultado: string | null;
+  fechaEvaluacion: string | null;
+  hitos: HitoEvaluacionDto[];
+}
+
+export interface ProgresoSolicitanteResponse {
+  expedienteId: string;
+  codigoExpediente: string;
+  ticketCodigo?: string;
+  evaluacionesCompletadas: number;
+  totalEvaluadores: number;
+  porcentajeProgreso: number;
+  evaluaciones: EvaluacionSlotDto[];
+}
+
+/**
+ * Consulta el progreso dinámico y detallado de las 5 evaluaciones para el Solicitante.
+ */
+export async function obtenerProgresoSolicitante(
+  id: string
+): Promise<ProgresoSolicitanteResponse> {
+  return await apiClient.get<ProgresoSolicitanteResponse>(
+    `/api/v1/expedientes/${id}/progreso-solicitante`
+  );
+}
+

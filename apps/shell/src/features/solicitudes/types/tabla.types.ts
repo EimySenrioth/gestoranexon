@@ -22,6 +22,7 @@ export type ProgresoEstado =
 export interface SolicitudItem {
   id: string;
   ticketId?: string;
+  codigoExpediente?: string;
   fecha: string;
   finalizado: boolean | "Si" | "NO";
   evaluacion: EvaluacionEstado;
