@@ -18,6 +18,7 @@ export interface SolicitudFirmaItem {
   };
   aprobar?: {
     aprobado: boolean;
+    concluido?: boolean;
     habilitado?: boolean;
     evaluacionesCompletadas?: number;
     totalEvaluadores?: number;

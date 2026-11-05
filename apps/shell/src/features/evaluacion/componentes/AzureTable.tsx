@@ -54,6 +54,7 @@ export function AzureTable({
     solicitudAAprobar,
     isModalAprobarOpen,
     isLoading,
+    isAprobando,
     handleEvaluarClick,
     handleCloseModal,
     handleConfirmarEvaluacion: confirmarEvaluacionHook,
@@ -168,6 +169,7 @@ export function AzureTable({
         onClose={handleCloseModalAprobar}
         onConfirm={handleAprobarExpediente}
         onRechazar={handleRechazarExpediente}
+        isSubmitting={isAprobando}
       />
     </div>
   );

@@ -10,6 +10,7 @@ interface UseSolicitudesTablaOptions {
   limit?: number;
   onConsultarEstatus?: (solicitud: SolicitudItem) => void;
   onVerExpediente?: (solicitud: SolicitudItem) => void;
+  onVerResultado?: (solicitud: SolicitudItem) => void;
 }
 
 export function useSolicitudesTabla({
@@ -18,6 +19,7 @@ export function useSolicitudesTabla({
   limit = 10,
   onConsultarEstatus,
   onVerExpediente,
+  onVerResultado,
 }: UseSolicitudesTablaOptions = {}) {
   const [solicitudes, setSolicitudes] = useState<SolicitudItem[]>(
     initialSolicitudes || []
@@ -85,6 +87,19 @@ export function useSolicitudesTabla({
     [onVerExpediente]
   );
 
+  const handleVerResultado = useCallback(
+    (item: SolicitudItem) => {
+      setSolicitudSeleccionada(item);
+      if (onVerResultado) {
+        onVerResultado(item);
+      } else if (onVerExpediente) {
+        setVista("expediente");
+        onVerExpediente(item);
+      }
+    },
+    [onVerResultado, onVerExpediente]
+  );
+
   const handleVolver = useCallback(() => {
     setVista("tabla");
     setSolicitudSeleccionada(null);
@@ -103,6 +118,7 @@ export function useSolicitudesTabla({
     solicitudSeleccionada,
     handleConsultar,
     handleVerExpediente,
+    handleVerResultado,
     handleVolver,
     recargar: () => cargarSolicitudes(page),
   };

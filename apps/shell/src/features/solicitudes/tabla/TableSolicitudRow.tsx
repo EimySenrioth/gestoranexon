@@ -7,6 +7,7 @@ interface TableSolicitudRowProps {
   solicitud: SolicitudItem;
   onConsultar?: (solicitud: SolicitudItem) => void;
   onVerExpediente?: (solicitud: SolicitudItem) => void;
+  onVerResultado?: (solicitud: SolicitudItem) => void;
   className?: string;
 }
 
@@ -14,6 +15,7 @@ export function TableSolicitudRow({
   solicitud,
   onConsultar,
   onVerExpediente,
+  onVerResultado,
   className = "",
 }: TableSolicitudRowProps) {
   const isFinalizado =
@@ -59,17 +61,17 @@ export function TableSolicitudRow({
           </span>
         </div>
 
-        {/* 5. Progreso ('Consultar estatus' o 'Expediente') */}
+        {/* 5. Progreso ('Consultar estatus' o 'Ver resultado') */}
         <div className="flex justify-end md:justify-center col-span-2 sm:col-span-1 md:col-span-1">
           {isFinalizado ? (
             <button
               type="button"
-              onClick={() => onVerExpediente?.(solicitud)}
-              title="Ver expediente finalizado"
+              onClick={() => (onVerResultado || onVerExpediente)?.(solicitud)}
+              title="Ver resultado de la evaluación"
               className="inline-flex items-center justify-center gap-1.5 px-5 py-1.5 rounded-full border-2 border-black/90 bg-white text-black hover:bg-black hover:text-white text-xs md:text-sm font-bold transition-all shadow-xs select-none active:scale-95 cursor-pointer"
               style={{ fontFamily: "var(--ui-font-family-lagu, sans-serif)" }}
             >
-              <span>Expediente</span>
+              <span>Ver resultado</span>
               <svg
                 width="16"
                 height="16"
@@ -79,14 +81,7 @@ export function TableSolicitudRow({
                 className="flex-shrink-0"
               >
                 <path
-                  d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <polyline
-                  points="22,6 12,13 2,6"
+                  d="M9 18l6-6-6-6"
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"

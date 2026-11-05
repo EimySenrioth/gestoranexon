@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateTicketDto } from '../ticketmanager/dto/index.js';
 import {
@@ -13,6 +13,7 @@ import {
   AsignarExpedienteDto,
   ExpedienteAsignadoResponseDto,
   MiembroCeiDisponibleDto,
+  AprobarPresidenciaDto,
 } from './dto/index.js';
 import { mapTicketToSolicitudFila } from './mappers/solicitud-estado.mapper.js';
 import {
@@ -884,5 +885,154 @@ export class ExpedientesService {
       porcentajeProgreso,
       evaluaciones: evaluacionesSlots,
     };
+  }
+
+  /**
+   * Dictamen y aprobación formal de Presidencia del CEI:
+   * Valida que el expediente cuente con las 5 calificaciones requeridas.
+   * Ejecuta una transacción atómica interactiva de Prisma que:
+   * 1. Actualiza Expediente a APROBADO.
+   * 2. Actualiza Ticket con resultadoEvaluacionExterna = 'APROBADO', fechaRecepcionEvaluacion y cerradoEn.
+   * 3. Si existe SesionVotacion, la cierra y establece dictamenPresidente.
+   * 4. Registra el evento de auditoría en la tabla Historial y TicketHistorial.
+   */
+  async aprobarPorPresidencia(
+    idOIdentificador: string,
+    presidenteId: string,
+    dto: AprobarPresidenciaDto,
+  ) {
+    // 1. Buscar expediente por id, codigo o ticketId
+    const expediente = await this.prisma.expediente.findFirst({
+      where: {
+        OR: [
+          { id: idOIdentificador },
+          { codigo: idOIdentificador },
+          { ticket: { id: idOIdentificador } },
+          { ticket: { codigo: idOIdentificador } },
+        ],
+      },
+      include: {
+        ticket: true,
+        evaluaciones: true,
+      },
+    });
+
+    if (!expediente) {
+      throw new ExpedienteNoEncontradoException(idOIdentificador);
+    }
+
+    // 2. Validar que tenga las 5 calificaciones
+    const completadas = (expediente.evaluaciones || []).filter(
+      (ev) => Boolean(ev.resultado),
+    );
+
+    if (completadas.length < 5) {
+      throw new BadRequestException(
+        `El expediente aún no cuenta con las 5 calificaciones requeridas para emitir dictamen (calificaciones actuales: ${completadas.length}/5).`,
+      );
+    }
+
+    const ahora = new Date();
+
+    // 3. Transacción atómica en PostgreSQL usando await para todas las operaciones asíncronas
+    return await this.prisma.$transaction(async (tx) => {
+      // 3.1 Actualizar Expediente
+      const expedienteActualizado = await tx.expediente.update({
+        where: { id: expediente.id },
+        data: {
+          estado: 'APROBADO',
+        },
+      });
+
+      // 3.2 Actualizar Ticket asociado
+      if (expediente.ticket) {
+        await tx.ticket.update({
+          where: { id: expediente.ticket.id },
+          data: {
+            resultadoEvaluacionExterna: 'APROBADO',
+            fechaRecepcionEvaluacion: ahora,
+            cerradoEn: ahora,
+          },
+        });
+
+        // 3.3 Registrar en TicketHistorial
+        await tx.ticketHistorial.create({
+          data: {
+            ticketId: expediente.ticket.id,
+            estadoAnterior: expediente.ticket.estado,
+            estadoNuevo: expediente.ticket.estado,
+            accion: 'DICTAMEN_APROBACION_PRESIDENCIA',
+            usuarioId: presidenteId,
+            metadata: {
+              estadoExpediente: 'APROBADO',
+              dictamen: 'APROBADO',
+              observaciones: dto?.observaciones || null,
+              resolucionUrl: dto?.resolucionUrl || null,
+              totalCalificaciones: completadas.length,
+            },
+          },
+        });
+      }
+
+      // 3.4 Si existe sesión de votación asociada, cerrarla
+      const sesionVotacion = await tx.sesionVotacion.findFirst({
+        where: { expedienteId: expediente.id },
+      });
+
+      if (sesionVotacion) {
+        const doc = sesionVotacion.documentoJson as any;
+        if (doc) {
+          doc.dictamenPresidenteCei = {
+            presidenteId,
+            resultado: 'Aprobado',
+            fechaEmision: ahora.toISOString(),
+            observaciones: dto?.observaciones,
+          };
+          doc.dictamenGlobal = {
+            resultado: 'Aprobado',
+            reglaAplicada: 'Aprobación y Dictamen formal de Presidencia CEI',
+          };
+        }
+
+        await tx.sesionVotacion.update({
+          where: { id: sesionVotacion.id },
+          data: {
+            estado: 'CerradaCompleta',
+            dictamenPresidente: 'Aprobado',
+            dictamenGlobal: 'Aprobado',
+            documentoJson: doc ?? sesionVotacion.documentoJson,
+            version: { increment: 1 },
+          },
+        });
+      }
+
+      // 3.5 Registrar en Historial general
+      await tx.historial.create({
+        data: {
+          entidad: 'Expediente',
+          entidadId: expediente.id,
+          evento: 'EXPEDIENTE_APROBADO_PRESIDENCIA',
+          descripcion: 'Aprobación y Dictamen formal emitido por Presidencia del CEI',
+          usuarioId: presidenteId,
+          expedienteId: expediente.id,
+          solicitudId: expediente.solicitudId || undefined,
+          metadata: {
+            dictamen: 'APROBADO',
+            fechaEmision: ahora.toISOString(),
+            observaciones: dto?.observaciones || null,
+            totalCalificaciones: completadas.length,
+          },
+        },
+      });
+
+      return {
+        ok: true,
+        mensaje: 'Expediente aprobado y dictaminado exitosamente por Presidencia.',
+        expedienteId: expediente.id,
+        codigoExpediente: expediente.codigo,
+        estado: expedienteActualizado.estado,
+        resultadoEvaluacion: 'APROBADO',
+      };
+    });
   }
 }

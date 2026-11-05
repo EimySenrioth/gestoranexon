@@ -15,6 +15,7 @@ interface TableSolicitudProps {
   limit?: number;
   onConsultarEstatus?: (solicitud: SolicitudItem) => void;
   onVerExpediente?: (solicitud: SolicitudItem) => void;
+  onVerResultado?: (solicitud: SolicitudItem) => void;
   className?: string;
 }
 
@@ -24,6 +25,7 @@ export function TableSolicitud({
   limit = 10,
   onConsultarEstatus,
   onVerExpediente,
+  onVerResultado,
   className = "",
 }: TableSolicitudProps) {
   const {
@@ -38,6 +40,7 @@ export function TableSolicitud({
     solicitudSeleccionada,
     handleConsultar,
     handleVerExpediente,
+    handleVerResultado,
     handleVolver,
     recargar,
   } = useSolicitudesTabla({
@@ -46,6 +49,7 @@ export function TableSolicitud({
     limit,
     onConsultarEstatus,
     onVerExpediente,
+    onVerResultado,
   });
 
   return (
@@ -117,6 +121,7 @@ export function TableSolicitud({
                   solicitud={sol}
                   onConsultar={handleConsultar}
                   onVerExpediente={handleVerExpediente}
+                  onVerResultado={handleVerResultado}
                 />
               ))
             ) : (

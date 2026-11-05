@@ -135,3 +135,27 @@ export async function firmarSolicitudEvaluacion(
     firmado: true,
   };
 }
+
+export interface AprobarExpedienteResponse {
+  ok: boolean;
+  mensaje: string;
+  expedienteId?: string;
+  codigoExpediente?: string;
+  estado?: string;
+  resultadoEvaluacion?: string;
+}
+
+/**
+ * Emite la aprobación y dictamen formal de Presidencia del CEI para un expediente
+ * que ya cuenta con las 5 calificaciones.
+ * Comunica con POST /api/v1/expedientes/:id/aprobar-presidencia usando await.
+ */
+export async function aprobarExpedientePresidencia(
+  expedienteId: string,
+  dto?: { observaciones?: string; resolucionUrl?: string }
+): Promise<AprobarExpedienteResponse> {
+  return await apiClient.post<AprobarExpedienteResponse>(
+    `/api/v1/expedientes/${encodeURIComponent(expedienteId)}/aprobar-presidencia`,
+    dto || {}
+  );
+}

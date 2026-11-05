@@ -5,6 +5,7 @@ import { SolicitudFirmaItem } from "../types/evaluacion.types";
 import {
   listarSolicitudesParaEvaluar,
   iniciarSesionEvaluacion,
+  aprobarExpedientePresidencia,
 } from "../services/evaluacion.service";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -41,6 +42,7 @@ export function useEvaluacion({
 
   const [isLoading, setIsLoading] = useState(!initialSolicitudes);
   const [isFirmando, setIsFirmando] = useState(false);
+  const [isAprobando, setIsAprobando] = useState(false);
 
   // Carga de datos reales paginados desde el backend
   const cargarSolicitudes = useCallback(
@@ -138,28 +140,52 @@ export function useEvaluacion({
   }, []);
 
   const handleConfirmarAprobacion = useCallback(
-    (item?: SolicitudFirmaItem) => {
+    async (item?: SolicitudFirmaItem) => {
       const target = item || solicitudAAprobar;
       if (!target) return;
 
-      const fechaHoy = new Date().toLocaleDateString("es-PE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
+      setIsAprobando(true);
+      try {
+        // Enviar dictamen de aprobación formal al backend usando await
+        await aprobarExpedientePresidencia(target.id);
 
-      const updatedItem: SolicitudFirmaItem = {
-        ...target,
-        etapaActual: "Dictaminado",
-        aprobar: { aprobado: true, fechaAprobacion: fechaHoy },
-      };
+        const fechaHoy = new Date().toLocaleDateString("es-PE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
 
-      setSolicitudes((prev) =>
-        prev.map((s) => (s.id === target.id ? updatedItem : s))
-      );
+        const updatedItem: SolicitudFirmaItem = {
+          ...target,
+          etapaActual: "Dictaminado",
+          aprobar: {
+            ...target.aprobar,
+            aprobado: true,
+            concluido: true,
+            habilitado: false,
+            fechaAprobacion: fechaHoy,
+          },
+        };
 
-      setIsModalAprobarOpen(false);
-      setSolicitudAAprobar(null);
+        setSolicitudes((prev) =>
+          prev.map((s) => (s.id === target.id ? updatedItem : s))
+        );
+
+        setIsModalAprobarOpen(false);
+        setSolicitudAAprobar(null);
+      } catch (error) {
+        console.error(
+          "[useEvaluacion] Error al aprobar expediente por Presidencia:",
+          error
+        );
+        alert(
+          error instanceof Error
+            ? error.message
+            : "No se pudo confirmar la aprobación del expediente."
+        );
+      } finally {
+        setIsAprobando(false);
+      }
     },
     [solicitudAAprobar]
   );
@@ -172,7 +198,12 @@ export function useEvaluacion({
       const updatedItem: SolicitudFirmaItem = {
         ...target,
         etapaActual: "Observado",
-        aprobar: { aprobado: false },
+        aprobar: {
+          ...target.aprobar,
+          aprobado: false,
+          concluido: true,
+          habilitado: false,
+        },
       };
 
       setSolicitudes((prev) =>
@@ -201,6 +232,7 @@ export function useEvaluacion({
     isModalAprobarOpen,
     isLoading,
     isFirmando,
+    isAprobando,
     handleEvaluarClick,
     handleCloseModal,
     handleConfirmarEvaluacion,

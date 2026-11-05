@@ -84,9 +84,13 @@ export function mapBackendToSolicitudFirma(
   const totalEvaluadores =
     item.expediente?.totalEvaluadores ??
     (todasEvaluaciones.length > 0 ? todasEvaluaciones.length : 5);
-  const habilitadoParaAprobar = evaluacionesCompletadas >= totalEvaluadores;
   const yaAprobado =
     estadoExpediente === "APROBADO" || estadoTicket === "APROBADA";
+  const yaRechazado =
+    estadoExpediente === "RECHAZADO" || estadoTicket === "RECHAZADO";
+  const yaConcluido = yaAprobado || yaRechazado;
+  const habilitadoParaAprobar =
+    evaluacionesCompletadas >= totalEvaluadores && !yaConcluido;
 
   return {
     id: codigoVisible,
@@ -101,6 +105,7 @@ export function mapBackendToSolicitudFirma(
     },
     aprobar: {
       aprobado: yaAprobado,
+      concluido: yaConcluido,
       habilitado: habilitadoParaAprobar,
       evaluacionesCompletadas,
       totalEvaluadores,

@@ -156,16 +156,19 @@ export function AzureTableRow({
       {isPresidente && (
         <div className="azure-col-action">
           <span className="md:hidden font-semibold text-gray-500 mr-2">Aprobar:</span>
-          {item.aprobar?.aprobado ? (
-            <span className="azure-text-aprobado">
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+          {item.aprobar?.concluido || item.aprobar?.aprobado ? (
+            <span
+              className="azure-text-concluido"
+              title="Dictamen emitido por Presidencia - Trámite concluido"
+            >
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                   clipRule="evenodd"
                 />
               </svg>
-              <span>Aprobado</span>
+              <span>Concluido</span>
             </span>
           ) : (
             <button

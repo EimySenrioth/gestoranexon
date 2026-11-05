@@ -13,6 +13,7 @@ import { CreateTicketDto } from '../ticketmanager/dto/index.js';
 import {
   QueryMisSolicitudesDto,
   AsignarExpedienteDto,
+  AprobarPresidenciaDto,
 } from './dto/index.js';
 import { JwtAuthGuard, RolesGuard } from '../common/guards/index.js';
 import { CurrentUser, Roles } from '../common/decorators/index.js';
@@ -139,6 +140,26 @@ export class ExpedientesController {
   @Get(':id')
   async obtenerPorId(@Param('id') id: string) {
     return this.expedientesService.obtenerPorId(id);
+  }
+
+  /**
+   * Dictamen formal y resolución definitiva de Presidencia del CEI:
+   * Aprueba formalmente el expediente una vez completadas las 5 calificaciones.
+   */
+  @Post(':id/aprobar-presidencia')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PRESIDENTE_CEI')
+  async aprobarPorPresidencia(
+    @Param('id') id: string,
+    @CurrentUser('id') presidenteId: string,
+    @Body() dto: AprobarPresidenciaDto,
+  ) {
+    return await this.expedientesService.aprobarPorPresidencia(
+      id,
+      presidenteId,
+      dto,
+    );
   }
 }
 

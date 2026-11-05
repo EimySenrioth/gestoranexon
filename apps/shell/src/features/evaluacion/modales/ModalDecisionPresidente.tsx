@@ -13,6 +13,7 @@ export interface ModalDecisionPresidenteProps {
   onRechazar?: (item?: SolicitudFirmaItem) => void;
   titulo?: string;
   notaTexto?: string;
+  isSubmitting?: boolean;
 }
 
 /**
@@ -32,12 +33,15 @@ export function ModalDecisionPresidente({
   onRechazar,
   titulo = "Aprobación y Dictamen de Presidencia",
   notaTexto = "La aprobación formal de Presidencia ratifica el consenso favorable del pleno del CEI y emite la resolución ética definitiva.",
+  isSubmitting = false,
 }: ModalDecisionPresidenteProps) {
   const handleAprobar = () => {
+    if (isSubmitting) return;
     onConfirm(item || undefined);
   };
 
   const handleRechazar = () => {
+    if (isSubmitting) return;
     if (onRechazar) {
       onRechazar(item || undefined);
     }
@@ -47,7 +51,7 @@ export function ModalDecisionPresidente({
   return (
     <BannerModal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={isSubmitting ? () => {} : onClose}
       watermarkText="PRESIDENCIA · CEI"
       headerIcon={<IconDecisionPresidente size={46} />}
       title={titulo}
@@ -57,6 +61,7 @@ export function ModalDecisionPresidente({
             type="button"
             className="banner-modal-pill-btn banner-modal-pill-btn--danger"
             onClick={handleRechazar}
+            disabled={isSubmitting}
           >
             Rechazar
           </button>
@@ -64,8 +69,9 @@ export function ModalDecisionPresidente({
             type="button"
             className="banner-modal-pill-btn banner-modal-pill-btn--primary"
             onClick={handleAprobar}
+            disabled={isSubmitting}
           >
-            Confirmar Aprobación
+            {isSubmitting ? "Aprobando..." : "Confirmar Aprobación"}
           </button>
         </>
       }

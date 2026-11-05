@@ -241,6 +241,22 @@
   font-weight: 600;
 }
 
+.azure-text-concluido {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  color: #616161;
+  font-weight: 600;
+  padding: 3px 10px;
+  background-color: #f3f2f1;
+  border: 1px solid #c8c6c4;
+  border-radius: 9999px;
+  user-select: none;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
 /* Modificador de 6 columnas cuando el usuario es Presidente del CEI */
 .azure-table-card--presidente .azure-table-head,
 .azure-table-card--presidente .azure-table-row {
