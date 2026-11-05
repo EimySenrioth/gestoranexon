@@ -5,6 +5,9 @@ export interface DocumentoExpedienteItem {
   label: string;
   estado: EstadoDocumentoExpediente;
   estadoLabel: string;
+  url?: string;
+  pdfUrl?: string;
+  tipoDocumental?: string;
 }
 
 export interface ExpedienteProyecto {
@@ -22,12 +25,6 @@ export const MOCK_DOCUMENTOS_EXPEDIENTE: DocumentoExpedienteItem[] = [
   {
     id: 'naturaleza-proyecto',
     label: 'Naturaleza del Proyecto',
-    estado: 'recibido',
-    estadoLabel: 'Recibido',
-  },
-  {
-    id: 'financiamiento',
-    label: 'Financiamiento',
     estado: 'recibido',
     estadoLabel: 'Recibido',
   },

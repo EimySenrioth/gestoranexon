@@ -52,6 +52,30 @@ export class DocumentManagementController {
   }
 
   /**
+   * Visualización inline de un documento (abre en el visor PDF del navegador sin forzar descarga).
+   */
+  @Get(':documentId/view')
+  @UseGuards(JwtAuthGuard)
+  async viewDocument(
+    @Param('documentId') documentId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Res() res: Response,
+  ) {
+    const docInfo = await this.documentManagementService.getDocumentForDownload(
+      documentId,
+      user,
+    );
+
+    res.setHeader('Content-Type', docInfo.mimeType || 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="${encodeURIComponent(docInfo.nombreOriginal)}"`,
+    );
+
+    return res.sendFile(docInfo.filePath);
+  }
+
+  /**
    * Descarga segura de un documento.
    */
   @Get(':documentId/download')

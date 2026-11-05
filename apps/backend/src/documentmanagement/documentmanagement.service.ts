@@ -290,7 +290,7 @@ export class DocumentManagementService {
    */
   async getDocumentForDownload(documentId: string, user: AuthenticatedUser) {
     try {
-      const doc = await this.prisma.ticketDocumento.findUnique({
+      let doc = await this.prisma.ticketDocumento.findUnique({
         where: { id: documentId },
         include: {
           ticket: {
@@ -303,6 +303,44 @@ export class DocumentManagementService {
       });
 
       if (!doc) {
+        const tipoBusqueda = documentId.toUpperCase().replace(/-/g, '_');
+        doc = await this.prisma.ticketDocumento.findFirst({
+          where: {
+            OR: [
+              { nombreOriginal: documentId },
+              { nombreArchivo: documentId },
+              { tipoDocumental: tipoBusqueda },
+            ],
+          },
+          include: {
+            ticket: {
+              select: {
+                solicitanteId: true,
+                estado: true,
+              },
+            },
+          },
+        });
+      }
+
+      if (!doc) {
+        // Fallback: verificar si el archivo existe directamente en disco en uploads/documents
+        const directPath = path.join(this.uploadDir, documentId);
+        if (fs.existsSync(directPath)) {
+          const stat = fs.statSync(directPath);
+          return {
+            filePath: directPath,
+            nombreOriginal: documentId,
+            mimeType: documentId.endsWith('.pdf')
+              ? 'application/pdf'
+              : documentId.endsWith('.mp3')
+                ? 'audio/mpeg'
+                : documentId.endsWith('.zip')
+                  ? 'application/zip'
+                  : 'application/octet-stream',
+            tamanioBytes: stat.size,
+          };
+        }
         throw new NotFoundException('Documento no encontrado');
       }
 
@@ -439,12 +477,21 @@ export class DocumentManagementService {
     storagePath: string;
     tamanioBytes: number;
   }) {
-    if (!fs.existsSync(doc.storagePath)) {
-      throw new NotFoundException('El archivo físico no fue encontrado en el servidor');
+    let resolvedPath = doc.storagePath;
+    if (!fs.existsSync(resolvedPath)) {
+      const fallbackPath = path.join(this.uploadDir, path.basename(doc.storagePath));
+      const fallbackName = path.join(this.uploadDir, doc.nombreOriginal);
+      if (fs.existsSync(fallbackPath)) {
+        resolvedPath = fallbackPath;
+      } else if (fs.existsSync(fallbackName)) {
+        resolvedPath = fallbackName;
+      } else {
+        throw new NotFoundException('El archivo físico no fue encontrado en el servidor');
+      }
     }
 
     return {
-      filePath: doc.storagePath,
+      filePath: resolvedPath,
       nombreOriginal: doc.nombreOriginal,
       mimeType: doc.mimeType,
       tamanioBytes: doc.tamanioBytes,

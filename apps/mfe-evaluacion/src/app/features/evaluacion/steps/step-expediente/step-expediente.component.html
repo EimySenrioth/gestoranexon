@@ -6,8 +6,9 @@
     <button
       type="button"
       class="expediente-badge-capsule"
-      [attr.aria-label]="'Ver documento de ' + doc.label"
-      (click)="onVerClick(doc)"
+      [attr.aria-label]="'Abrir PDF de ' + doc.label + ' en nueva pestaña'"
+      title="Abrir PDF en nueva pestaña"
+      (click)="onAbrirPdf(doc, $event)"
     >
       <!-- Icono de ojo estilizado SVG -->
       <svg

@@ -363,54 +363,6 @@ export class EvaluacionService {
         // Construir la lista de documentos reales a partir de los archivos del ticket
         const docs: DocumentoExpedienteItem[] = [];
 
-        if (ticket.participantes) {
-          const partLabel = Array.isArray(ticket.participantes)
-            ? ticket.participantes.join(', ')
-            : ticket.participantes;
-          docs.push({
-            id: 'participantes',
-            label: `Participantes: ${partLabel}`,
-            estado: 'recibido',
-            estadoLabel: 'Recibido',
-          });
-        }
-
-        if (ticket.naturalezaProyecto) {
-          docs.push({
-            id: 'naturaleza-proyecto',
-            label: `Naturaleza del Proyecto: ${ticket.naturalezaProyecto}`,
-            estado: 'recibido',
-            estadoLabel: 'Recibido',
-          });
-        }
-
-        if (ticket.financiamiento) {
-          docs.push({
-            id: 'financiamiento',
-            label: `Financiamiento: ${financiamientoTexto}`,
-            estado: 'recibido',
-            estadoLabel: 'Recibido',
-          });
-        }
-
-        if (ticket.modalidad) {
-          docs.push({
-            id: 'modalidad',
-            label: `Modalidad: ${ticket.modalidad}`,
-            estado: 'recibido',
-            estadoLabel: 'Recibido',
-          });
-        }
-
-        if (ticket.planProyecto) {
-          docs.push({
-            id: 'plan-proyecto',
-            label: `Plan de Proyecto: ${ticket.planProyecto}`,
-            estado: 'recibido',
-            estadoLabel: 'Recibido',
-          });
-        }
-
         const documentosAdjuntos =
           Array.isArray(data.documentos) && data.documentos.length > 0
             ? data.documentos
@@ -418,8 +370,101 @@ export class EvaluacionService {
               ? ticket.documentos
               : [];
 
+        const token =
+          this.sessionService.accessToken() ||
+          this.sessionService.token() ||
+          '';
+        const tokenParam = token ? `?token=${encodeURIComponent(token)}` : '';
+
+        // Buscar coincidencia entre campos de texto y documentos adjuntos reales
+        const buscarDocAdjunto = (valor: string | string[] | undefined) => {
+          if (!valor) return undefined;
+          const nombres = Array.isArray(valor) ? valor : [valor];
+          for (const nom of nombres) {
+            const limpio = String(nom).trim().toLowerCase();
+            const encontrado = documentosAdjuntos.find((d: any) => {
+              const dNom = (d.nombreOriginal || d.nombre || '').toLowerCase();
+              return dNom && (dNom === limpio || dNom.includes(limpio) || limpio.includes(dNom));
+            });
+            if (encontrado) return encontrado;
+          }
+          return undefined;
+        };
+
+        const idsAgregados = new Set<string>();
+
+        if (ticket.participantes) {
+          const partLabel = Array.isArray(ticket.participantes)
+            ? ticket.participantes.join(', ')
+            : ticket.participantes;
+          const match = buscarDocAdjunto(ticket.participantes);
+          if (match?.id) idsAgregados.add(match.id);
+          const rawName = Array.isArray(ticket.participantes) ? ticket.participantes[0] : ticket.participantes;
+          const targetId = match?.id || rawName || 'participantes';
+          const docUrl = match?.url || `${this.apiUrl}/documents/${encodeURIComponent(targetId)}/view${tokenParam}`;
+          docs.push({
+            id: targetId,
+            label: `Participantes: ${partLabel}`,
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+            url: docUrl,
+            pdfUrl: docUrl,
+            tipoDocumental: match?.tipoDocumental,
+          });
+        }
+
+        if (ticket.naturalezaProyecto) {
+          const match = buscarDocAdjunto(ticket.naturalezaProyecto);
+          if (match?.id) idsAgregados.add(match.id);
+          const targetId = match?.id || ticket.naturalezaProyecto || 'naturaleza-proyecto';
+          const docUrl = match?.url || `${this.apiUrl}/documents/${encodeURIComponent(targetId)}/view${tokenParam}`;
+          docs.push({
+            id: targetId,
+            label: `Naturaleza del Proyecto: ${ticket.naturalezaProyecto}`,
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+            url: docUrl,
+            pdfUrl: docUrl,
+            tipoDocumental: match?.tipoDocumental,
+          });
+        }
+
+        if (ticket.modalidad) {
+          const match = buscarDocAdjunto(ticket.modalidad);
+          if (match?.id) idsAgregados.add(match.id);
+          const targetId = match?.id || ticket.modalidad || 'modalidad';
+          const docUrl = match?.url || `${this.apiUrl}/documents/${encodeURIComponent(targetId)}/view${tokenParam}`;
+          docs.push({
+            id: targetId,
+            label: `Modalidad: ${ticket.modalidad}`,
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+            url: docUrl,
+            pdfUrl: docUrl,
+            tipoDocumental: match?.tipoDocumental,
+          });
+        }
+
+        if (ticket.planProyecto) {
+          const match = buscarDocAdjunto(ticket.planProyecto);
+          if (match?.id) idsAgregados.add(match.id);
+          const targetId = match?.id || ticket.planProyecto || 'plan-proyecto';
+          const docUrl = match?.url || `${this.apiUrl}/documents/${encodeURIComponent(targetId)}/view${tokenParam}`;
+          docs.push({
+            id: targetId,
+            label: `Plan de Proyecto: ${ticket.planProyecto}`,
+            estado: 'recibido',
+            estadoLabel: 'Recibido',
+            url: docUrl,
+            pdfUrl: docUrl,
+            tipoDocumental: match?.tipoDocumental,
+          });
+        }
+
         if (documentosAdjuntos.length > 0) {
           for (const d of documentosAdjuntos) {
+            if (idsAgregados.has(d.id)) continue;
+            idsAgregados.add(d.id);
             const nombreDoc = d.nombre || d.nombreOriginal || 'Documento adjunto';
             const prefijoTipo =
               d.tipoDocumental === 'AUDIO_ASUNTO'
@@ -427,11 +472,15 @@ export class EvaluacionService {
                 : d.tipoDocumental?.startsWith('ANEXO_ASUNTO')
                   ? 'Anexo de Asunto: '
                   : '';
+            const docUrl = d.url || `${this.apiUrl}/documents/${d.id}/view${tokenParam}`;
             docs.push({
               id: d.id,
               label: `${prefijoTipo}${nombreDoc}`,
               estado: 'recibido',
               estadoLabel: 'Recibido',
+              url: docUrl,
+              pdfUrl: docUrl,
+              tipoDocumental: d.tipoDocumental,
             });
           }
         }
@@ -448,6 +497,11 @@ export class EvaluacionService {
       },
       error: (err) => {
         console.warn('[EvaluacionService] Error al cargar expediente desde API, aplicando datos de respaldo:', err);
+        const token =
+          this.sessionService.accessToken() ||
+          this.sessionService.token() ||
+          '';
+        const tokenParam = token ? `?token=${encodeURIComponent(token)}` : '';
         this._codigoExpediente.set(expedienteId || 'EXP-2026-0012');
         this._datosGenerales.set({
           tituloProyecto: 'Apple Treeh 56',
@@ -463,42 +517,48 @@ export class EvaluacionService {
             label: 'Participantes: Art Aseguramiento_de_la_Calidad.pdf',
             estado: 'recibido',
             estadoLabel: 'Recibido',
+            pdfUrl: `${this.apiUrl}/documents/participantes/view${tokenParam}`,
+            url: `${this.apiUrl}/documents/participantes/view${tokenParam}`,
           },
           {
             id: 'naturaleza-proyecto',
             label: 'Naturaleza del Proyecto: Tarea4_Equipo2.pdf',
             estado: 'recibido',
             estadoLabel: 'Recibido',
-          },
-          {
-            id: 'financiamiento',
-            label: 'Financiamiento: UNTELS',
-            estado: 'recibido',
-            estadoLabel: 'Recibido',
+            pdfUrl: `${this.apiUrl}/documents/naturaleza-proyecto/view${tokenParam}`,
+            url: `${this.apiUrl}/documents/naturaleza-proyecto/view${tokenParam}`,
           },
           {
             id: 'modalidad',
             label: 'Modalidad: Cuestionario1-1&Digrama.pdf',
             estado: 'recibido',
             estadoLabel: 'Recibido',
+            pdfUrl: `${this.apiUrl}/documents/modalidad/view${tokenParam}`,
+            url: `${this.apiUrl}/documents/modalidad/view${tokenParam}`,
           },
           {
             id: 'plan-proyecto',
             label: 'Plan de Proyecto: Cuestionario22.pdf',
             estado: 'recibido',
             estadoLabel: 'Recibido',
+            pdfUrl: `${this.apiUrl}/documents/plan-proyecto/view${tokenParam}`,
+            url: `${this.apiUrl}/documents/plan-proyecto/view${tokenParam}`,
           },
           {
             id: 'cmvn3p8rs000eecs4tkmnmrd9',
             label: 'Anexo de Asunto: lagu-sans (1).zip',
             estado: 'recibido',
             estadoLabel: 'Recibido',
+            pdfUrl: `${this.apiUrl}/documents/cmvn3p8rs000eecs4tkmnmrd9/view${tokenParam}`,
+            url: `${this.apiUrl}/documents/cmvn3p8rs000eecs4tkmnmrd9/view${tokenParam}`,
           },
           {
             id: 'cmvn3p8r4000decs4a4odwwpu',
             label: 'Audio de Asunto: 2hollis, Shawn Wasabi - Crush x BURNT RICE (Slowed + Reverb) Mashup, Remix [BEST VERSION].mp3',
             estado: 'recibido',
             estadoLabel: 'Recibido',
+            pdfUrl: `${this.apiUrl}/documents/cmvn3p8r4000decs4a4odwwpu/view${tokenParam}`,
+            url: `${this.apiUrl}/documents/cmvn3p8r4000decs4a4odwwpu/view${tokenParam}`,
           },
           {
             id: 'anexo',

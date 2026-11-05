@@ -39,6 +39,8 @@ export class JwtAuthGuard implements CanActivate {
       token = request.headers['x-evaluation-token'] as string;
     } else if (request.body?.token) {
       token = request.body.token as string;
+    } else if ((request.query as any)?.token) {
+      token = (request.query as any).token as string;
     }
 
     if (!token || token.startsWith('dev-mock-token')) {
