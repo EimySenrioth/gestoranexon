@@ -27,7 +27,7 @@ export function useSolicitudesTabla({
   const [page, setPage] = useState<number>(initialPage);
   const [total, setTotal] = useState<number>(initialSolicitudes?.length || 0);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [vista, setVista] = useState<"tabla" | "progreso" | "expediente">("tabla");
+  const [vista, setVista] = useState<"tabla" | "progreso" | "expediente" | "resultado">("tabla");
   const [solicitudSeleccionada, setSolicitudSeleccionada] =
     useState<SolicitudItem | null>(null);
   const [isLoading, setIsLoading] = useState(!initialSolicitudes);
@@ -90,14 +90,10 @@ export function useSolicitudesTabla({
   const handleVerResultado = useCallback(
     (item: SolicitudItem) => {
       setSolicitudSeleccionada(item);
-      if (onVerResultado) {
-        onVerResultado(item);
-      } else if (onVerExpediente) {
-        setVista("expediente");
-        onVerExpediente(item);
-      }
+      setVista("resultado");
+      onVerResultado?.(item);
     },
-    [onVerResultado, onVerExpediente]
+    [onVerResultado]
   );
 
   const handleVolver = useCallback(() => {

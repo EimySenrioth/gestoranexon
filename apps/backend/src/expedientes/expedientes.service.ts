@@ -1,4 +1,7 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateTicketDto } from '../ticketmanager/dto/index.js';
 import {
@@ -170,6 +173,9 @@ export class ExpedientesService {
         },
       });
 
+      // Auto-sincronizar los documentos del proyecto en ticket_documentos para que estén disponibles
+      await this.sincronizarDocumentosObligatoriosTicket(tx, ticket);
+
       // 6. Crear las fichas en 'evaluaciones' para cada miembro del CEI
       if (miembrosCei.length > 0) {
         await tx.evaluacion.createMany({
@@ -282,13 +288,151 @@ export class ExpedientesService {
   }
 
   /**
+   * Asegura que los documentos base del proyecto registrados en el ticket
+   * (naturalezaProyecto, participantes, modalidad, planProyecto)
+   * existan como registros en ticket_documentos para que sean entregados por el endpoint
+   * y puedan ser visualizados y descargados.
+   */
+  private async sincronizarDocumentosObligatoriosTicket(
+    client: any,
+    ticket: any,
+  ): Promise<any[]> {
+    if (!ticket) return [];
+
+    if (!client?.ticketDocumento?.findMany) {
+      return ticket.documentos || [];
+    }
+
+    try {
+      const uploadDir =
+        process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads', 'documents');
+
+      const docsActuales = await client.ticketDocumento.findMany({
+        where: { ticketId: ticket.id },
+        orderBy: { creadoEn: 'asc' },
+      });
+
+      const tiposExistentes = new Set(docsActuales.map((d: any) => d.tipoDocumental));
+      const nombresExistentes = new Set(docsActuales.map((d: any) => d.nombreOriginal));
+
+      const faltantes: Array<{ tipo: string; nombre: string }> = [];
+
+      if (
+        ticket.naturalezaProyecto &&
+        typeof ticket.naturalezaProyecto === 'string' &&
+        ticket.naturalezaProyecto.trim()
+      ) {
+        if (
+          !tiposExistentes.has('NATURALEZA_PROYECTO') &&
+          !nombresExistentes.has(ticket.naturalezaProyecto)
+        ) {
+          faltantes.push({ tipo: 'NATURALEZA_PROYECTO', nombre: ticket.naturalezaProyecto });
+        }
+      }
+
+      if (Array.isArray(ticket.participantes)) {
+        ticket.participantes.forEach((p: any) => {
+          if (
+            p &&
+            typeof p === 'string' &&
+            p.trim() &&
+            !tiposExistentes.has('PARTICIPANTES') &&
+            !nombresExistentes.has(p)
+          ) {
+            faltantes.push({ tipo: 'PARTICIPANTES', nombre: p });
+          }
+        });
+      }
+
+      if (
+        ticket.modalidad &&
+        typeof ticket.modalidad === 'string' &&
+        ticket.modalidad.trim()
+      ) {
+        if (
+          !tiposExistentes.has('MODALIDAD') &&
+          !nombresExistentes.has(ticket.modalidad)
+        ) {
+          faltantes.push({ tipo: 'MODALIDAD', nombre: ticket.modalidad });
+        }
+      }
+
+      if (
+        ticket.planProyecto &&
+        typeof ticket.planProyecto === 'string' &&
+        ticket.planProyecto.trim()
+      ) {
+        if (
+          !tiposExistentes.has('PLAN_PROYECTO') &&
+          !nombresExistentes.has(ticket.planProyecto)
+        ) {
+          faltantes.push({ tipo: 'PLAN_PROYECTO', nombre: ticket.planProyecto });
+        }
+      }
+
+      const nuevosDocs: any[] = [];
+
+      for (const item of faltantes) {
+        try {
+          const filePath = path.join(uploadDir, item.nombre);
+          let size = 1024;
+          let hash = '0'.repeat(64);
+
+          if (fs.existsSync(filePath)) {
+            const buf = fs.readFileSync(filePath);
+            size = buf.length;
+            hash = crypto.createHash('sha256').update(buf).digest('hex');
+          }
+
+          const mime = item.nombre.endsWith('.pdf')
+            ? 'application/pdf'
+            : item.nombre.endsWith('.mp3')
+              ? 'audio/mpeg'
+              : item.nombre.endsWith('.zip')
+                ? 'application/zip'
+                : 'application/octet-stream';
+
+          const nuevo = await client.ticketDocumento.create({
+            data: {
+              ticketId: ticket.id,
+              nombreOriginal: item.nombre,
+              nombreArchivo: item.nombre,
+              tipoDocumental: item.tipo,
+              mimeType: mime,
+              tamanioBytes: size,
+              hashSha256: hash,
+              storagePath: filePath,
+              version: 1,
+              estado: 'PENDIENTE_VALIDACION',
+              subidoPorId: ticket.solicitanteId || 'usr_solicitante_1',
+            },
+          });
+          nuevosDocs.push(nuevo);
+        } catch (err) {
+          this.logger.warn(`No se pudo sincronizar documento ${item.tipo} (${item.nombre}): ${err}`);
+        }
+      }
+
+      return [...docsActuales, ...nuevosDocs];
+    } catch (err) {
+      this.logger.warn(`Error en sincronizarDocumentosObligatoriosTicket para ticket ${ticket.id}: ${err}`);
+      return ticket.documentos || [];
+    }
+  }
+
+  /**
    * Obtiene el detalle de un expediente por su ID.
    */
   async obtenerPorId(id: string) {
-    // 1. Buscar primero en Expediente (por id o codigo)
+    // 1. Buscar primero en Expediente (por id, codigo o ticket relacionado)
     const expediente = await this.prisma.expediente.findFirst({
       where: {
-        OR: [{ id }, { codigo: id }],
+        OR: [
+          { id },
+          { codigo: id },
+          { ticket: { id } },
+          { ticket: { codigo: id } },
+        ],
       },
       include: {
         ticket: {
@@ -306,27 +450,43 @@ export class ExpedientesService {
     });
 
     if (expediente) {
+      const ticketDocs = expediente.ticket
+        ? await this.sincronizarDocumentosObligatoriosTicket(this.prisma, expediente.ticket)
+        : [];
+
       const docsCombinados =
-        expediente.documentos && expediente.documentos.length > 0
-          ? expediente.documentos
-          : expediente.ticket?.documentos || [];
+        ticketDocs.length > 0
+          ? ticketDocs
+          : expediente.documentos || [];
 
       return {
         id: expediente.id,
         codigo: expediente.codigo,
         estado: expediente.estado,
-        ticket: expediente.ticket,
+        ticket: expediente.ticket
+          ? {
+              ...expediente.ticket,
+              documentos: ticketDocs,
+            }
+          : null,
         documentos: docsCombinados,
         historial: expediente.historial,
       };
     }
 
-    // 2. Si no fue por expediente, buscar en Ticket (por id o codigo)
+    // 2. Si no fue por expediente, buscar en Ticket (por id, codigo o expediente relacionado)
     const ticket = await this.prisma.ticket.findFirst({
       where: {
-        OR: [{ id }, { codigo: id }],
+        OR: [
+          { id },
+          { codigo: id },
+          { expediente: { id } },
+          { expediente: { codigo: id } },
+        ],
       },
       include: {
+        solicitante: true,
+        asignadoA: true,
         expediente: true,
         documentos: true,
         historial: {
@@ -339,12 +499,17 @@ export class ExpedientesService {
       throw new ExpedienteNoEncontradoException(id);
     }
 
+    const ticketDocs = await this.sincronizarDocumentosObligatoriosTicket(this.prisma, ticket);
+
     return {
       id: ticket.expediente?.id || ticket.id,
       codigo: ticket.expediente?.codigo || ticket.codigo,
       estado: ticket.expediente?.estado || ticket.estado,
-      ticket,
-      documentos: ticket.documentos,
+      ticket: {
+        ...ticket,
+        documentos: ticketDocs,
+      },
+      documentos: ticketDocs,
       historial: ticket.historial,
     };
   }

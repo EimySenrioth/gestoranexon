@@ -13,7 +13,9 @@ import type { Role } from "@/navigation/registry/types";
 import type { LoginResponse } from "@/features/auth/services/auth.service";
 
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  "http://localhost:3000";
 
 export interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;

@@ -7,6 +7,7 @@ import { TableSolicitudRow } from "./TableSolicitudRow";
 import { TablePaginacion } from "./TablePaginacion";
 import { InformacionSolicitudProgreso } from "./InformacionSolicitudProgreso";
 import { InformacionExpediente } from "./InformacionExpediente";
+import { VerResultadoExpediente } from "../componentes/VerResultadoExpediente";
 import { useSolicitudesTabla } from "../hooks/useSolicitudesTabla";
 
 interface TableSolicitudProps {
@@ -55,7 +56,7 @@ export function TableSolicitud({
   return (
     <div
       className={`w-full max-w-5xl mx-auto transition-all ${
-        vista === "expediente"
+        vista === "expediente" || vista === "resultado"
           ? "p-0"
           : "bg-white rounded-3xl border-2 border-black/80 shadow-2xl p-6 md:p-8"
       } ${className}`}
@@ -63,6 +64,11 @@ export function TableSolicitud({
     >
       {vista === "progreso" && solicitudSeleccionada ? (
         <InformacionSolicitudProgreso
+          solicitud={solicitudSeleccionada}
+          onVolver={handleVolver}
+        />
+      ) : vista === "resultado" && solicitudSeleccionada ? (
+        <VerResultadoExpediente
           solicitud={solicitudSeleccionada}
           onVolver={handleVolver}
         />
