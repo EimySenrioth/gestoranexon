@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service.js';
+import { GenerarAnexo9PdfUseCase } from '../cei-documentos/use-cases/generar-anexo9-pdf.use-case.js';
 import { CreateTicketDto } from '../ticketmanager/dto/index.js';
 import {
   siguienteCorrelativo,
@@ -49,7 +50,10 @@ export interface ExpedienteCreado {
 export class ExpedientesService {
   private readonly logger = new Logger(ExpedientesService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly generarAnexo9PdfUseCase?: GenerarAnexo9PdfUseCase,
+  ) {}
 
   /**
    * Registra y almacena un expediente / trámite de forma persistente en PostgreSQL.
@@ -443,6 +447,7 @@ export class ExpedientesService {
           },
         },
         documentos: true,
+        anexo9Documento: true,
         historial: {
           orderBy: { creadoEn: 'asc' },
         },
@@ -454,10 +459,40 @@ export class ExpedientesService {
         ? await this.sincronizarDocumentosObligatoriosTicket(this.prisma, expediente.ticket)
         : [];
 
-      const docsCombinados =
+      const docsCombinados: any[] =
         ticketDocs.length > 0
-          ? ticketDocs
-          : expediente.documentos || [];
+          ? [...ticketDocs]
+          : expediente.documentos ? [...expediente.documentos] : [];
+
+      // Si existe o se puede resolver el Anexo N°9 generado
+      let docAnexo9 = expediente.anexo9Documento;
+      if (!docAnexo9 && this.generarAnexo9PdfUseCase) {
+        try {
+          const res = await this.generarAnexo9PdfUseCase.ejecutar(expediente.id);
+          docAnexo9 = res.documento as any;
+        } catch {
+          // Si faltan firmas o no está listo para generar, simplemente no se adjunta aún
+        }
+      }
+
+      if (docAnexo9) {
+        docsCombinados.push({
+          id: docAnexo9.id,
+          ticketDocumentoId: docAnexo9.id,
+          ticketId: expediente.ticket?.id || expediente.id,
+          nombreOriginal: docAnexo9.nombreArchivo,
+          nombreArchivo: docAnexo9.nombreArchivo,
+          tipoDocumental: 'ANEXO_EVALUACION',
+          tipo: 'ANEXO_EVALUACION',
+          mimeType: docAnexo9.mimeType || 'application/pdf',
+          tamanioBytes: docAnexo9.tamanioBytes,
+          version: docAnexo9.version || 1,
+          storagePath: docAnexo9.storagePath,
+          urlPublica: docAnexo9.urlPublica,
+          estado: docAnexo9.estado,
+          creadoEn: docAnexo9.creadoEn,
+        });
+      }
 
       return {
         id: expediente.id,
@@ -466,7 +501,7 @@ export class ExpedientesService {
         ticket: expediente.ticket
           ? {
               ...expediente.ticket,
-              documentos: ticketDocs,
+              documentos: docsCombinados,
             }
           : null,
         documentos: docsCombinados,
@@ -487,7 +522,11 @@ export class ExpedientesService {
       include: {
         solicitante: true,
         asignadoA: true,
-        expediente: true,
+        expediente: {
+          include: {
+            anexo9Documento: true,
+          },
+        },
         documentos: true,
         historial: {
           orderBy: { creadoEn: 'asc' },
@@ -500,6 +539,36 @@ export class ExpedientesService {
     }
 
     const ticketDocs = await this.sincronizarDocumentosObligatoriosTicket(this.prisma, ticket);
+    const docsCombinados: any[] = [...ticketDocs];
+
+    let docAnexo9 = ticket.expediente?.anexo9Documento;
+    if (!docAnexo9 && ticket.expediente?.id && this.generarAnexo9PdfUseCase) {
+      try {
+        const res = await this.generarAnexo9PdfUseCase.ejecutar(ticket.expediente.id);
+        docAnexo9 = res.documento as any;
+      } catch {
+        // Silencioso si aún no está listo
+      }
+    }
+
+    if (docAnexo9) {
+      docsCombinados.push({
+        id: docAnexo9.id,
+        ticketDocumentoId: docAnexo9.id,
+        ticketId: ticket.id,
+        nombreOriginal: docAnexo9.nombreArchivo,
+        nombreArchivo: docAnexo9.nombreArchivo,
+        tipoDocumental: 'ANEXO_EVALUACION',
+        tipo: 'ANEXO_EVALUACION',
+        mimeType: docAnexo9.mimeType || 'application/pdf',
+        tamanioBytes: docAnexo9.tamanioBytes,
+        version: docAnexo9.version || 1,
+        storagePath: docAnexo9.storagePath,
+        urlPublica: docAnexo9.urlPublica,
+        estado: docAnexo9.estado,
+        creadoEn: docAnexo9.creadoEn,
+      });
+    }
 
     return {
       id: ticket.expediente?.id || ticket.id,
@@ -507,9 +576,9 @@ export class ExpedientesService {
       estado: ticket.expediente?.estado || ticket.estado,
       ticket: {
         ...ticket,
-        documentos: ticketDocs,
+        documentos: docsCombinados,
       },
-      documentos: ticketDocs,
+      documentos: docsCombinados,
       historial: ticket.historial,
     };
   }

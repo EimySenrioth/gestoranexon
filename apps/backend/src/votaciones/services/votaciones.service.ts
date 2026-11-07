@@ -21,12 +21,16 @@ import {
   EmitirDictamenPresidenteDto,
   CrearSesionVotacionDto,
 } from '../dto/index.js';
+import { GenerarAnexo9PdfUseCase } from '../../cei-documentos/use-cases/generar-anexo9-pdf.use-case.js';
 
 @Injectable()
 export class VotacionesService {
   private readonly logger = new Logger(VotacionesService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly generarAnexo9PdfUseCase: GenerarAnexo9PdfUseCase,
+  ) {}
 
   /**
    * Inicializa una sesión de votación para un anexo y sus 5 evaluadores asignados.
@@ -362,7 +366,7 @@ export class VotacionesService {
     presidenteId: string,
     dto: EmitirDictamenPresidenteDto,
   ) {
-    return await this.prisma.$transaction(async (tx) => {
+    const resultadoTx = await this.prisma.$transaction(async (tx) => {
       const sesion = await tx.sesionVotacion.findUnique({
         where: { id: sesionId },
       });
@@ -425,8 +429,31 @@ export class VotacionesService {
         },
       });
 
-      return doc.dictamenPresidenteCei;
+      return {
+        dictamen: doc.dictamenPresidenteCei,
+        expedienteId: sesion.expedienteId,
+        totalVotos: doc.votos ? doc.votos.length : 0,
+      };
     });
+
+    // TRIGGER DESACOPLADO AUTOMÁTICO: Generación de Anexo N°9 oficial
+    if (resultadoTx.totalVotos >= 5) {
+      setImmediate(async () => {
+        try {
+          this.logger.log(
+            `Disparando generación automática de Anexo N°9 para expediente ${resultadoTx.expedienteId} (Sesión: ${sesionId})`,
+          );
+          await this.generarAnexo9PdfUseCase.ejecutar(resultadoTx.expedienteId, sesionId);
+        } catch (error) {
+          this.logger.error(
+            `Error al generar Anexo N°9 automático para expediente ${resultadoTx.expedienteId}:`,
+            error,
+          );
+        }
+      });
+    }
+
+    return resultadoTx.dictamen;
   }
 
   /**

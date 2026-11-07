@@ -324,6 +324,46 @@ export class DocumentManagementService {
       }
 
       if (!doc) {
+        // 2. Verificar si corresponde a un documento de expediente (p. ej. Anexo N°9 generado)
+        const expDoc = await this.prisma.expedienteDocumento.findFirst({
+          where: {
+            OR: [
+              { id: documentId },
+              { nombreArchivo: documentId },
+            ],
+          },
+          include: {
+            expediente: {
+              include: {
+                ticket: {
+                  select: {
+                    solicitanteId: true,
+                    estado: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        if (expDoc) {
+          const isOwner = expDoc.expediente?.ticket?.solicitanteId === user.id;
+          const isCei = user.roles.some((r) =>
+            ROLES_CEI.includes(r.toUpperCase() as any),
+          );
+
+          if (isOwner || isCei) {
+            return {
+              filePath: expDoc.storagePath,
+              nombreOriginal: expDoc.nombreArchivo,
+              mimeType: expDoc.mimeType,
+              tamanioBytes: expDoc.tamanioBytes,
+            };
+          }
+
+          throw new ForbiddenException('No tiene permisos para acceder a este documento');
+        }
+
         // Fallback: verificar si el archivo existe directamente en disco en uploads/documents
         const directPath = path.join(this.uploadDir, documentId);
         if (fs.existsSync(directPath)) {

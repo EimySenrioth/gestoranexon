@@ -9,6 +9,7 @@ import { DocumentManagementModule } from './documentmanagement/documentmanagemen
 import { ExpedientesModule } from './expedientes/expedientes.module.js';
 import { VotacionesModule } from './votaciones/votaciones.module.js';
 import { EvaluacionesModule } from './evaluaciones/evaluaciones.module.js';
+import { CeiDocumentosModule } from './cei-documentos/cei-documentos.module.js';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { EvaluacionesModule } from './evaluaciones/evaluaciones.module.js';
     ExpedientesModule,
     VotacionesModule,
     EvaluacionesModule,
+    CeiDocumentosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

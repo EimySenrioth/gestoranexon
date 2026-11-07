@@ -98,6 +98,14 @@ model Expediente {
   creadoEn      DateTime         @default(now())
   actualizadoEn DateTime         @updatedAt
 
+  // Trazabilidad Anexo N°9 Activo
+  anexo9DocumentoId String?              @unique
+  anexo9Url         String?              @db.Text
+  anexo9GeneradoEn  DateTime?
+  anexo9Documento   ExpedienteDocumento? @relation("ExpedienteAnexo9Activo", fields: [anexo9DocumentoId], references: [id])
+
+  documentosAnexos ExpedienteDocumento[] @relation("ExpedienteTodosLosDocumentos")
+
   solicitud    Solicitud?   @relation(fields: [solicitudId], references: [id])
   gestor       Usuario?     @relation(fields: [gestorId], references: [id])
   ticket       Ticket?      @relation("ExpedienteTicket")
@@ -453,4 +461,68 @@ model SesionVotacion {
   @@index([expedienteId])
   @@index([estado])
   @@map("sesiones_votacion")
+}
+
+// ============================================================================
+// DOMINIO DE DOCUMENTOS OFICIALES EMITIDOS POR EL CEI
+// ============================================================================
+
+enum EstadoDocumentoExpediente {
+  VIGENTE
+  ANULADO
+}
+
+enum TipoDocumentoExpediente {
+  ANEXO_9
+  DICTAMEN_FINAL
+  RESOLUCION_CEI
+}
+
+model ExpedienteDocumento {
+  id                String                    @id @default(cuid())
+
+  // Llaves foráneas relacionales
+  expedienteId      String
+  ticketId          String?
+  sesionVotacionId  String?
+
+  // Códigos de negocio legibles (Cadena de custodia e inmutabilidad sin requerir JOINs)
+  codigoExpediente  String                    @db.VarChar(50)
+  codigoTicket      String?                   @db.VarChar(50)
+
+  tipoDocumento     TipoDocumentoExpediente   @default(ANEXO_9)
+  estado            EstadoDocumentoExpediente @default(VIGENTE)
+  dictamenFinal     String
+
+  // Archivo físico en disco local y blindaje criptográfico
+  nombreArchivo     String                    @db.VarChar(255)
+  storagePath       String                    @db.VarChar(1000)
+  urlPublica        String?                   @db.Text
+  mimeType          String                    @default("application/pdf") @db.VarChar(100)
+  tamanioBytes      Int
+  totalPaginas      Int
+  hashSha256        String                    @db.Char(64)
+  version           Int                       @default(1)
+
+  // Auditoría y congelado legal
+  firmantesSnapshot Json
+  creadoPor         String                    @default("SISTEMA_CEI")
+  metadata          Json?
+  creadoEn          DateTime                  @default(now())
+  actualizadoEn     DateTime                  @updatedAt
+
+  // Trazabilidad de anulación administrativa
+  anuladoEn         DateTime?
+  motivoAnulacion   String?                   @db.Text
+
+  expediente        Expediente                @relation("ExpedienteTodosLosDocumentos", fields: [expedienteId], references: [id], onDelete: Cascade)
+  expedienteActivo  Expediente?               @relation("ExpedienteAnexo9Activo")
+
+  // Índices y regla estricta de unicidad compuesta
+  @@unique([expedienteId, tipoDocumento, version])
+  @@index([codigoExpediente])
+  @@index([codigoTicket])
+  @@index([hashSha256])
+  @@index([sesionVotacionId])
+  @@map("expediente_documentos")
 }

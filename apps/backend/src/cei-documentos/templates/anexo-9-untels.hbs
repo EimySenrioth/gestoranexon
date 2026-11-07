@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Anexo N°9 - Revisión CEI UNTELS</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 15mm 12mm 15mm 12mm;
+      @bottom-right {
+        content: "Página " counter(page) " de " counter(pages);
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 8pt;
+        color: #666;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10pt;
+      line-height: 1.3;
+      color: #111827;
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+    }
+
+    /* Encabezado Institucional */
+    .header-container {
+      text-align: center;
+      border-bottom: 2px solid #1e3a8a;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+
+    .header-inst {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #1e3a8a;
+      text-transform: uppercase;
+      margin: 0 0 2px 0;
+    }
+
+    .header-sub {
+      font-size: 10pt;
+      font-weight: 600;
+      color: #374151;
+      margin: 0 0 2px 0;
+    }
+
+    .header-doc-title {
+      font-size: 11pt;
+      font-weight: bold;
+      color: #0f172a;
+      margin: 6px 0 2px 0;
+      text-decoration: underline;
+    }
+
+    /* Ficha Técnica del Proyecto */
+    .ficha-proyecto {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+      font-size: 9.5pt;
+    }
+
+    .ficha-proyecto td {
+      padding: 3px 6px;
+      border: 1px solid #cbd5e1;
+      vertical-align: top;
+    }
+
+    .ficha-label {
+      background-color: #f1f5f9;
+      font-weight: bold;
+      color: #1e293b;
+      width: 25%;
+    }
+
+    .ficha-valor {
+      color: #0f172a;
+    }
+
+    .seccion-titulo {
+      font-size: 10pt;
+      font-weight: bold;
+      color: #1e3a8a;
+      text-transform: uppercase;
+      margin: 12px 0 6px 0;
+      border-left: 4px solid #1e3a8a;
+      padding-left: 6px;
+    }
+
+    /* Tabla Consolidada de 5 Evaluadores */
+    .tabla-criterios {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+      page-break-inside: auto;
+    }
+
+    .tabla-criterios thead {
+      display: table-header-group;
+    }
+
+    .tabla-criterios th {
+      background-color: #1e3a8a;
+      color: #ffffff;
+      font-size: 8.5pt;
+      font-weight: bold;
+      text-align: center;
+      padding: 6px 4px;
+      border: 1px solid #0f172a;
+      text-transform: uppercase;
+    }
+
+    .tabla-criterios td {
+      border: 1px solid #cbd5e1;
+      padding: 5px;
+      vertical-align: top;
+      font-size: 9pt;
+    }
+
+    .tabla-criterios tr {
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+
+    .cat-header {
+      background-color: #e2e8f0;
+      font-weight: bold;
+      color: #0f172a;
+      font-size: 9.5pt;
+      text-transform: uppercase;
+      padding: 4px 8px !important;
+    }
+
+    .col-num {
+      width: 4%;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .col-desc {
+      width: 34%;
+      text-align: justify;
+      color: #1f2937;
+    }
+
+    .col-eval {
+      width: 5.5%;
+      text-align: center;
+      font-weight: bold;
+      font-size: 11pt;
+    }
+
+    .check-cumple {
+      color: #15803d;
+    }
+
+    .check-nocumple {
+      color: #b91c1c;
+    }
+
+    /* Regla Estricta: Observaciones en Arial 10pt */
+    .col-observaciones {
+      width: 34%;
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 10pt !important;
+      line-height: 1.35;
+      color: #1a1a1a;
+      text-align: justify;
+    }
+
+    .obs-item {
+      margin-bottom: 4px;
+      padding-bottom: 2px;
+      border-bottom: 1px dotted #cbd5e1;
+    }
+
+    .obs-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .obs-autor {
+      font-weight: bold;
+      color: #1e3a8a;
+      font-size: 8.5pt;
+      display: block;
+    }
+
+    .obs-vacia {
+      color: #94a3b8;
+      font-style: italic;
+      font-size: 8.5pt;
+    }
+
+    /* Dictamen Final */
+    .seccion-dictamen {
+      margin-top: 10px;
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      border: 2px solid #1e3a8a;
+      background-color: #f8fafc;
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+
+    .dictamen-titulo {
+      font-size: 10pt;
+      font-weight: bold;
+      color: #1e3a8a;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .dictamen-resultado {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #0f172a;
+      text-align: center;
+      padding: 4px;
+      background-color: #e0f2fe;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Sección de Firmas Digitales de los 5 Miembros */
+    .seccion-firmas {
+      margin-top: 18px;
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+
+    .firmas-grid {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .firmas-grid td {
+      width: 33.33%;
+      padding: 10px 8px;
+      text-align: center;
+      vertical-align: bottom;
+      border: none;
+    }
+
+    .firma-box {
+      border-top: 1px solid #111827;
+      padding-top: 4px;
+      margin: 0 10px;
+    }
+
+    .firma-img-container {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2px;
+    }
+
+    .firma-img {
+      max-height: 55px;
+      max-width: 160px;
+      object-fit: contain;
+    }
+
+    .firma-nombre {
+      font-size: 8.5pt;
+      font-weight: bold;
+      color: #111827;
+      margin: 0;
+    }
+
+    .firma-cargo {
+      font-size: 8pt;
+      color: #4b5563;
+      margin: 1px 0;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .firma-hash {
+      font-size: 6.5pt;
+      color: #6b7280;
+      font-family: monospace;
+      margin: 1px 0 0 0;
+    }
+
+    .firma-fecha {
+      font-size: 7pt;
+      color: #4b5563;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado Institucional -->
+  <div class="header-container">
+    <div class="header-inst">Universidad Nacional Tecnológica de Lima Sur</div>
+    <div class="header-sub">Vicerrectorado de Investigación - Comité de Ética para la Investigación (CEI)</div>
+    <div class="header-doc-title">ANEXO N° 9: FORMATO DE REVISIÓN Y DICTAMEN CONSOLIDADO</div>
+  </div>
+
+  <!-- Ficha Técnica del Expediente -->
+  <table class="ficha-proyecto">
+    <tr>
+      <td class="ficha-label">Código Expediente:</td>
+      <td class="ficha-valor"><strong>{{expediente.codigo}}</strong></td>
+      <td class="ficha-label">Fecha de Emisión:</td>
+      <td class="ficha-valor">{{expediente.fechaDictamen}}</td>
+    </tr>
+    <tr>
+      <td class="ficha-label">Título del Proyecto:</td>
+      <td class="ficha-valor" colspan="3"><strong>{{expediente.tituloProyecto}}</strong></td>
+    </tr>
+    <tr>
+      <td class="ficha-label">Investigador Principal:</td>
+      <td class="ficha-valor">{{expediente.investigadorPrincipal}}</td>
+      <td class="ficha-label">Unidad / Facultad:</td>
+      <td class="ficha-valor">{{expediente.facultadOUnidad}}</td>
+    </tr>
+  </table>
+
+  <!-- 1. Tabla de Cumplimiento de Principios Éticos (5 preguntas) -->
+  <div class="seccion-titulo">I. Cumplimiento de Principios Éticos</div>
+  <table class="tabla-criterios">
+    <thead>
+      <tr>
+        <th class="col-num">N°</th>
+        <th class="col-desc">Criterios de Principios Éticos Evaluados</th>
+        <th class="col-eval">E1</th>
+        <th class="col-eval">E2</th>
+        <th class="col-eval">E3</th>
+        <th class="col-eval">E4</th>
+        <th class="col-eval">E5</th>
+        <th class="col-observaciones">Observaciones (Arial 10pt)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each criteriosEticos}}
+        <tr>
+          <td class="col-num">{{this.numero}}</td>
+          <td class="col-desc">{{this.descripcion}}</td>
+          <td class="col-eval">
+            {{#if this.eval1Cumple}}<span class="check-cumple">&#10004;</span>{{else}}<span class="check-nocumple">&#10008;</span>{{/if}}
+          </td>
+          <td class="col-eval">
+            {{#if this.eval2Cumple}}<span class="check-cumple">&#10004;</span>{{else}}<span class="check-nocumple">&#10008;</span>{{/if}}
+          </td>
+          <td class="col-eval">
+            {{#if this.eval3Cumple}}<span class="check-cumple">&#10004;</span>{{else}}<span class="check-nocumple">&#10008;</span>{{/if}}
+          </td>
+          <td class="col-eval">
+            {{#if this.eval4Cumple}}<span class="check-cumple">&#10004;</span>{{else}}<span class="check-nocumple">&#10008;</span>{{/if}}
+          </td>
+          <td class="col-eval">
+            {{#if this.eval5Cumple}}<span class="check-cumple">&#10004;</span>{{else}}<span class="check-nocumple">&#10008;</span>{{/if}}
+          </td>
+          <td class="col-observaciones">
+            {{#if this.observaciones.length}}
+              {{#each this.observaciones}}
+                <div class="obs-item">
+                  <span class="obs-autor">{{this.cargo}} ({{this.evaluadorNombre}}):</span>
+                  {{this.texto}}
+                </div>
+              {{/each}}
+            {{else}}
+              <span class="obs-vacia">Sin observaciones registradas.</span>
+            {{/if}}
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <!-- 2. Tabla de Cumplimiento de Normativa Legal (4 preguntas) -->
+  <div class="seccion-titulo">II. Cumplimiento de Normativa Legal</div>
+  <table class="tabla-criterios">
+    <thead>
+      <tr>
+        <th class="col-num">N°</th>
+        <th class="col-desc">Criterios de Normativa Legal Evaluados</th>
+        <th class="col-eval">E1</th>
+        <th class="col-eval">E2</th>
+        <th class="col-eval">E3</th>
+        <th class="col-eval">E4</th>
+        <th class="col-eval">E5</th>
+        <th class="col-observaciones">Observaciones (Arial 10pt)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each criteriosNormativa}}
+        <tr>
+          <td class="col-num">{{this.numero}}</td>
+          <td class="col-desc">{{this.descripcion}}</td>
+          <td class="col-eval">
+            {{#if this.eval1Cumple}}<span class="check-cumple">&#10004;</span>{{else}}<span class="check-nocumple">&#10008;</span>{{/if}}
+          </td>
+          <td class="col-eval">
+            {{#if this.eval2Cumple}}<span class="check-cumple">&#10004;</span>{{else}}<span class="check-nocumple">&#10008;</span>{{/if}}
+          </td>
+          <td class="col-eval">
+            {{#if this.eval3Cumple}}<span class="check-cumple">&#10004;</span>{{else}}<span class="check-nocumple">&#10008;</span>{{/if}}
+          </td>
+          <td class="col-eval">
+            {{#if this.eval4Cumple}}<span class="check-cumple">&#10004;</span>{{else}}<span class="check-nocumple">&#10008;</span>{{/if}}
+          </td>
+          <td class="col-eval">
+            {{#if this.eval5Cumple}}<span class="check-cumple">&#10004;</span>{{else}}<span class="check-nocumple">&#10008;</span>{{/if}}
+          </td>
+          <td class="col-observaciones">
+            {{#if this.observaciones.length}}
+              {{#each this.observaciones}}
+                <div class="obs-item">
+                  <span class="obs-autor">{{this.cargo}} ({{this.evaluadorNombre}}):</span>
+                  {{this.texto}}
+                </div>
+              {{/each}}
+            {{else}}
+              <span class="obs-vacia">Sin observaciones registradas.</span>
+            {{/if}}
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <!-- Dictamen Final Oficial -->
+  <div class="seccion-dictamen">
+    <div class="dictamen-titulo">DICTAMEN FINAL DEL COMITÉ DE ÉTICA PARA LA INVESTIGACIÓN:</div>
+    <div class="dictamen-resultado">
+      {{dictamenFinal}}
+    </div>
+  </div>
+
+  <!-- Bloque de Firmas de los 5 Miembros Oficiales -->
+  <div class="seccion-firmas">
+    <table class="firmas-grid">
+      <tr>
+        <!-- Miembro 1 (Presidente) -->
+        <td>
+          {{#if firmantes.[0]}}
+            <div class="firma-img-container">
+              <img class="firma-img" src="{{firmantes.[0].firmaDataUrl}}" alt="Firma">
+            </div>
+            <div class="firma-box">
+              <p class="firma-nombre">{{firmantes.[0].nombreCompleto}}</p>
+              <p class="firma-cargo">{{firmantes.[0].cargoCei}}</p>
+              <p class="firma-fecha">{{firmantes.[0].fechaLegible}}</p>
+            </div>
+          {{/if}}
+        </td>
+
+        <!-- Miembro 2 (Vicepresidente) -->
+        <td>
+          {{#if firmantes.[1]}}
+            <div class="firma-img-container">
+              <img class="firma-img" src="{{firmantes.[1].firmaDataUrl}}" alt="Firma">
+            </div>
+            <div class="firma-box">
+              <p class="firma-nombre">{{firmantes.[1].nombreCompleto}}</p>
+              <p class="firma-cargo">{{firmantes.[1].cargoCei}}</p>
+              <p class="firma-fecha">{{firmantes.[1].fechaLegible}}</p>
+            </div>
+          {{/if}}
+        </td>
+
+        <!-- Miembro 3 (Secretaría Técnica) -->
+        <td>
+          {{#if firmantes.[2]}}
+            <div class="firma-img-container">
+              <img class="firma-img" src="{{firmantes.[2].firmaDataUrl}}" alt="Firma">
+            </div>
+            <div class="firma-box">
+              <p class="firma-nombre">{{firmantes.[2].nombreCompleto}}</p>
+              <p class="firma-cargo">{{firmantes.[2].cargoCei}}</p>
+              <p class="firma-fecha">{{firmantes.[2].fechaLegible}}</p>
+            </div>
+          {{/if}}
+        </td>
+      </tr>
+
+      <tr>
+        <!-- Miembro 4 (Secretaría Administrativa) -->
+        <td>
+          {{#if firmantes.[3]}}
+            <div class="firma-img-container">
+              <img class="firma-img" src="{{firmantes.[3].firmaDataUrl}}" alt="Firma">
+            </div>
+            <div class="firma-box">
+              <p class="firma-nombre">{{firmantes.[3].nombreCompleto}}</p>
+              <p class="firma-cargo">{{firmantes.[3].cargoCei}}</p>
+              <p class="firma-fecha">{{firmantes.[3].fechaLegible}}</p>
+            </div>
+          {{/if}}
+        </td>
+
+        <!-- Miembro 5 (Vocal) -->
+        <td>
+          {{#if firmantes.[4]}}
+            <div class="firma-img-container">
+              <img class="firma-img" src="{{firmantes.[4].firmaDataUrl}}" alt="Firma">
+            </div>
+            <div class="firma-box">
+              <p class="firma-nombre">{{firmantes.[4].nombreCompleto}}</p>
+              <p class="firma-cargo">{{firmantes.[4].cargoCei}}</p>
+              <p class="firma-fecha">{{firmantes.[4].fechaLegible}}</p>
+            </div>
+          {{/if}}
+        </td>
+
+        <!-- Celda vacía para centrar balance -->
+        <td></td>
+      </tr>
+    </table>
+  </div>
+
+</body>
+</html>
+
