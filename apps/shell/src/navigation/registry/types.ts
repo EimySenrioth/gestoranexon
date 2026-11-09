@@ -9,7 +9,7 @@ export type Role =
   | "ADMINISTRADOR"
   | "solicitante";
 
-export type ModuleId = "inicio" | "solicitudes" | "homeview2" | "evaluacion";
+export type ModuleId = "inicio" | "solicitudes" | "homeview2" | "evaluacion" | "homeview3";
 
 export interface ModuleDefinition {
   id: ModuleId;

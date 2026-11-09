@@ -1,0 +1,562 @@
+/* apps/shell/src/design-tokens/azure/gestion-usuarios.css */
+/* Estilos para Gestión de Usuarios y Modal Lateral estilo Microsoft Azure / Entra Admin Center */
+
+/* 1. Contenedor de Administración */
+.admin-users-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: var(--ui-font-family-lagu, sans-serif);
+}
+
+/* 2. Breadcrumb y Encabezado Azure */
+.admin-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--ui-azure-text-link, #0078d4);
+  margin-bottom: 2px;
+}
+
+.admin-breadcrumb-separator {
+  color: var(--ui-azure-text-muted, #8a8886);
+}
+
+.admin-header-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-header-title-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-header-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #eff6fc;
+  color: #0078d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-header-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--ui-azure-text-primary, #242424);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.admin-header-subtitle {
+  font-size: 0.82rem;
+  color: var(--ui-azure-text-secondary, #616161);
+  margin: 2px 0 0 0;
+}
+
+/* 3. Banner Informativo Azure */
+.admin-azure-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background-color: #eff6fc;
+  border: 1px solid #c7e0f4;
+  border-left: 4px solid #0078d4;
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: #242424;
+}
+
+.admin-azure-alert-icon {
+  color: #0078d4;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* 4. Barra de Acciones y Pestañas */
+.admin-toolbar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid var(--ui-azure-border-light, #edebe9);
+  padding: 12px 16px;
+}
+
+@media (min-width: 768px) {
+  .admin-toolbar-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.admin-tabs-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 2px solid transparent;
+}
+
+.admin-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 8px 16px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ui-azure-text-secondary, #616161);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-tab-btn:hover {
+  color: var(--ui-azure-text-primary, #242424);
+  background: #f8f9fa;
+  border-radius: 4px 4px 0 0;
+}
+
+.admin-tab-btn.active {
+  color: var(--ui-azure-text-link, #0078d4);
+  border-bottom-color: #0078d4;
+}
+
+.admin-tab-badge {
+  background: #edebe9;
+  color: #242424;
+  font-size: 0.75rem;
+  padding: 2px 7px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.admin-tab-btn.active .admin-tab-badge {
+  background: #deecf9;
+  color: #0078d4;
+}
+
+/* Herramientas derechas */
+.admin-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid var(--ui-azure-border-neutral, #e1dfdd);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ui-azure-text-primary, #242424);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-action-btn:hover {
+  background: #f3f2f1;
+}
+
+.admin-action-btn-primary {
+  background: #0078d4;
+  color: #ffffff;
+  border-color: #0078d4;
+}
+
+.admin-action-btn-primary:hover {
+  background: #106ebe;
+  border-color: #106ebe;
+}
+
+/* 5. Barra de Búsqueda y Filtros */
+.admin-search-bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-search-input-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid var(--ui-azure-border-neutral, #e1dfdd);
+  border-radius: 4px;
+  padding: 6px 12px;
+  width: 100%;
+  max-width: 360px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-search-input-box:focus-within {
+  border-color: #0078d4;
+  box-shadow: 0 0 0 1px #0078d4;
+}
+
+.admin-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.88rem;
+  color: #242424;
+  width: 100%;
+}
+
+.admin-search-input::placeholder {
+  color: #8a8886;
+}
+
+.admin-count-text {
+  font-size: 0.85rem;
+  color: var(--ui-azure-text-secondary, #616161);
+}
+
+/* 6. Tabla Estilo Azure Portal */
+.admin-table-wrapper {
+  background: #ffffff;
+  border: 1px solid var(--ui-azure-border-light, #edebe9);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.admin-table-head th {
+  background: #faf9f8;
+  color: var(--ui-azure-text-secondary, #616161);
+  font-weight: 600;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--ui-azure-border-light, #edebe9);
+  white-space: nowrap;
+}
+
+.admin-table-row {
+  border-bottom: 1px solid var(--ui-azure-border-light, #edebe9);
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+}
+
+.admin-table-row:hover {
+  background-color: #f3f2f1;
+}
+
+.admin-table-cell {
+  padding: 10px 14px;
+  vertical-align: middle;
+}
+
+/* Avatar circular Azure */
+.admin-user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.admin-user-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-user-name-link {
+  color: #0078d4;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.admin-user-name-link:hover {
+  text-decoration: underline;
+}
+
+/* Badges de Estado y Rol */
+.admin-status-enabled {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #107c10;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.admin-status-disabled {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #8a8886;
+  font-weight: 500;
+  font-size: 0.82rem;
+}
+
+.admin-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #faf9f8;
+  border: 1px solid #e1dfdd;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  color: #242424;
+  font-weight: 500;
+}
+
+/* 7. Modal Lateral (Flyout Drawer - Estilo "Clone a Virtual Machine") */
+.admin-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 9998;
+  transition: opacity 0.25s ease;
+}
+
+.admin-drawer-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 480px;
+  height: 100vh;
+  background-color: #ffffff;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  animation: slideInRight 0.25s ease-out forwards;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.admin-drawer-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--ui-azure-border-light, #edebe9);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.admin-drawer-title-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-drawer-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-drawer-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ui-azure-text-primary, #242424);
+  margin: 0;
+}
+
+.admin-drawer-badge {
+  background: #eff6fc;
+  color: #0078d4;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #c7e0f4;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-drawer-subtitle {
+  font-size: 0.85rem;
+  color: var(--ui-azure-text-secondary, #616161);
+  margin: 0;
+}
+
+.admin-drawer-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #616161;
+  padding: 4px 8px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.admin-drawer-close-btn:hover {
+  background: #f3f2f1;
+  color: #242424;
+}
+
+.admin-drawer-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Campos de Formulario Fluent */
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ui-azure-text-primary, #242424);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-form-required {
+  color: #a80000;
+}
+
+.admin-form-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--ui-azure-border-neutral, #8a8886);
+  border-radius: 2px;
+  font-size: 0.9rem;
+  color: #242424;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-form-input:focus {
+  border-color: #0078d4;
+  box-shadow: 0 0 0 1px #0078d4;
+}
+
+.admin-form-input[readonly] {
+  background-color: #f3f2f1;
+  border-color: #e1dfdd;
+  color: #616161;
+}
+
+.admin-password-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Botón "Cambiar contraseña" no funcional */
+.admin-btn-change-password-disabled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: #f3f2f1;
+  color: #8a8886;
+  border: 1px solid #d1d1d1;
+  border-radius: 2px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: not-allowed;
+  user-select: none;
+  transition: none;
+}
+
+.admin-drawer-warning-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fff4ce;
+  border-left: 4px solid #795b00;
+  padding: 12px;
+  border-radius: 2px;
+  font-size: 0.83rem;
+  color: #795b00;
+}
+
+.admin-drawer-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--ui-azure-border-light, #edebe9);
+  background: #faf9f8;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.admin-btn-cancel {
+  padding: 6px 16px;
+  background: #ffffff;
+  border: 1px solid #8a8886;
+  border-radius: 2px;
+  color: #242424;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-btn-cancel:hover {
+  background: #f3f2f1;
+}
+
+.admin-btn-save {
+  padding: 6px 18px;
+  background: #0078d4;
+  border: 1px solid #0078d4;
+  border-radius: 2px;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-btn-save:hover {
+  background: #106ebe;
+}
+

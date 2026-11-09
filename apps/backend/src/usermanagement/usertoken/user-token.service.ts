@@ -9,14 +9,20 @@ export class UserTokenService {
   /**
    * Determina la vista principal según el rol:
    * - 'SOLICITANTE': ve la Vista 1 ('/inicio')
-   * - Todos los demás roles (Comité CEI, Evaluadores, Administrador): ven la Vista 2 ('/homeview2')
+   * - 'ADMINISTRADOR': ve la Vista 3 de Administración ('/homeview3')
+   * - Todos los demás roles (Comité CEI, Evaluadores): ven la Vista 2 ('/homeview2')
    */
-  determineHomeView(roles: string[]): 'inicio' | 'homeview2' {
+  determineHomeView(roles: string[]): 'inicio' | 'homeview2' | 'homeview3' {
     const isOnlySolicitante =
       roles.length === 1 && roles[0].toUpperCase() === 'SOLICITANTE';
 
     if (isOnlySolicitante) {
       return 'inicio';
+    }
+
+    const isAdmin = roles.some((r) => r.toUpperCase() === 'ADMINISTRADOR');
+    if (isAdmin) {
+      return 'homeview3';
     }
 
     return 'homeview2';

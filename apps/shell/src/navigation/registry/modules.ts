@@ -28,4 +28,10 @@ export const MODULES: ModuleDefinition[] = [
       "ADMINISTRADOR",
     ],
   },
+  {
+    id: "homeview3",
+    label: "Gestión de Usuarios",
+    path: "/homeview3",
+    roles: ["ADMINISTRADOR"],
+  },
 ];

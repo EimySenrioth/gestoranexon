@@ -7,7 +7,7 @@ export interface UserTokenPayload {
   email: string;
   nombre: string;
   roles: string[];         // Códigos de roles: ['SOLICITANTE'] o ['PRESIDENTE_CEI', ...]
-  homeView: 'inicio' | 'homeview2'; // Vista por defecto según su rol
+  homeView: 'inicio' | 'homeview2' | 'homeview3'; // Vista por defecto según su rol
   iat?: number;
   exp?: number;
 }
@@ -16,7 +16,7 @@ export interface UserTokenResponse {
   accessToken: string;
   tokenType: 'Bearer';
   expiresIn: string;
-  homeView: 'inicio' | 'homeview2';
+  homeView: 'inicio' | 'homeview2' | 'homeview3';
   user: {
     id: string;
     email: string;

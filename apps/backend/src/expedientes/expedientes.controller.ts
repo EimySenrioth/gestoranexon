@@ -72,6 +72,7 @@ export class ExpedientesController {
   @Get('asignados-a-mi')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
+    'ADMINISTRADOR',
     'PRESIDENTE_CEI',
     'VICEPRESIDENTE_CEI',
     'SECRETARIA_TECNICA_CEI',

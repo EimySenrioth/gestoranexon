@@ -11,7 +11,7 @@ export interface SessionState {
   user: SessionUser | null;
   roles: Role[];
   token: string | null;
-  homeView: "inicio" | "homeview2" | null;
+  homeView: "inicio" | "homeview2" | "homeview3" | null;
 }
 
 export const initialSessionState: SessionState = {

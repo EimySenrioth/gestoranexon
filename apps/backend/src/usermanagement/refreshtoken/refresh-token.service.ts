@@ -69,7 +69,14 @@ export class RefreshTokenService {
       const isOnlySolicitante =
         roleCodes.length === 1 &&
         (roleCodes[0] === 'SOLICITANTE' || roleCodes[0] === 'solicitante');
-      const homeView = isOnlySolicitante ? 'inicio' : 'homeview2';
+      const isAdmin = roleCodes.some(
+        (code: string) => code.toUpperCase() === 'ADMINISTRADOR',
+      );
+      const homeView = isOnlySolicitante
+        ? 'inicio'
+        : isAdmin
+          ? 'homeview3'
+          : 'homeview2';
 
       return {
         id: u.id,
@@ -81,13 +88,26 @@ export class RefreshTokenService {
     } catch (error) {
       if (error instanceof UnauthorizedException) throw error;
       this.logger.warn(`[DEV FALLBACK] Base de datos no disponible al cargar sesión. Usando sesión en memoria para: ${usuarioId}`);
-      const isComite = usuarioId.includes('presidente') || usuarioId.includes('secretaria') || usuarioId.includes('admin');
-      const roleCodes = isComite ? ['PRESIDENTE_CEI'] : ['SOLICITANTE'];
-      const homeView = isComite ? 'homeview2' : 'inicio';
+      const isAdmin = usuarioId.includes('admin');
+      const isComite = !isAdmin && (usuarioId.includes('presidente') || usuarioId.includes('secretaria'));
+      const roleCodes = isAdmin
+        ? ['ADMINISTRADOR']
+        : isComite
+          ? ['PRESIDENTE_CEI']
+          : ['SOLICITANTE'];
+      const homeView = isAdmin
+        ? 'homeview3'
+        : isComite
+          ? 'homeview2'
+          : 'inicio';
       return {
         id: usuarioId,
         email: usuarioId.includes('@') ? usuarioId : `${usuarioId}@estancia.pe`,
-        nombre: isComite ? 'Miembro Comité' : 'Investigador Principal',
+        nombre: isAdmin
+          ? 'Administrador Sistema'
+          : isComite
+            ? 'Miembro Comité'
+            : 'Investigador Principal',
         roles: roleCodes,
         homeView,
       };

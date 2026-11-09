@@ -37,9 +37,9 @@ describe('UserTokenService', () => {
       expect(view).toBe('homeview2');
     });
 
-    it('debe asignar "homeview2" (Vista 2) para ADMINISTRADOR', () => {
+    it('debe asignar "homeview3" (Vista 3) para ADMINISTRADOR', () => {
       const view = service.determineHomeView(['ADMINISTRADOR']);
-      expect(view).toBe('homeview2');
+      expect(view).toBe('homeview3');
     });
 
     it('debe asignar "homeview2" si un usuario tiene rol mixto (SOLICITANTE + VOCAL_CEI)', () => {

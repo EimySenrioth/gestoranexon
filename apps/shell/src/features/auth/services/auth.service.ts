@@ -22,7 +22,7 @@ export interface LoginResponse {
   accessToken: string;
   tokenType: "Bearer";
   expiresIn: string;
-  homeView: "inicio" | "homeview2";
+  homeView: "inicio" | "homeview2" | "homeview3";
   user: {
     id: string;
     email: string;

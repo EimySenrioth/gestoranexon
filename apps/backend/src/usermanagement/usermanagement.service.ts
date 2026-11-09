@@ -338,7 +338,7 @@ export class UserManagementService {
         codigo: r.rol.codigo,
         nombre: r.rol.nombre,
       })) ?? [],
-      homeView, // 'inicio' o 'homeview2'
+      homeView, // 'inicio', 'homeview2' o 'homeview3'
       creadoEn: user.creadoEn,
       actualizadoEn: user.actualizadoEn,
     };
