@@ -1,41 +1,32 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { CategoriaUsuario, UsuarioItem } from "../types/usuarios.types";
-import {
-  MOCK_USUARIOS_EVALUADORES,
-  MOCK_USUARIOS_SOLICITANTES,
-} from "../mocks/usuarios.mock";
+import React, { useState } from "react";
+import { UsuarioItem } from "../types/usuarios.types";
+import { useUsuariosCursorTabla } from "../hooks/useUsuariosCursorTabla";
 import { UsuariosTabs } from "./UsuariosTabs";
 import { UsuariosToolbar } from "./UsuariosToolbar";
 import { UsuariosTable } from "./UsuariosTable";
 import { UsuarioFlyoutDrawer } from "../modales/UsuarioFlyoutDrawer";
 
 export function GestionUsuarios() {
-  const [categoriaActiva, setCategoriaActiva] = useState<CategoriaUsuario>("EVALUADOR");
-  const [busqueda, setBusqueda] = useState("");
-  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<UsuarioItem | null>(null);
+  const {
+    categoriaActiva,
+    cambiarCategoria,
+    busqueda,
+    setBusqueda,
+    usuarios,
+    isLoading,
+    conteos,
+    rolesDisponibles,
+    pageInfo,
+    irSiguienteCursor,
+    irAnteriorCursor,
+    refrescarTabla,
+  } = useUsuariosCursorTabla(8);
+
+  const [usuarioSeleccionado, setUsuarioSeleccionado] =
+    useState<UsuarioItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  // Lista base según pestaña activa
-  const listaBase = useMemo(() => {
-    return categoriaActiva === "EVALUADOR"
-      ? MOCK_USUARIOS_EVALUADORES
-      : MOCK_USUARIOS_SOLICITANTES;
-  }, [categoriaActiva]);
-
-  // Filtrado por texto de búsqueda
-  const usuariosFiltrados = useMemo(() => {
-    if (!busqueda.trim()) return listaBase;
-    const term = busqueda.toLowerCase().trim();
-    return listaBase.filter(
-      (u) =>
-        u.nombre.toLowerCase().includes(term) ||
-        u.email.toLowerCase().includes(term) ||
-        u.rolEtiqueta.toLowerCase().includes(term) ||
-        (u.departamento && u.departamento.toLowerCase().includes(term))
-    );
-  }, [listaBase, busqueda]);
 
   const handleSelectUser = (usuario: UsuarioItem) => {
     setUsuarioSeleccionado(usuario);
@@ -78,9 +69,12 @@ export function GestionUsuarios() {
             </svg>
           </div>
           <div>
-            <h1 className="admin-header-title">Gestión de Usuarios | Directorio</h1>
+            <h1 className="admin-header-title">
+              Gestión de Usuarios | Directorio
+            </h1>
             <p className="admin-header-subtitle">
-              Administración centralizada de cuentas, roles y credenciales del sistema
+              Administración centralizada de cuentas, roles y credenciales del
+              sistema
             </p>
           </div>
         </div>
@@ -91,21 +85,25 @@ export function GestionUsuarios() {
             type="button"
             className="admin-action-btn admin-action-btn-primary"
             onClick={() => {
-              // Abrir drawer con usuario plantilla para nuevo usuario
+              const esPestanaAdmin = categoriaActiva === "ADMINISTRADOR";
               handleSelectUser({
                 id: `usr-new-${Date.now()}`,
                 nombre: "",
+                apellido: "",
+                nombreCompleto: "",
                 email: "",
                 passwordEnmascarada: "••••••••••••",
-                categoria: categoriaActiva,
-                rol: categoriaActiva === "EVALUADOR" ? "EVALUADOR" : "SOLICITANTE",
-                rolEtiqueta:
-                  categoriaActiva === "EVALUADOR" ? "Evaluador Ético" : "Solicitante",
+                categoria: esPestanaAdmin ? "ADMINISTRADOR" : "SOLICITANTE",
+                rolId: esPestanaAdmin ? 8 : 1,
+                rol: esPestanaAdmin ? "ADMINISTRADOR" : "SOLICITANTE",
+                rolEtiqueta: esPestanaAdmin
+                  ? "Administrador"
+                  : "Solicitante / Investigador",
                 habilitado: true,
-                avatarColor: "#0078d4",
+                avatarColor: esPestanaAdmin ? "#242424" : "#0078d4",
                 iniciales: "+",
+                creadoEn: new Date().toISOString(),
                 fechaRegistro: new Date().toISOString().split("T")[0],
-                departamento: "UNTELS",
               });
             }}
           >
@@ -128,30 +126,11 @@ export function GestionUsuarios() {
           <button
             type="button"
             className="admin-action-btn"
-            title="Descargar lista de usuarios"
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            <span>Descargar</span>
-          </button>
-
-          <button
-            type="button"
-            className="admin-action-btn"
-            onClick={() => setBusqueda("")}
-            title="Actualizar lista"
+            onClick={() => {
+              setBusqueda("");
+              refrescarTabla(true);
+            }}
+            title="Actualizar lista desde la base de datos"
           >
             <svg
               width="15"
@@ -190,9 +169,9 @@ export function GestionUsuarios() {
           <line x1="12" y1="8" x2="12.01" y2="8" />
         </svg>
         <div>
-          <strong>Consola de Administración UNTELS:</strong> Selecciona un usuario
-          de la lista para desplegar el panel lateral derecho con el detalle de su
-          cuenta y credenciales.
+          <strong>Consola de Administración UNTELS:</strong> Selecciona un
+          usuario de la lista para desplegar el panel lateral derecho con el
+          detalle de su cuenta y credenciales.
         </div>
       </div>
 
@@ -200,34 +179,41 @@ export function GestionUsuarios() {
       <div className="admin-toolbar-row">
         <UsuariosTabs
           categoriaActiva={categoriaActiva}
-          onCambiarCategoria={(cat) => {
-            setCategoriaActiva(cat);
-            setBusqueda("");
-          }}
-          conteoEvaluadores={MOCK_USUARIOS_EVALUADORES.length}
-          conteoSolicitantes={MOCK_USUARIOS_SOLICITANTES.length}
+          onCambiarCategoria={cambiarCategoria}
+          conteoEvaluadores={conteos.totalEvaluadores}
+          conteoSolicitantes={conteos.totalSolicitantes}
+          conteoAdministradores={conteos.totalAdministradores}
         />
 
         <UsuariosToolbar
           busqueda={busqueda}
           onBusquedaChange={setBusqueda}
-          totalEncontrados={usuariosFiltrados.length}
+          totalEncontrados={pageInfo.totalCategoria}
+          onRefresh={() => refrescarTabla(true)}
         />
       </div>
 
-      {/* 5. Tabla de Usuarios Azure */}
+      {/* 5. Tabla de Usuarios Azure con Paginación por Cursor */}
       <UsuariosTable
-        usuarios={usuariosFiltrados}
+        usuarios={usuarios}
+        isLoading={isLoading}
+        hasPrevPage={pageInfo.hasPrevPage}
+        hasNextPage={pageInfo.hasNextPage}
+        numeroLoteActual={pageInfo.numeroLoteActual}
+        totalCategoria={pageInfo.totalCategoria}
+        onAnteriorCursor={irAnteriorCursor}
+        onSiguienteCursor={irSiguienteCursor}
         onSelectUser={handleSelectUser}
       />
 
       {/* 6. Modal Lateral Derecho (Flyout Drawer) */}
       <UsuarioFlyoutDrawer
         usuario={usuarioSeleccionado}
+        rolesDisponibles={rolesDisponibles}
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
+        onSaved={() => refrescarTabla(false)}
       />
     </div>
   );
 }
-

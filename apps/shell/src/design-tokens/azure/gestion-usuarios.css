@@ -560,3 +560,46 @@
   background: #106ebe;
 }
 
+/* 8. Subpanel flotante hacia la izquierda para Cambiar Contraseña */
+.admin-password-flyout-left {
+  position: fixed;
+  top: 50%;
+  right: 492px;
+  transform: translateY(-50%);
+  width: 360px;
+  max-width: calc(100vw - 508px);
+  background: #ffffff;
+  border: 1px solid #c7e0f4;
+  border-top: 4px solid #0078d4;
+  border-radius: 6px;
+  box-shadow: -8px 12px 32px rgba(0, 0, 0, 0.22);
+  padding: 18px 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: var(--ui-font-family-lagu, sans-serif);
+  animation: slideOutLeftFromDrawer 0.2s ease-out forwards;
+}
+
+@keyframes slideOutLeftFromDrawer {
+  from {
+    opacity: 0;
+    transform: translate(24px, -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+}
+
+@media (max-width: 860px) {
+  .admin-password-flyout-left {
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+}
+

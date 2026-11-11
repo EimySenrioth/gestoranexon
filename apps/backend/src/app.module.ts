@@ -10,6 +10,7 @@ import { ExpedientesModule } from './expedientes/expedientes.module.js';
 import { VotacionesModule } from './votaciones/votaciones.module.js';
 import { EvaluacionesModule } from './evaluaciones/evaluaciones.module.js';
 import { CeiDocumentosModule } from './cei-documentos/cei-documentos.module.js';
+import { AdminUsuariosModule } from './admin-usuarios/admin-usuarios.module.js';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { CeiDocumentosModule } from './cei-documentos/cei-documentos.module.js';
     VotacionesModule,
     EvaluacionesModule,
     CeiDocumentosModule,
+    AdminUsuariosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

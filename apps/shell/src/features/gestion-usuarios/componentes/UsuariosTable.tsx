@@ -7,29 +7,39 @@ import { UsuariosPagination } from "./UsuariosPagination";
 
 interface UsuariosTableProps {
   usuarios: UsuarioItem[];
+  isLoading?: boolean;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  numeroLoteActual: number;
+  totalCategoria: number;
+  onAnteriorCursor: () => void;
+  onSiguienteCursor: () => void;
   onSelectUser: (usuario: UsuarioItem) => void;
 }
 
-export function UsuariosTable({ usuarios, onSelectUser }: UsuariosTableProps) {
+export function UsuariosTable({
+  usuarios,
+  isLoading = false,
+  hasPrevPage,
+  hasNextPage,
+  numeroLoteActual,
+  totalCategoria,
+  onAnteriorCursor,
+  onSiguienteCursor,
+  onSelectUser,
+}: UsuariosTableProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [pagina, setPagina] = useState(1);
-  const itemsPorPagina = 8;
-
-  const totalPaginas = Math.ceil(usuarios.length / itemsPorPagina);
-  const indiceInicio = (pagina - 1) * itemsPorPagina;
-  const usuariosPaginados = usuarios.slice(indiceInicio, indiceInicio + itemsPorPagina);
 
   const isAllSelected =
-    usuariosPaginados.length > 0 &&
-    usuariosPaginados.every((u) => selectedIds.includes(u.id));
+    usuarios.length > 0 && usuarios.every((u) => selectedIds.includes(u.id));
 
   const handleToggleSelectAll = () => {
     if (isAllSelected) {
       setSelectedIds((prev) =>
-        prev.filter((id) => !usuariosPaginados.some((u) => u.id === id))
+        prev.filter((id) => !usuarios.some((u) => u.id === id))
       );
     } else {
-      const currentIds = usuariosPaginados.map((u) => u.id);
+      const currentIds = usuarios.map((u) => u.id);
       setSelectedIds((prev) => Array.from(new Set([...prev, ...currentIds])));
     }
   };
@@ -59,11 +69,25 @@ export function UsuariosTable({ usuarios, onSelectUser }: UsuariosTableProps) {
               <th>Correo electrónico (UPN) ⇅</th>
               <th>Rol asignado</th>
               <th>Estado</th>
-              <th>Departamento / Facultad</th>
+              <th>Fecha de registro</th>
             </tr>
           </thead>
           <tbody>
-            {usuariosPaginados.length === 0 ? (
+            {isLoading ? (
+              <tr>
+                <td
+                  colSpan={6}
+                  style={{
+                    padding: "36px",
+                    textAlign: "center",
+                    color: "#616161",
+                    fontSize: "0.95rem",
+                  }}
+                >
+                  Cargando usuarios desde la base de datos...
+                </td>
+              </tr>
+            ) : usuarios.length === 0 ? (
               <tr>
                 <td
                   colSpan={6}
@@ -74,11 +98,11 @@ export function UsuariosTable({ usuarios, onSelectUser }: UsuariosTableProps) {
                     fontSize: "0.95rem",
                   }}
                 >
-                  No se encontraron usuarios que coincidan con la búsqueda.
+                  No se encontraron usuarios registrados que coincidan con la búsqueda.
                 </td>
               </tr>
             ) : (
-              usuariosPaginados.map((usuario) => (
+              usuarios.map((usuario) => (
                 <UsuariosTableRow
                   key={usuario.id}
                   usuario={usuario}
@@ -93,11 +117,15 @@ export function UsuariosTable({ usuarios, onSelectUser }: UsuariosTableProps) {
       </div>
 
       <UsuariosPagination
-        paginaActual={pagina}
-        totalPaginas={totalPaginas}
-        onCambiarPagina={setPagina}
+        hasPrevPage={hasPrevPage}
+        hasNextPage={hasNextPage}
+        numeroLoteActual={numeroLoteActual}
+        mostradosEnLote={usuarios.length}
+        totalCategoria={totalCategoria}
+        isLoading={isLoading}
+        onAnteriorCursor={onAnteriorCursor}
+        onSiguienteCursor={onSiguienteCursor}
       />
     </div>
   );
 }
-

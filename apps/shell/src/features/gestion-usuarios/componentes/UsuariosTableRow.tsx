@@ -35,12 +35,12 @@ export function UsuariosTableRow({
           type="checkbox"
           checked={isSelected}
           onChange={() => onToggleSelect?.(usuario.id)}
-          aria-label={`Seleccionar ${usuario.nombre}`}
+          aria-label={`Seleccionar ${usuario.nombreCompleto}`}
           style={{ cursor: "pointer" }}
         />
       </td>
 
-      {/* Nombre y Avatar circular */}
+      {/* Nombre completo y Avatar circular */}
       <td className="admin-table-cell">
         <div className="admin-user-name-cell">
           <div
@@ -61,7 +61,7 @@ export function UsuariosTableRow({
               textAlign: "left",
             }}
           >
-            {usuario.nombre}
+            {usuario.nombreCompleto || usuario.nombre}
           </button>
         </div>
       </td>
@@ -114,11 +114,10 @@ export function UsuariosTableRow({
         )}
       </td>
 
-      {/* Departamento / Unidad */}
+      {/* Fecha de Registro en Base de Datos */}
       <td className="admin-table-cell" style={{ color: "#616161", fontSize: "0.82rem" }}>
-        {usuario.departamento || "—"}
+        {usuario.fechaRegistro || "—"}
       </td>
     </tr>
   );
 }
-

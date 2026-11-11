@@ -267,6 +267,16 @@ export class UserManagementService {
         throw new UnauthorizedException('Credenciales inválidas o usuario inactivo.');
       }
 
+      if (
+        typeof dto.password === 'string' &&
+        dto.password.trim().length > 0 &&
+        typeof user.password === 'string' &&
+        user.password.trim().length > 0 &&
+        dto.password.trim() !== user.password.trim()
+      ) {
+        throw new UnauthorizedException('Credenciales inválidas o usuario inactivo.');
+      }
+
       const roleCodes = user.roles.map((r: { rol: { codigo: string } }) => r.rol.codigo);
 
       return this.userTokenService.generateToken({
@@ -304,6 +314,16 @@ export class UserManagementService {
       });
 
       if (!user || !user.activo) {
+        throw new UnauthorizedException('Credenciales inválidas o usuario inactivo.');
+      }
+
+      if (
+        typeof dto.password === 'string' &&
+        dto.password.trim().length > 0 &&
+        typeof user.password === 'string' &&
+        user.password.trim().length > 0 &&
+        dto.password.trim() !== user.password.trim()
+      ) {
         throw new UnauthorizedException('Credenciales inválidas o usuario inactivo.');
       }
 
