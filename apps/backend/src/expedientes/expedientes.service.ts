@@ -1169,7 +1169,7 @@ export class ExpedientesService {
     const ahora = new Date();
 
     // 3. Transacción atómica en PostgreSQL usando await para todas las operaciones asíncronas
-    return await this.prisma.$transaction(async (tx) => {
+    const resultadoTx = await this.prisma.$transaction(async (tx) => {
       // 3.1 Actualizar Expediente
       const expedienteActualizado = await tx.expediente.update({
         where: { id: expediente.id },
@@ -1266,7 +1266,25 @@ export class ExpedientesService {
         codigoExpediente: expediente.codigo,
         estado: expedienteActualizado.estado,
         resultadoEvaluacion: 'APROBADO',
+        sesionVotacionId: sesionVotacion?.id,
       };
     });
+
+    // 4. Generar el documento PDF del Anexo N°9 de forma inmediata al aprobar por Presidencia
+    if (this.generarAnexo9PdfUseCase) {
+      try {
+        await this.generarAnexo9PdfUseCase.ejecutar(
+          expediente.id,
+          resultadoTx.sesionVotacionId,
+        );
+      } catch (err) {
+        this.logger.warn(
+          `No se pudo generar el Anexo N°9 automáticamente al aprobar ${expediente.codigo}: ${err instanceof Error ? err.message : err}`,
+        );
+      }
+    }
+
+    const { sesionVotacionId: _omit, ...respuesta } = resultadoTx;
+    return respuesta;
   }
 }

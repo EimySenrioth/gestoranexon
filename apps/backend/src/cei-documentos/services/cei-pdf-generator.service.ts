@@ -12,9 +12,35 @@ export class CeiPdfGeneratorService {
   private readonly templatePath: string;
 
   constructor() {
-    // Resolver ruta absoluta del template
+    // Resolver ruta absoluta del template (en dist o fallback en src)
     const currentDir = path.dirname(fileURLToPath(import.meta.url));
-    this.templatePath = path.resolve(currentDir, '..', 'templates', 'anexo-9-untels.hbs');
+    const distTemplate = path.resolve(currentDir, '..', 'templates', 'anexo-9-untels.hbs');
+    const srcTemplate = path.resolve(
+      process.cwd(),
+      'src',
+      'cei-documentos',
+      'templates',
+      'anexo-9-untels.hbs',
+    );
+    const rootSrcTemplate = path.resolve(
+      process.cwd(),
+      'apps',
+      'backend',
+      'src',
+      'cei-documentos',
+      'templates',
+      'anexo-9-untels.hbs',
+    );
+
+    if (fs.existsSync(distTemplate)) {
+      this.templatePath = distTemplate;
+    } else if (fs.existsSync(srcTemplate)) {
+      this.templatePath = srcTemplate;
+    } else if (fs.existsSync(rootSrcTemplate)) {
+      this.templatePath = rootSrcTemplate;
+    } else {
+      this.templatePath = distTemplate;
+    }
   }
 
   /**
