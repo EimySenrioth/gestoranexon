@@ -6,9 +6,10 @@ import { AccountCard } from "./AccountCard";
 
 interface AccountStepProps {
   onNext: () => void;
+  onSwitchToRegister?: () => void;
 }
 
-export function AccountStep({ onNext }: AccountStepProps) {
+export function AccountStep({ onNext, onSwitchToRegister }: AccountStepProps) {
   const [activeTab, setActiveTab] = useState("login");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -22,7 +23,13 @@ export function AccountStep({ onNext }: AccountStepProps) {
       {/* Selector de pestañas: Iniciar sesión / ¿eres nuevo? */}
       <Tabs
         activeId={activeTab}
-        onTabChange={(tabId) => setActiveTab(tabId)}
+        onTabChange={(tabId) => {
+          if (tabId === "register" && onSwitchToRegister) {
+            onSwitchToRegister();
+          } else {
+            setActiveTab(tabId);
+          }
+        }}
       />
 
       {/* Tarjeta de cuenta */}

@@ -11,6 +11,7 @@ import { VotacionesModule } from './votaciones/votaciones.module.js';
 import { EvaluacionesModule } from './evaluaciones/evaluaciones.module.js';
 import { CeiDocumentosModule } from './cei-documentos/cei-documentos.module.js';
 import { AdminUsuariosModule } from './admin-usuarios/admin-usuarios.module.js';
+import { NewUsersModule } from './newusers/newusers.module.js';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AdminUsuariosModule } from './admin-usuarios/admin-usuarios.module.js';
     EvaluacionesModule,
     CeiDocumentosModule,
     AdminUsuariosModule,
+    NewUsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
